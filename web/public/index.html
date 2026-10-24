@@ -715,6 +715,7 @@
             <option value="2">📈 Tab 2: Performance &amp; Equity Curves</option>
             <option value="3">🧠 Tab 3: Edge Attribution &amp; Leak Matrix</option>
             <option value="4">🎲 Tab 4: Quant Risk &amp; Monte Carlo Sim</option>
+            <option value="5">📡 Tab 5: 1-Min Chartink Webhook Radar</option>
           </select>
           <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-blue-400 font-black text-xs">
             ▼
@@ -905,103 +906,37 @@
       </section>
 
       <!-- ========================================== -->
-      <!-- 1-MINUTE CHARTINK SCANNER COMMAND RADAR -->
+      <!-- COMPACT 1-MINUTE RADAR LIVE TICKER (Direct shortcut to Tab 5) -->
       <!-- ========================================== -->
-      <section id="chartinkScannerSection" class="glass-card rounded-2xl p-5 sm:p-6 shadow-2xl border border-emerald-500/30 bg-gradient-to-br from-slate-900/95 via-slate-900/80 to-emerald-950/20 relative overflow-hidden">
-        <!-- Section Header Strip -->
-        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between pb-4 border-b border-slate-800/80 gap-3">
+      <div id="radarCompactTickerBanner" onclick="switchTab(5)" class="cursor-pointer glass-card rounded-2xl p-4 border border-emerald-500/40 bg-gradient-to-r from-emerald-950/40 via-slate-900/90 to-teal-950/30 hover:border-emerald-400 transition shadow-xl group">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
           <div class="flex items-center gap-3">
-            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-600 flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-emerald-500/25 border border-emerald-400/30">
+            <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-black text-base group-hover:scale-110 transition">
               📡
             </div>
             <div>
-              <div class="flex items-center gap-2 flex-wrap">
-                <h2 class="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
-                  <span>1-Min Chartink Webhook Radar</span>
-                  <span class="text-xs font-mono font-semibold text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1.5 shadow-sm shadow-emerald-950/50">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>ACTIVE RADAR</span>
-                  </span>
-                </h2>
-                <span id="scannerActiveScanBadge" class="text-[11px] font-mono font-semibold text-slate-300 bg-slate-800/80 px-2.5 py-0.5 rounded-md border border-slate-700">
-                  Sprut Trading - Vwap BO
+              <div class="flex items-center gap-2">
+                <span class="font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <span>1-Min Chartink Radar</span>
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                </span>
+                <span id="tickerAlertsCountBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  0 Alerts
                 </span>
               </div>
-              <p class="text-xs text-slate-400 mt-0.5">
-                Real-time 1m breakout momentum feed &bull; Frequency-ranked institutional volume &bull; 1-click execution pre-fill
+              <p id="tickerTopStocksText" class="text-[11px] text-slate-400 mt-0.5 truncate max-w-xl">
+                Awaiting inbound 1-minute webhooks on <code class="text-emerald-400 font-mono">/new-stocks</code>...
               </p>
             </div>
           </div>
-
-          <!-- Quick Action Buttons -->
-          <div class="flex items-center gap-2 flex-wrap">
-            <button onclick="openWebhookConfigModal()" class="px-2.5 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm" title="View Webhook URL & Chartink Integration Instructions">
-              <span>🔗</span>
-              <span>Webhook Setup</span>
-            </button>
-            <button onclick="simulateTestChartinkAlert()" class="px-2.5 py-1.5 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm" title="Simulate a Test 1-Minute Breakout Alert">
-              <span>🧪</span>
-              <span>Test Pulse</span>
-            </button>
-            <button onclick="clearScannerFeed()" class="px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/20 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm" title="Clear current session alert feed">
-              <span>🗑️</span>
-              <span>Clear Session</span>
-            </button>
+          <div class="flex items-center gap-2 self-end sm:self-auto">
+            <span class="text-[11px] font-bold text-emerald-300 group-hover:text-white flex items-center gap-1 transition">
+              <span>Open Dedicated Radar (Tab 5)</span>
+              <span>&rarr;</span>
+            </span>
           </div>
         </div>
-
-        <!-- TOP RANKED STOCKS PODIUM (SORTED BY ALERT FREQUENCY COUNT) -->
-        <div class="mt-4">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 mb-2.5">
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <span>🔥</span> Top Ranked Momentum Stocks (Highest Frequency)
-              </span>
-              <span id="topStocksTotalCount" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">0 tracked</span>
-            </div>
-            <span class="text-[11px] text-slate-400">Multiple alerts = Continuous institutional buying/selling pressure</span>
-          </div>
-
-          <!-- Dynamic Top Stocks Grid -->
-          <div id="topStocksPodiumGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-            <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 text-center col-span-full py-6">
-              <span class="text-2xl block mb-1">📡</span>
-              <p class="text-xs text-slate-400 font-medium">Listening for 1-minute Chartink breakout alerts on <code class="text-emerald-400 font-mono bg-slate-950 px-1.5 py-0.5 rounded">/new-stocks</code></p>
-              <p class="text-[11px] text-slate-500 mt-1">No alerts received yet today. Click "Test Pulse" above to test the radar.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- LIVE STREAM RECENT ALERTS LIST -->
-        <div class="mt-6 pt-4 border-t border-slate-800/80">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <span>⚡</span> Chronological 1-Min Alert Stream
-              </span>
-              <span id="streamAlertsCount" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">0 alerts</span>
-            </div>
-
-            <!-- Search and Filter Bar -->
-            <div class="flex items-center gap-2 w-full sm:w-auto">
-              <div class="relative flex-1 sm:w-48">
-                <input type="text" id="scannerSearchInput" oninput="filterScannerFeed()" placeholder="Search symbol..." class="w-full bg-slate-950/80 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono">
-              </div>
-              <button onclick="toggleScannerVoiceAlert()" id="scannerVoiceToggleBtn" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1 transition" title="Toggle audio voice announcement on new alerts">
-                <span id="scannerVoiceIcon">🔊</span>
-                <span id="scannerVoiceLabel">Alerts Voice ON</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Alert Cards Container (Scrollable stream) -->
-          <div id="scannerAlertsStreamContainer" class="space-y-2.5 max-h-80 overflow-y-auto pr-1">
-            <div class="p-3 text-center text-xs text-slate-500 italic">
-              Awaiting inbound webhooks from Chartink...
-            </div>
-          </div>
-        </div>
-      </section>
+      </div>
 
       <!-- Quick Trade Entry Card -->
       <section id="executionFormCard" class="glass-card rounded-2xl p-6 shadow-2xl relative overflow-hidden">
@@ -2321,6 +2256,188 @@
           </div>
         </div>
       </section>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: 1-MIN CHARTINK MOMENTUM RADAR -->
+    <!-- ========================================== -->
+    <div id="tabContent5" class="hidden mt-6 space-y-6">
+
+      <!-- TOP RADAR COMMAND HEADER STRIP -->
+      <section class="glass-card rounded-2xl p-5 sm:p-6 shadow-2xl border border-emerald-500/30 bg-gradient-to-br from-slate-900/95 via-slate-900/80 to-emerald-950/25 relative overflow-hidden">
+        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between pb-4 border-b border-slate-800/80 gap-4">
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-emerald-500/25 border border-emerald-400/30">
+              📡
+            </div>
+            <div>
+              <div class="flex items-center gap-2.5 flex-wrap">
+                <h1 class="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-2">
+                  <span>1-Min Chartink Webhook Radar</span>
+                  <span class="text-slate-600 font-normal">|</span>
+                  <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1.5 shadow-sm shadow-emerald-950/50">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>ACTIVE RADAR</span>
+                  </span>
+                </h1>
+                <span id="tab5ActiveScanBadge" class="text-[11px] font-mono font-semibold text-slate-300 bg-slate-800/80 px-2.5 py-0.5 rounded-md border border-slate-700">
+                  Sprut Trading - Vwap BO
+                </span>
+              </div>
+              <p class="text-xs text-slate-400 mt-1">
+                Real-time 1m breakout momentum feed &bull; Frequency-ranked institutional volume &bull; Interactive 1m candlestick charts
+              </p>
+            </div>
+          </div>
+
+          <!-- Radar Action Controls -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="openWebhookConfigModal()" class="px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm" title="View Webhook URL & Chartink Integration Instructions">
+              <span>🔗</span>
+              <span>Webhook Setup</span>
+            </button>
+            <button onclick="simulateTestChartinkAlert()" class="px-3 py-1.5 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm" title="Simulate a Test 1-Minute Breakout Alert">
+              <span>🧪</span>
+              <span>Test Alert Pulse</span>
+            </button>
+            <button onclick="toggleScannerVoiceAlert()" id="tab5VoiceToggleBtn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition border border-slate-700" title="Toggle audio voice announcement on new alerts">
+              <span id="tab5VoiceIcon">🔊</span>
+              <span id="tab5VoiceLabel">Voice ON</span>
+            </button>
+            <button onclick="exportScannerAlertsCSV()" class="px-3 py-1.5 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 text-blue-300 border border-blue-500/30 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm" title="Download Session Alerts CSV">
+              <span>📥</span>
+              <span>Export CSV</span>
+            </button>
+            <button onclick="clearScannerFeed()" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/20 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm" title="Clear current session alert feed">
+              <span>🗑️</span>
+              <span>Clear Session</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 SESSION MOMENTUM STAT CARDS -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800">
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">Alerts Received</span>
+            <span id="tab5TotalAlertsStat" class="text-lg font-black font-mono text-white mt-0.5 block">0</span>
+            <span class="text-[10px] text-slate-500">1-minute scanner triggers</span>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800">
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">Unique Stocks</span>
+            <span id="tab5UniqueStocksStat" class="text-lg font-black font-mono text-emerald-400 mt-0.5 block">0</span>
+            <span class="text-[10px] text-slate-500">Under institutional radar</span>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800">
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">Momentum Leader</span>
+            <span id="tab5MomentumLeaderStat" class="text-lg font-black font-mono text-amber-300 mt-0.5 block">--</span>
+            <span class="text-[10px] text-slate-500">Highest alert frequency</span>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800">
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">Execution Window</span>
+            <span class="text-lg font-black font-mono text-blue-400 mt-0.5 block">09:15–10:30 AM</span>
+            <span class="text-[10px] text-slate-500">NSE 1-min momentum</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TOP RANKED MOMENTUM STOCKS PODIUM -->
+      <section class="glass-card rounded-2xl p-5 shadow-2xl border border-slate-800">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 pb-3 mb-4 border-b border-slate-800">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+              <span>🔥</span> Frequency Leaderboard (Top Momentum Stocks)
+            </span>
+            <span id="tab5TopStocksCountBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">0 tracked</span>
+          </div>
+          <span class="text-[11px] text-slate-400">Multiple alerts = Continuous institutional breakout surge. Click stock to view 1m chart.</span>
+        </div>
+
+        <div id="tab5PodiumGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3.5">
+          <div class="p-5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-center col-span-full py-8">
+            <span class="text-3xl block mb-2">📡</span>
+            <p class="text-xs text-slate-300 font-medium">Listening for 1-minute Chartink breakout alerts on <code class="text-emerald-400 font-mono bg-slate-950 px-1.5 py-0.5 rounded">/new-stocks</code></p>
+            <p class="text-[11px] text-slate-500 mt-1">No alerts received yet today. Click "Test Alert Pulse" above to test the radar.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SPLIT-VIEW COMMAND DESK (ALERT STREAM + INTERACTIVE 1-MIN CHART) -->
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+
+        <!-- LEFT COLUMN: CHRONOLOGICAL ALERT STREAM (7 COLS ON XL) -->
+        <div class="xl:col-span-7 space-y-4">
+          <section class="glass-card rounded-2xl p-5 shadow-2xl border border-slate-800">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 mb-3 border-b border-slate-800">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                  <span>⚡</span> Live 1-Minute Alert Stream
+                </span>
+                <span id="tab5StreamCountBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">0 alerts</span>
+              </div>
+
+              <!-- Filter Search -->
+              <div class="relative w-full sm:w-56">
+                <input type="text" id="tab5SearchInput" oninput="filterTab5Feed()" placeholder="Search symbol or scan..." class="w-full bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono">
+              </div>
+            </div>
+
+            <div id="tab5AlertsStreamContainer" class="space-y-3 max-h-[580px] overflow-y-auto pr-1">
+              <div class="p-6 text-center text-xs text-slate-500 italic">
+                Awaiting inbound 1-minute Chartink webhooks...
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- RIGHT COLUMN: INTERACTIVE 1-MIN CANDLESTICK CHART & FAST EXECUTION (5 COLS ON XL) -->
+        <div class="xl:col-span-5 space-y-4">
+          <section class="glass-card rounded-2xl p-5 shadow-2xl border border-slate-800 flex flex-col h-full">
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-black text-white font-mono flex items-center gap-1.5" id="tab5ChartSymbolTitle">
+                  <span class="text-emerald-400">📈</span> NSE:RELIANCE
+                </span>
+                <span class="text-[10px] font-mono bg-blue-500/10 text-blue-300 px-2 py-0.5 rounded border border-blue-500/20 font-bold">1m TF</span>
+              </div>
+              <button onclick="openSelectedStockInTradingView()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 transition">
+                <span>TradingView ↗</span>
+              </button>
+            </div>
+
+            <!-- Embedded TradingView 1-Minute Candlestick Chart -->
+            <div class="w-full rounded-xl overflow-hidden border border-slate-800 bg-slate-950 min-h-[420px] relative">
+              <iframe id="tab5TradingViewFrame" src="https://s.tradingview.com/widgetembed/?symbol=NSE%3ARELIANCE&interval=1&theme=dark&style=1&timezone=Asia%2FKolkata" class="w-full h-[420px] border-0" allowtransparency="true" scrolling="no"></iframe>
+            </div>
+
+            <!-- Fast Execution Strip Right Under Chart -->
+            <div class="mt-4 p-4 rounded-xl bg-slate-950/90 border border-slate-800 space-y-3">
+              <div class="flex items-center justify-between text-xs">
+                <div>
+                  <span class="text-[10px] uppercase font-bold text-slate-500 block">Active Selected Stock</span>
+                  <span id="tab5ChartSelectedSymbolText" class="font-mono font-black text-white text-base">RELIANCE</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-[10px] uppercase font-bold text-slate-500 block">Trigger Price</span>
+                  <span id="tab5ChartSelectedPriceText" class="font-mono font-bold text-emerald-400 text-base">₹2,500.00</span>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
+                <button onclick="executeFromRadar('Long')" class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 transition shadow-lg shadow-emerald-950/50">
+                  <span>⚡</span>
+                  <span>Pre-fill LONG</span>
+                </button>
+                <button onclick="executeFromRadar('Short')" class="py-2.5 px-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 transition shadow-lg shadow-rose-950/50">
+                  <span>⚡</span>
+                  <span>Pre-fill SHORT</span>
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+      </div>
 
     </div>
   </main>
@@ -4305,7 +4422,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       recalculateCalculators();
     }
 
-    // --- Tab Switching (4 SPACIOUS TABS) ---
+    // --- Tab Switching (5 DEDICATED TABS) ---
     function switchTab(tabNum) {
       currentTab = tabNum;
 
@@ -4314,7 +4431,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       if (dropdown) dropdown.value = String(tabNum);
 
       // Safe tab content and button toggling
-      for (let i = 1; i <= 4; i++) {
+      for (let i = 1; i <= 5; i++) {
         const btn = document.getElementById(`tabBtn${i}`);
         const content = document.getElementById(`tabContent${i}`);
         if (content) {
@@ -4331,6 +4448,10 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             btn.classList.remove('active');
           }
         }
+      }
+
+      if (tabNum === 5 && typeof fetchScannerAlerts === 'function') {
+        fetchScannerAlerts();
       }
 
       // Safe chart rendering wrapped in try/catch so chart errors never block tab switching
@@ -4918,10 +5039,12 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         .replace(/'/g, '&#039;');
     }
 
+    let activeRadarSymbol = 'RELIANCE';
+    let activeRadarPrice = 2500.00;
+    let tab5SearchQuery = '';
+
     function scrollToScannerFeed() {
-      switchTab(1);
-      const el = document.getElementById('chartinkScannerSection');
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      switchTab(5);
     }
 
     function openWebhookConfigModal() {
@@ -4951,10 +5074,19 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
     function toggleScannerVoiceAlert() {
       scannerVoiceAlerts = !scannerVoiceAlerts;
-      const icon = document.getElementById('scannerVoiceIcon');
-      const label = document.getElementById('scannerVoiceLabel');
-      if (icon) icon.textContent = scannerVoiceAlerts ? '🔊' : '🔇';
-      if (label) label.textContent = scannerVoiceAlerts ? 'Alerts Voice ON' : 'Alerts Voice MUTED';
+      const icons = ['scannerVoiceIcon', 'tab5VoiceIcon'];
+      const labels = [
+        { id: 'scannerVoiceLabel', on: 'Alerts Voice ON', off: 'Alerts Voice MUTED' },
+        { id: 'tab5VoiceLabel', on: 'Voice ON', off: 'Voice MUTED' }
+      ];
+      icons.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = scannerVoiceAlerts ? '🔊' : '🔇';
+      });
+      labels.forEach(l => {
+        const el = document.getElementById(l.id);
+        if (el) el.textContent = scannerVoiceAlerts ? l.on : l.off;
+      });
     }
 
     async function fetchScannerAlerts() {
@@ -4985,6 +5117,27 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             headerLeader.classList.add('hidden');
           }
 
+          // Tab 1 Compact Ticker update
+          const tickerCount = document.getElementById('tickerAlertsCountBadge');
+          const tickerText = document.getElementById('tickerTopStocksText');
+          if (tickerCount) tickerCount.textContent = `${data.total_alerts || 0} Alerts`;
+          if (tickerText && topScannerStocks.length > 0) {
+            const topStr = topScannerStocks.slice(0, 3).map(s => `${s.symbol} (${s.count}x) ₹${parseFloat(s.latest_price || 0).toFixed(2)}`).join(' • ');
+            tickerText.innerHTML = `<strong>Top Momentum:</strong> ${escapeHtml(topStr)}`;
+          }
+
+          // Tab 5 Stat Cards update
+          const statAlerts = document.getElementById('tab5TotalAlertsStat');
+          const statUnique = document.getElementById('tab5UniqueStocksStat');
+          const statLeader = document.getElementById('tab5MomentumLeaderStat');
+          if (statAlerts) statAlerts.textContent = data.total_alerts || 0;
+          if (statUnique) statUnique.textContent = data.unique_stocks_count || 0;
+          if (statLeader && topScannerStocks.length > 0) {
+            statLeader.textContent = `${topScannerStocks[0].symbol} (${topScannerStocks[0].count}x)`;
+          } else if (statLeader) {
+            statLeader.textContent = '--';
+          }
+
           renderTopStocksPodium(topScannerStocks);
           renderAlertsStream(allScannerAlerts);
         }
@@ -5000,26 +5153,94 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       if (scannerVoiceAlerts && typeof speakCoach === 'function' && alert.stocks && alert.stocks.length > 0) {
         const topSym = alert.stocks[0].symbol;
         const scanShort = (alert.scan_name || "Breakout").replace(/Sprut Trading - /gi, "");
-        speakCoach(`Alert on ${topSym}. ${scanShort}.`);
+        speakCoach(`Radar alert on ${topSym}. ${scanShort}.`);
+      }
+    }
+
+    function selectStockForChart(symbol, price) {
+      activeRadarSymbol = symbol.toUpperCase().trim();
+      activeRadarPrice = price || 0;
+
+      const titleEl = document.getElementById('tab5ChartSymbolTitle');
+      const textSym = document.getElementById('tab5ChartSelectedSymbolText');
+      const textPx = document.getElementById('tab5ChartSelectedPriceText');
+      const frame = document.getElementById('tab5TradingViewFrame');
+
+      if (titleEl) titleEl.innerHTML = `<span class="text-emerald-400">📈</span> NSE:${escapeHtml(activeRadarSymbol)}`;
+      if (textSym) textSym.textContent = activeRadarSymbol;
+      if (textPx) textPx.textContent = activeRadarPrice > 0 ? `₹${parseFloat(activeRadarPrice).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'Mkt Price';
+
+      if (frame) {
+        frame.src = `https://s.tradingview.com/widgetembed/?symbol=NSE%3A${encodeURIComponent(activeRadarSymbol)}&interval=1&theme=dark&style=1&timezone=Asia%2FKolkata`;
+      }
+    }
+
+    function openSelectedStockInTradingView() {
+      openTradingViewChart(activeRadarSymbol);
+    }
+
+    function executeFromRadar(direction) {
+      switchTab(1);
+      const formEl = document.getElementById('executionFormCard');
+      if (formEl) formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Pre-fill Symbol & Direction
+      const symInput = document.getElementById('symbol');
+      if (symInput) symInput.value = activeRadarSymbol;
+
+      if (typeof setTradeDirection === 'function') {
+        setTradeDirection(direction);
+      } else {
+        const dirSelect = document.getElementById('direction');
+        if (dirSelect) dirSelect.value = direction;
+      }
+
+      // Pre-fill Price
+      const entryInput = document.getElementById('entry_price');
+      if (entryInput && activeRadarPrice > 0) {
+        entryInput.value = activeRadarPrice;
+      }
+
+      // Match Strategy to VWAP Bounce
+      const setupSelect = document.getElementById('setup_name');
+      if (setupSelect) setupSelect.value = '1m VWAP Bounce';
+
+      recalculateCalculators();
+
+      // Focus Stop Loss input
+      const slInput = document.getElementById('stop_price');
+      if (slInput) {
+        slInput.focus();
+        slInput.classList.add('ring-2', 'ring-amber-400');
+        setTimeout(() => slInput.classList.remove('ring-2', 'ring-amber-400'), 2500);
+      }
+
+      if (typeof speakCoach === 'function' && scannerVoiceAlerts) {
+        speakCoach(`Loaded ${activeRadarSymbol} ${direction}. Enter stop loss.`);
       }
     }
 
     function renderTopStocksPodium(stocks) {
-      const container = document.getElementById('topStocksPodiumGrid');
-      const countLabel = document.getElementById('topStocksTotalCount');
+      const container = document.getElementById('tab5PodiumGrid');
+      const countLabel = document.getElementById('tab5TopStocksCountBadge');
       if (!container) return;
 
       if (countLabel) countLabel.textContent = `${stocks.length} tracked`;
 
       if (!stocks || stocks.length === 0) {
         container.innerHTML = `
-          <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 text-center col-span-full py-6">
-            <span class="text-2xl block mb-1">📡</span>
+          <div class="p-5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-center col-span-full py-8">
+            <span class="text-3xl block mb-2">📡</span>
             <p class="text-xs text-slate-300 font-medium">Listening for 1-minute Chartink breakout alerts on <code class="text-emerald-400 font-mono bg-slate-950 px-1.5 py-0.5 rounded">/new-stocks</code></p>
-            <p class="text-[11px] text-slate-500 mt-1">No alerts received yet today. Click "Test Pulse" above to test the radar.</p>
+            <p class="text-[11px] text-slate-500 mt-1">No alerts received yet today. Click "Test Alert Pulse" above to test the radar.</p>
           </div>
         `;
         return;
+      }
+
+      // Automatically select top stock for chart if currently default
+      if (stocks.length > 0 && activeRadarSymbol === 'RELIANCE' && stocks[0].symbol !== 'RELIANCE') {
+        selectStockForChart(stocks[0].symbol, stocks[0].latest_price);
       }
 
       const medals = ['🥇', '🥈', '🥉', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th'];
@@ -5027,22 +5248,23 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       container.innerHTML = stocks.map((s, idx) => {
         const medal = medals[idx] || `#${idx + 1}`;
         const borderStyle = idx === 0 
-          ? 'border-amber-400/50 bg-gradient-to-b from-amber-500/10 via-slate-900/90 to-slate-950 shadow-lg shadow-amber-950/30 ring-1 ring-amber-400/30' 
+          ? 'border-amber-400/60 bg-gradient-to-b from-amber-500/15 via-slate-900/90 to-slate-950 shadow-xl shadow-amber-950/40 ring-1 ring-amber-400/40' 
           : idx === 1
-          ? 'border-slate-400/40 bg-gradient-to-b from-slate-400/10 via-slate-900/90 to-slate-950'
+          ? 'border-slate-300/40 bg-gradient-to-b from-slate-300/10 via-slate-900/90 to-slate-950 shadow-md'
           : idx === 2
-          ? 'border-amber-700/40 bg-gradient-to-b from-amber-800/10 via-slate-900/90 to-slate-950'
+          ? 'border-amber-700/50 bg-gradient-to-b from-amber-800/10 via-slate-900/90 to-slate-950'
           : 'border-slate-800/80 bg-slate-900/80';
 
         const priceText = s.latest_price > 0 ? `₹${parseFloat(s.latest_price).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'Mkt Price';
         const scanTag = s.scans && s.scans.length > 0 ? s.scans[0] : '1m Breakout';
+        const isSelected = activeRadarSymbol === s.symbol;
 
         return `
-          <div class="p-3.5 rounded-xl border ${borderStyle} relative group hover:border-emerald-500/50 transition duration-200">
+          <div class="p-3.5 rounded-xl border ${borderStyle} ${isSelected ? 'ring-2 ring-emerald-400' : ''} relative group hover:border-emerald-500/60 transition duration-200 cursor-pointer" onclick="selectStockForChart('${escapeHtml(s.symbol)}', ${s.latest_price || 0})">
             <div class="flex items-center justify-between pb-2 border-b border-slate-800/80">
               <div class="flex items-center gap-2">
                 <span class="text-base select-none">${medal}</span>
-                <span class="font-black text-white text-sm font-mono tracking-wide">${escapeHtml(s.symbol)}</span>
+                <span class="font-black text-white text-sm font-mono tracking-wide group-hover:text-emerald-400 transition">${escapeHtml(s.symbol)}</span>
               </div>
               <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${s.count >= 3 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse' : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'}">
                 🔥 ${s.count}x Alert${s.count > 1 ? 's' : ''}
@@ -5052,23 +5274,23 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             <div class="mt-2.5 flex items-baseline justify-between">
               <div>
                 <span class="text-[10px] uppercase font-bold text-slate-500 block">Trigger Price</span>
-                <span class="font-mono font-bold text-emerald-400 text-sm">${priceText}</span>
+                <span class="font-mono font-black text-emerald-400 text-sm">${priceText}</span>
               </div>
               <div class="text-right">
-                <span class="text-[10px] text-slate-500 block truncate max-w-[110px]" title="${escapeHtml(scanTag)}">${escapeHtml(scanTag)}</span>
-                <span class="text-[10px] font-mono text-slate-400">${s.last_seen ? escapeHtml(s.last_seen.split(' ')[1]) : ''}</span>
+                <span class="text-[10px] text-slate-400 block truncate max-w-[110px]" title="${escapeHtml(scanTag)}">${escapeHtml(scanTag)}</span>
+                <span class="text-[10px] font-mono text-slate-500">${s.last_seen ? escapeHtml(s.last_seen.split(' ')[1]) : ''}</span>
               </div>
             </div>
 
             <!-- Action Strip -->
             <div class="mt-3 pt-2.5 border-t border-slate-800/60 grid grid-cols-2 gap-1.5">
-              <button onclick="prefillTradeFromScanner('${escapeHtml(s.symbol)}', ${s.latest_price || 0}, '${escapeHtml(scanTag)}')" class="py-1 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] flex items-center justify-center gap-1 transition shadow-sm" title="Pre-fill execution form with ${escapeHtml(s.symbol)}">
+              <button onclick="event.stopPropagation(); prefillTradeFromScanner('${escapeHtml(s.symbol)}', ${s.latest_price || 0}, '${escapeHtml(scanTag)}')" class="py-1 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] flex items-center justify-center gap-1 transition shadow-sm" title="Pre-fill execution form with ${escapeHtml(s.symbol)}">
                 <span>⚡</span>
                 <span>Trade</span>
               </button>
-              <button onclick="openTradingViewChart('${escapeHtml(s.symbol)}')" class="py-1 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-semibold text-[11px] flex items-center justify-center gap-1 transition border border-slate-700" title="Open 1m chart on TradingView">
+              <button onclick="event.stopPropagation(); selectStockForChart('${escapeHtml(s.symbol)}', ${s.latest_price || 0})" class="py-1 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-semibold text-[11px] flex items-center justify-center gap-1 transition border border-slate-700" title="Load 1m interactive chart">
                 <span>📈</span>
-                <span>Chart</span>
+                <span>1m Chart</span>
               </button>
             </div>
           </div>
@@ -5077,13 +5299,13 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     }
 
     function renderAlertsStream(alerts) {
-      const container = document.getElementById('scannerAlertsStreamContainer');
-      const countLabel = document.getElementById('streamAlertsCount');
+      const container = document.getElementById('tab5AlertsStreamContainer');
+      const countLabel = document.getElementById('tab5StreamCountBadge');
       if (!container) return;
 
       const filtered = alerts.filter(a => {
-        if (!scannerSearchQuery) return true;
-        const q = scannerSearchQuery.toUpperCase();
+        if (!tab5SearchQuery) return true;
+        const q = tab5SearchQuery.toUpperCase();
         if (a.scan_name && a.scan_name.toUpperCase().includes(q)) return true;
         if (a.stocks && a.stocks.some(s => s.symbol.toUpperCase().includes(q))) return true;
         return false;
@@ -5093,8 +5315,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div class="p-3 text-center text-xs text-slate-500 italic">
-            ${scannerSearchQuery ? 'No alerts match your filter.' : 'Awaiting inbound 1-minute Chartink webhooks on /new-stocks...'}
+          <div class="p-6 text-center text-xs text-slate-500 italic">
+            ${tab5SearchQuery ? 'No alerts match your search.' : 'Awaiting inbound 1-minute Chartink webhooks on /new-stocks...'}
           </div>
         `;
         return;
@@ -5109,18 +5331,17 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           const cnt = stk.count > 1 ? `<span class="bg-amber-500/20 text-amber-300 px-1 rounded text-[9px] font-bold">🔥 ${stk.count}x</span>` : '';
 
           return `
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-500 text-xs transition">
-              <span class="font-bold text-white font-mono cursor-pointer" onclick="prefillTradeFromScanner('${escapeHtml(stk.symbol)}', ${stk.price || 0}, '${escapeHtml(scanName)}')" title="Click to trade ${escapeHtml(stk.symbol)}">${escapeHtml(stk.symbol)}</span>
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-500 text-xs transition cursor-pointer" onclick="selectStockForChart('${escapeHtml(stk.symbol)}', ${stk.price || 0})">
+              <span class="font-bold text-white font-mono hover:text-emerald-400 transition" title="Click to view chart">${escapeHtml(stk.symbol)}</span>
               ${px ? `<span class="text-emerald-400 font-mono text-[11px] font-semibold">${px}</span>` : ''}
               ${cnt}
-              <button onclick="prefillTradeFromScanner('${escapeHtml(stk.symbol)}', ${stk.price || 0}, '${escapeHtml(scanName)}')" class="text-emerald-400 hover:text-white transition text-xs font-bold" title="Pre-fill trade form">⚡</button>
-              <button onclick="openTradingViewChart('${escapeHtml(stk.symbol)}')" class="text-slate-400 hover:text-blue-400 transition text-[11px]" title="TradingView Chart">📈</button>
+              <button onclick="event.stopPropagation(); prefillTradeFromScanner('${escapeHtml(stk.symbol)}', ${stk.price || 0}, '${escapeHtml(scanName)}')" class="text-emerald-400 hover:text-white transition text-xs font-bold" title="Pre-fill trade form">⚡</button>
             </div>
           `;
         }).join('');
 
         return `
-          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition">
+          <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 hover:border-slate-700 transition">
             <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-900 text-xs">
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">🕒 ${escapeHtml(timeText)}</span>
@@ -5136,9 +5357,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       }).join('');
     }
 
-    function filterScannerFeed() {
-      const input = document.getElementById('scannerSearchInput');
-      scannerSearchQuery = input ? input.value.trim() : '';
+    function filterTab5Feed() {
+      const input = document.getElementById('tab5SearchInput');
+      tab5SearchQuery = input ? input.value.trim() : '';
       renderAlertsStream(allScannerAlerts);
     }
 
@@ -5197,6 +5418,37 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       navigator.clipboard.writeText(symbol.trim().toUpperCase());
     }
 
+    function exportScannerAlertsCSV() {
+      if (!allScannerAlerts || allScannerAlerts.length === 0) {
+        alert("No scanner alerts recorded in today's session yet.");
+        return;
+      }
+
+      const rows = [["Alert ID", "Received At", "Triggered At", "Scan Name", "Symbol", "Trigger Price", "Session Alert Count"]];
+      allScannerAlerts.forEach(a => {
+        (a.stocks || []).forEach(s => {
+          rows.push([
+            a.id,
+            `"${a.received_at || ''}"`,
+            `"${a.triggered_at || ''}"`,
+            `"${a.scan_name || ''}"`,
+            `"${s.symbol}"`,
+            s.price || 0,
+            s.count || 1
+          ]);
+        });
+      });
+
+      const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `chartink_radar_session_alerts_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
     async function simulateTestChartinkAlert() {
       const sampleStocks = [
         { sym: 'RELIANCE', price: 2515.50 },
@@ -5242,6 +5494,22 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             allScannerAlerts = [];
             topScannerStocks = [];
             lastSeenAlertId = null;
+            renderTopStocksPodium([]);
+            renderAlertsStream([]);
+            const headerCount = document.getElementById('headerScannerCount');
+            const headerLeader = document.getElementById('headerScannerTopLeader');
+            if (headerCount) headerCount.textContent = '0';
+            if (headerLeader) headerLeader.classList.add('hidden');
+            const tickerCount = document.getElementById('tickerAlertsCountBadge');
+            const tickerText = document.getElementById('tickerTopStocksText');
+            if (tickerCount) tickerCount.textContent = '0 Alerts';
+            if (tickerText) tickerText.textContent = 'Awaiting inbound 1-minute webhooks on /new-stocks...';
+          }
+        } catch (e) {
+          alert("Error clearing feed: " + e.message);
+        }
+      }
+    }
             renderTopStocksPodium([]);
             renderAlertsStream([]);
             const headerCount = document.getElementById('headerScannerCount');
@@ -9753,6 +10021,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       { id: 'tab2', category: 'Views', title: 'Switch to Tab 2: Performance & Equity Curves', hotkey: '2', action: () => switchTab(2) },
       { id: 'tab3', category: 'Views', title: 'Switch to Tab 3: Edge Attribution & Leak Matrix', hotkey: '3', action: () => switchTab(3) },
       { id: 'tab4', category: 'Views', title: 'Switch to Tab 4: Quant Risk & Monte Carlo Sim', hotkey: '4', action: () => switchTab(4) },
+      { id: 'tab5', category: 'Views', title: 'Switch to Tab 5: 1-Min Chartink Webhook Radar', hotkey: '5', action: () => switchTab(5) },
       { id: 'long', category: 'Execution', title: 'Set Direction: LONG (Buy)', hotkey: 'L', action: () => setTradeDirection('Long') },
       { id: 'short', category: 'Execution', title: 'Set Direction: SHORT (Sell)', hotkey: 'S', action: () => setTradeDirection('Short') },
       { id: 'combat', category: 'Execution', title: 'Toggle Combat Mode HUD (Minimalist)', hotkey: 'H', action: () => toggleCombatMode() },
