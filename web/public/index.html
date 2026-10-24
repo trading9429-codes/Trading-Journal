@@ -645,6 +645,13 @@
           <span>📥</span>
           <span>Download .XLSX</span>
         </a>
+
+        <!-- Cloud Backup Button / Status Badge -->
+        <button id="cloudBackupHeaderBtn" onclick="openCloudBackupModal()" class="px-2.5 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-slate-300 hover:text-white flex items-center gap-1.5 transition text-xs font-semibold shadow-sm" title="Cloud Backup: Auto-Sync trades to GitHub repository">
+          <span id="cloudBackupIcon">☁️</span>
+          <span id="cloudBackupLabel">Cloud Backup</span>
+          <span id="cloudBackupDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+        </button>
       </div>
     </div>
   </header>
@@ -3672,6 +3679,95 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     </div>
   </div>
 
+  <!-- ========================================== -->
+  <!-- MODAL: AUTOMATED CLOUD BACKUP (GITHUB AUTO-SYNC) -->
+  <!-- ========================================== -->
+  <div id="cloudBackupModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-2xl w-full max-w-xl border border-sky-500/30 shadow-2xl p-6 relative max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-500/30 flex items-center justify-center text-sky-400 font-bold text-lg">
+            ☁️
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              Automated Cloud Backup
+              <span id="modalBackupStatusBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Checking...</span>
+            </h3>
+            <p class="text-xs text-slate-400">Zero-Data-Loss GitHub Auto-Sync &bull; Survives Container Restarts</p>
+          </div>
+        </div>
+        <button onclick="closeCloudBackupModal()" class="text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+      </div>
+
+      <!-- Sync Status Card -->
+      <div class="mt-4 p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-3">
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div>
+            <span class="text-[10px] uppercase text-slate-500 font-bold block">Target Repository</span>
+            <span id="backupRepoText" class="font-mono font-semibold text-sky-300">trading9429-codes/Trading-Journal</span>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase text-slate-500 font-bold block">Target Branch</span>
+            <span id="backupBranchText" class="font-mono font-semibold text-slate-300">main</span>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase text-slate-500 font-bold block">Backup File</span>
+            <span class="font-mono text-slate-300">web/trades_store.json</span>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase text-slate-500 font-bold block">Last Cloud Sync</span>
+            <span id="backupLastSyncText" class="font-mono text-emerald-400">Never</span>
+          </div>
+        </div>
+
+        <div id="backupStatusBanner" class="p-3 rounded-lg bg-slate-950 border border-slate-800 text-xs flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span id="backupStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+            <span id="backupStatusMsg" class="text-slate-300">Checking configuration...</span>
+          </div>
+          <button id="triggerSyncBtn" onclick="triggerManualCloudBackup()" class="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition flex items-center gap-1.5 shadow">
+            <span>⚡</span>
+            <span>Sync to Cloud Now</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- How It Works & Render Setup Instructions -->
+      <div class="mt-4 space-y-3 text-xs">
+        <div class="p-3.5 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-200">
+          <h4 class="font-bold flex items-center gap-1.5 text-white mb-1">
+            <span>ℹ️</span> How Automated Cloud Backup Works:
+          </h4>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            Every time you log, edit, or import a trade, the system automatically commits your updated ledger directly to your GitHub repository in the background. When Render spins down or restarts, it re-fetches the latest trades from GitHub so you <strong>never lose a single trade</strong>.
+          </p>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 space-y-2">
+          <h4 class="font-bold text-white text-xs flex items-center gap-1.5">
+            <span>🔑</span> Enable Auto-Sync on Render in 2 Minutes:
+          </h4>
+          <ol class="list-decimal list-inside space-y-1 text-[11px] text-slate-400">
+            <li>Generate a GitHub Personal Access Token (Classic with <code class="text-sky-300 font-mono">repo</code> scope, or Fine-grained with Read/Write for Contents).</li>
+            <li>Go to your Render Dashboard &rarr; Your Web Service &rarr; <strong>Environment</strong> tab.</li>
+            <li>Click <strong>Add Environment Variable</strong>: Key: <code class="text-sky-300 font-mono">GITHUB_TOKEN</code>, Value: <em>(your GitHub token)</em>.</li>
+            <li>Click <strong>Save Changes</strong>. Render will automatically enable cloud backup sync!</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="mt-5 flex items-center justify-between pt-3 border-t border-slate-800">
+        <a href="/api/download" download="D3_Tracking_Spreadsheet.xlsx" class="text-xs text-blue-400 hover:underline flex items-center gap-1">
+          <span>📥 Download Offline Excel (.xlsx)</span>
+        </a>
+        <button onclick="closeCloudBackupModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- APPLICATION LOGIC SCRIPT -->
   <script>
     let startingCapital = 200000;
@@ -4533,7 +4629,96 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       localStorage.setItem('traderResetTrades', JSON.stringify(tradesData));
     }
 
+    // --- GitHub Cloud Backup & Auto-Sync ---
+    async function checkCloudBackupStatus() {
+      try {
+        const resp = await fetch('/api/backup/status');
+        if (resp.ok) {
+          const data = await resp.json();
+          updateCloudBackupUI(data);
+        }
+      } catch (e) {
+        console.warn("Could not check backup status:", e);
+      }
+    }
+
+    function updateCloudBackupUI(status) {
+      const headerDot = document.getElementById('cloudBackupDot');
+      const headerLabel = document.getElementById('cloudBackupLabel');
+      const modalBadge = document.getElementById('modalBackupStatusBadge');
+      const statusDot = document.getElementById('backupStatusDot');
+      const statusMsg = document.getElementById('backupStatusMsg');
+      const lastSync = document.getElementById('backupLastSyncText');
+      const repoText = document.getElementById('backupRepoText');
+      const branchText = document.getElementById('backupBranchText');
+
+      if (repoText && status.repo) repoText.textContent = status.repo;
+      if (branchText && status.branch) branchText.textContent = status.branch;
+      if (lastSync && status.last_sync) lastSync.textContent = status.last_sync;
+
+      if (status.configured) {
+        if (headerDot) {
+          headerDot.className = "w-2 h-2 rounded-full bg-emerald-400";
+        }
+        if (headerLabel) headerLabel.textContent = "Cloud Sync Active";
+        if (modalBadge) {
+          modalBadge.className = "text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+          modalBadge.textContent = "Active & Connected";
+        }
+        if (statusDot) statusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+        if (statusMsg) statusMsg.textContent = status.status || "Ready to sync";
+      } else {
+        if (headerDot) {
+          headerDot.className = "w-2 h-2 rounded-full bg-amber-400 animate-pulse";
+        }
+        if (headerLabel) headerLabel.textContent = "Cloud Backup";
+        if (modalBadge) {
+          modalBadge.className = "text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30";
+          modalBadge.textContent = "Token Needed";
+        }
+        if (statusDot) statusDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
+        if (statusMsg) statusMsg.textContent = "Set GITHUB_TOKEN on Render to enable automated zero-loss sync";
+      }
+    }
+
+    function openCloudBackupModal() {
+      checkCloudBackupStatus();
+      const modal = document.getElementById('cloudBackupModal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeCloudBackupModal() {
+      const modal = document.getElementById('cloudBackupModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function triggerManualCloudBackup() {
+      const btn = document.getElementById('triggerSyncBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳</span><span>Syncing to GitHub...</span>';
+      }
+      try {
+        const resp = await fetch('/api/backup/sync', { method: 'POST' });
+        const res = await resp.json();
+        if (res.success) {
+          alert("✅ Cloud Backup Successful!\n\n" + (res.message || "Trades backed up to GitHub repository."));
+        } else {
+          alert("⚠️ Cloud Backup Notice:\n\n" + (res.error || res.message || "Token missing or failed to sync."));
+        }
+        if (res.backup_status) updateCloudBackupUI(res.backup_status);
+      } catch (e) {
+        alert("❌ Backup network error: " + e.message);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>⚡</span><span>Sync to Cloud Now</span>';
+        }
+      }
+    }
+
     async function loadTrades() {
+      checkCloudBackupStatus();
       try {
         const resp = await fetch('/api/trades');
         if (resp.ok) {

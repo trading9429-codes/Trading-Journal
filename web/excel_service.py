@@ -236,19 +236,41 @@ class ExcelTradeManager:
         self.sync_excel_file()
         
     def _load_data(self):
+        # 1. Try loading from remote GitHub backup if configured
+        try:
+            from github_sync import get_remote_file_info
+            _, remote_trades, err = get_remote_file_info()
+            if remote_trades and isinstance(remote_trades, list) and len(remote_trades) > 0:
+                print(f"[Cloud Backup] Loaded {len(remote_trades)} trades from GitHub backup.")
+                self._save_local(remote_trades)
+                return remote_trades
+        except Exception as e:
+            pass
+
+        # 2. Try loading from local DATA_JSON_PATH
         if os.path.exists(DATA_JSON_PATH):
             try:
                 with open(DATA_JSON_PATH, "r") as f:
-                    return json.load(f)
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        return data
             except Exception:
                 pass
-        self._save_data(DEFAULT_TRADES)
+        self._save_local(DEFAULT_TRADES)
         return DEFAULT_TRADES
         
-    def _save_data(self, trades_list):
+    def _save_local(self, trades_list):
         os.makedirs(os.path.dirname(DATA_JSON_PATH), exist_ok=True)
         with open(DATA_JSON_PATH, "w") as f:
             json.dump(trades_list, f, indent=2)
+
+    def _save_data(self, trades_list):
+        self._save_local(trades_list)
+        try:
+            from github_sync import async_push_trades
+            async_push_trades(trades_list)
+        except Exception as e:
+            pass
             
     def get_trades(self):
         return self.trades

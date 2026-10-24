@@ -45,6 +45,12 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(content)
             else:
                 self.send_error(404, "Sample CSV not found.")
+        elif path == "/api/backup/status":
+            try:
+                from github_sync import get_backup_status
+                self._send_json(get_backup_status())
+            except Exception as e:
+                self._send_json({"configured": False, "status": "Error", "last_error": str(e)})
         else:
             # Serve static files from PUBLIC_DIR
             super().do_GET()
@@ -110,6 +116,14 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
                 self._send_json({"result": res, "message": "Emergency FYERS Kill Switch executed!"})
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
+        elif path == "/api/backup/sync":
+            try:
+                from github_sync import push_trades_to_github, get_backup_status
+                success, msg = push_trades_to_github(manager.get_trades(), commit_message="Manual cloud backup from Dashboard")
+                status = get_backup_status()
+                self._send_json({"success": success, "message": msg, "backup_status": status})
+            except Exception as e:
+                self._send_json({"success": False, "error": str(e)}, status=500)
         else:
             self.send_error(404, "Endpoint not found.")
 
