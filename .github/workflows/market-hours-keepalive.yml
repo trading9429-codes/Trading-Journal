@@ -1,11 +1,13 @@
-name: Market Hours Anti-Sleep Sentinel
+name: 09:00–11:30 AM IST Market Keep-Alive Sentinel
 
 on:
   schedule:
-    # Runs every 12 minutes from 03:20 UTC to 10:20 UTC, Monday through Friday
-    # 03:20 UTC = 08:50 AM IST (10 mins before pre-market prep)
-    # 10:20 UTC = 03:50 PM IST (Market close wrap-up)
-    - cron: '*/12 3-10 * * 1-5'
+    # 03:30 UTC to 06:00 UTC, Monday through Friday
+    # 03:30 UTC = 09:00 AM IST
+    # 06:00 UTC = 11:30 AM IST
+    - cron: '30,42,54 3 * * 1-5'
+    - cron: '*/12 4-5 * * 1-5'
+    - cron: '0 6 * * 1-5'
   workflow_dispatch: # Allows manual trigger from GitHub UI
 
 jobs:
@@ -15,11 +17,23 @@ jobs:
     steps:
       - name: Ping Trader Journal Web Service
         run: |
-          TARGET_URL="${{ secrets.RENDER_APP_URL }}"
-          if [ -z "$TARGET_URL" ]; then
-            TARGET_URL="https://trading-journal.onrender.com"
+          # Calculate current IST time
+          IST_TIME=$(TZ="Asia/Kolkata" date "+%Y-%m-%d %H:%M:%S IST")
+          IST_HOUR=$(TZ="Asia/Kolkata" date +%H)
+          IST_MIN=$(TZ="Asia/Kolkata" date +%M)
+          TOTAL_MIN=$(( 10#$IST_HOUR * 60 + 10#$IST_MIN ))
+
+          # Window: 09:00 AM (540 min) to 11:30 AM (690 min)
+          if [ "$TOTAL_MIN" -ge 540 ] && [ "$TOTAL_MIN" -le 690 ]; then
+            TARGET_URL="${{ secrets.RENDER_APP_URL }}"
+            if [ -z "$TARGET_URL" ]; then
+              TARGET_URL="https://trading-journal.onrender.com"
+            fi
+            echo "Current Time: $IST_TIME (Within 09:00–11:30 AM IST execution window)"
+            echo "Sending keep-alive pulse to $TARGET_URL/api/ping"
+            RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" --max-time 30 "$TARGET_URL/api/ping" || true)
+            echo "$RESPONSE"
+            echo "Keep-alive pulse dispatched successfully."
+          else
+            echo "Current Time: $IST_TIME (Outside 09:00–11:30 AM IST window). Sleeping to preserve free quota."
           fi
-          echo "Sending keep-alive ping to $TARGET_URL/api/ping at $(date -u)"
-          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" --max-time 30 "$TARGET_URL/api/ping" || true)
-          echo "$RESPONSE"
-          echo "Keep-alive pulse dispatched successfully."

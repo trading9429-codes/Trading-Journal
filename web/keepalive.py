@@ -8,14 +8,14 @@ from datetime import datetime, timezone, timedelta
 IST = timezone(timedelta(hours=5, minutes=30))
 
 def is_market_hours():
-    """Checks if current IST time is within NSE trading keep-alive window (08:50 AM - 03:45 PM IST, Mon-Fri)."""
+    """Checks if current IST time is within NSE execution window (09:00 AM - 11:30 AM IST, Mon-Fri)."""
     now = datetime.now(IST)
     if now.weekday() >= 5:  # Saturday or Sunday
         return False
-    # 08:50 AM to 15:45 (03:45 PM)
+    # 09:00 AM to 11:30 AM IST
     minutes_from_midnight = now.hour * 60 + now.minute
-    start_minutes = 8 * 60 + 50   # 08:50 AM
-    end_minutes = 15 * 60 + 45    # 03:45 PM
+    start_minutes = 9 * 60        # 09:00 AM IST
+    end_minutes = 11 * 60 + 30    # 11:30 AM IST
     return start_minutes <= minutes_from_midnight <= end_minutes
 
 def get_target_url():

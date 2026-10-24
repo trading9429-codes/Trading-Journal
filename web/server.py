@@ -57,7 +57,7 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
             now_ist = datetime.now(ist)
             is_weekday = now_ist.weekday() < 5
             minutes = now_ist.hour * 60 + now_ist.minute
-            is_market_hours = is_weekday and (8 * 60 + 50 <= minutes <= 15 * 60 + 45)
+            is_market_hours = is_weekday and (9 * 60 <= minutes <= 11 * 60 + 30)
             self._send_json({
                 "status": "healthy",
                 "time_ist": now_ist.strftime("%Y-%m-%d %H:%M:%S IST"),
