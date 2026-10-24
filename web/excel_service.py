@@ -286,25 +286,41 @@ class ExcelTradeManager:
         now = datetime.now()
         date_str = str(payload.get("date") or now.strftime("%Y-%m-%d"))
         time_str = str(payload.get("time") or now.strftime("%H:%M"))
+        exit_time_str = str(payload.get("exit_time") or time_str)
         day_str = datetime.strptime(date_str, "%Y-%m-%d").strftime("%a") if date_str else "Mon"
         
         setup_name = str(payload.get("setup_name") or "1m Indicator Setup")
         scanner_time = str(payload.get("scanner_alert_time") or time_str)
         lesson = str(payload.get("lesson") or "Trade logged via Web Quick-Logger")
-        screenshot = str(payload.get("screenshot_link") or "")
+        screenshot = str(payload.get("screenshot_link") or payload.get("screenshot") or "")
         
         # Calculations
         risk_per_share = abs(entry - stop)
         risk_amount = round(risk_per_share * qty, 2)
         reward_per_share = (exit_p - entry) if direction == "Long" else (entry - exit_p)
-        rr_planned = round(abs(exit_p - entry) / risk_per_share, 2) if risk_per_share > 0 else 0.0
         
-        turnover = (entry * qty) + (exit_p * qty)
-        costs = round(0.0011 * turnover, 2) # 0.11% statutory turnover friction
-        gross_pnl = round(reward_per_share * qty, 2)
-        net_pnl = round(gross_pnl - costs, 2)
-        r_multiple = round(net_pnl / risk_amount, 2) if risk_amount > 0 else 0.0
-        outcome = "Win" if net_pnl > 0 else ("Loss" if net_pnl < 0 else "BE")
+        # Target Price
+        target = float(payload.get("target_price") or payload.get("target") or 0.0)
+        if target <= 0:
+            target = round(entry + 2.2 * risk_per_share if direction == "Long" else entry - 2.2 * risk_per_share, 2)
+
+        rr_planned = float(payload.get("rr_planned") or (round(abs(target - entry) / risk_per_share, 2) if risk_per_share > 0 else 0.0))
+        
+        # Costs / FYERS Brokerage
+        if payload.get("costs") is not None and float(payload.get("costs")) > 0:
+            costs = round(float(payload.get("costs")), 2)
+        else:
+            try:
+                charges = calculate_fyers_charges(entry, exit_p, qty, direction)
+                costs = float(charges.get("total_costs", 0.0))
+            except Exception:
+                turnover = (entry * qty) + (exit_p * qty)
+                costs = round(0.0011 * turnover, 2)
+                
+        gross_pnl = float(payload.get("gross_pnl") if payload.get("gross_pnl") is not None else round(reward_per_share * qty, 2))
+        net_pnl = float(payload.get("net_pnl") if payload.get("net_pnl") is not None else round(gross_pnl - costs, 2))
+        r_multiple = float(payload.get("r_multiple") if payload.get("r_multiple") is not None else (round(net_pnl / risk_amount, 2) if risk_amount > 0 else 0.0))
+        outcome = payload.get("outcome") or ("Win" if net_pnl > 0 else ("Loss" if net_pnl < 0 else "BE"))
         
         checklist_score = int(payload.get("checklist_score", 5))
         rule_violation = "Y" if payload.get("rule_violation") in [True, "Y", "y"] else "N"
@@ -313,13 +329,15 @@ class ExcelTradeManager:
         trade_valid = "Y" if (checklist_score >= 5 and rule_violation == "N" and rr_planned >= 2.2) else "N"
         
         trade_num = len(self.trades) + 1
-        new_id = f"T-{trade_num:03d}"
+        new_id = str(payload.get("id") or f"T-{trade_num:03d}")
         
         new_trade = {
             "id": new_id,
             "date": date_str,
             "day": day_str,
             "time": time_str,
+            "exit_time": exit_time_str,
+            "hold_duration": int(payload.get("hold_duration") or 0),
             "symbol": symbol,
             "direction": direction,
             "setup_name": setup_name,
@@ -327,9 +345,9 @@ class ExcelTradeManager:
             "htf_ok": payload.get("htf_ok", "Y"),
             "no_chase": payload.get("no_chase", "Y"),
             "stop_defined": payload.get("stop_defined", "Y"),
-            "target_price": target if target > 0 else (entry + 2.2*risk_per_share if direction == "Long" else entry - 2.2*risk_per_share),
+            "target_price": target,
             "rr_planned": rr_planned,
-            "risk_percent": 0.0025,
+            "risk_percent": float(payload.get("risk_percent", 0.0025)),
             "risk_amount": risk_amount,
             "entry_price": entry,
             "stop_price": stop,

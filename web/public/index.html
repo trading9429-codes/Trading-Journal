@@ -4588,6 +4588,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           const res = await resp.json();
           tradesData.push(res.trade || tradeObj);
         } else {
+          const errRes = await resp.json().catch(() => ({}));
+          console.error("Backend error logging trade:", errRes);
+          alert("⚠️ Server Sync Warning: " + (errRes.error || "Could not persist trade to server database."));
           tradesData.push(tradeObj);
         }
       } catch (err) {
