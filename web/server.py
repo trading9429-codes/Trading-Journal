@@ -51,6 +51,19 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
                 self._send_json(get_backup_status())
             except Exception as e:
                 self._send_json({"configured": False, "status": "Error", "last_error": str(e)})
+        elif path == "/api/ping" or path == "/healthz":
+            from datetime import datetime, timezone, timedelta
+            ist = timezone(timedelta(hours=5, minutes=30))
+            now_ist = datetime.now(ist)
+            is_weekday = now_ist.weekday() < 5
+            minutes = now_ist.hour * 60 + now_ist.minute
+            is_market_hours = is_weekday and (8 * 60 + 50 <= minutes <= 15 * 60 + 45)
+            self._send_json({
+                "status": "healthy",
+                "time_ist": now_ist.strftime("%Y-%m-%d %H:%M:%S IST"),
+                "market_hours": is_market_hours,
+                "keepalive": "active"
+            })
         else:
             # Serve static files from PUBLIC_DIR
             super().do_GET()
@@ -153,6 +166,11 @@ def run_server():
     with httpd:
         print(f"Server started on http://127.0.0.1:{active_port}")
         print(f"Data source: {XLSX_PATH}")
+        try:
+            from keepalive import start_keepalive_daemon
+            start_keepalive_daemon()
+        except Exception as e:
+            print(f"[Keep-Alive] Daemon startup notice: {e}")
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:

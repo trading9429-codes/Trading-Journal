@@ -1,0 +1,25 @@
+name: Market Hours Anti-Sleep Sentinel
+
+on:
+  schedule:
+    # Runs every 12 minutes from 03:20 UTC to 10:20 UTC, Monday through Friday
+    # 03:20 UTC = 08:50 AM IST (10 mins before pre-market prep)
+    # 10:20 UTC = 03:50 PM IST (Market close wrap-up)
+    - cron: '*/12 3-10 * * 1-5'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  keepalive-ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping Trader Journal Web Service
+        run: |
+          TARGET_URL="${{ secrets.RENDER_APP_URL }}"
+          if [ -z "$TARGET_URL" ]; then
+            TARGET_URL="https://trading-journal.onrender.com"
+          fi
+          echo "Sending keep-alive ping to $TARGET_URL/api/ping at $(date -u)"
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" --max-time 30 "$TARGET_URL/api/ping" || true)
+          echo "$RESPONSE"
+          echo "Keep-alive pulse dispatched successfully."
