@@ -75,16 +75,19 @@ class ChartinkScannerManager:
             matched_items = []
             for i, sym in enumerate(stock_list):
                 px = price_list[i] if i < len(price_list) else 0.0
+                is_new = sym not in self.stock_stats
 
                 # Update or initialize stock_stats frequency counter
-                if sym not in self.stock_stats:
+                if is_new:
                     self.stock_stats[sym] = {
                         "symbol": sym,
                         "count": 1,
                         "latest_price": px,
                         "first_seen": now_ist,
                         "last_seen": now_ist,
-                        "scans": [scan_name]
+                        "scans": [scan_name],
+                        "confluence_count": 1,
+                        "is_new": True
                     }
                 else:
                     self.stock_stats[sym]["count"] += 1
@@ -93,11 +96,16 @@ class ChartinkScannerManager:
                     self.stock_stats[sym]["last_seen"] = now_ist
                     if scan_name not in self.stock_stats[sym]["scans"]:
                         self.stock_stats[sym]["scans"].append(scan_name)
+                    self.stock_stats[sym]["confluence_count"] = len(self.stock_stats[sym]["scans"])
+                    self.stock_stats[sym]["is_new"] = False
 
                 matched_items.append({
                     "symbol": sym,
                     "price": px,
-                    "count": self.stock_stats[sym]["count"]
+                    "count": self.stock_stats[sym]["count"],
+                    "is_new": is_new,
+                    "confluence_count": self.stock_stats[sym]["confluence_count"],
+                    "scans": list(self.stock_stats[sym]["scans"])
                 })
 
             alert_entry = {
@@ -108,7 +116,9 @@ class ChartinkScannerManager:
                 "scan_url": scan_url,
                 "alert_name": alert_name,
                 "stocks": matched_items,
-                "stocks_count": len(matched_items)
+                "stocks_count": len(matched_items),
+                "has_new_stocks": any(item["is_new"] for item in matched_items),
+                "has_confluence": any(item["confluence_count"] >= 2 for item in matched_items)
             }
 
             self.alerts.insert(0, alert_entry)  # Newest first
@@ -117,20 +127,27 @@ class ChartinkScannerManager:
             return {
                 "status": "success",
                 "alert": alert_entry,
-                "top_stocks": self.get_top_stocks(10)
+                "top_stocks": self.get_top_stocks(12)
             }
 
-    def get_top_stocks(self, limit=10):
+    def get_top_stocks(self, limit=12):
         """Returns stocks sorted descending by alert frequency count."""
-        sorted_stocks = sorted(self.stock_stats.values(), key=lambda x: x["count"], reverse=True)
+        sorted_stocks = sorted(self.stock_stats.values(), key=lambda x: (x.get("confluence_count", 1) >= 2, x["count"]), reverse=True)
         return sorted_stocks[:limit]
 
     def get_scanner_data(self):
         with self._lock:
+            all_scans = list({s for item in self.stock_stats.values() for s in item.get("scans", [])})
+            confluence_count = sum(1 for item in self.stock_stats.values() if item.get("confluence_count", 1) >= 2)
+            new_count = sum(1 for item in self.stock_stats.values() if item.get("count", 1) == 1)
+
             return {
                 "total_alerts": len(self.alerts),
                 "unique_stocks_count": len(self.stock_stats),
-                "top_stocks": self.get_top_stocks(12),
+                "confluence_stocks_count": confluence_count,
+                "new_stocks_count": new_count,
+                "all_scans": all_scans,
+                "top_stocks": self.get_top_stocks(16),
                 "alerts": self.alerts[:100]  # return latest 100 alerts
             }
 

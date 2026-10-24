@@ -526,6 +526,9 @@
   </style>
 </head>
 <body class="min-h-screen pb-16">
+  <!-- Floating Real-Time Radar Toast Alerts Container (High Priority Execution HUD) -->
+  <div id="scannerToastContainer" class="fixed top-5 right-5 z-[999] space-y-2.5 pointer-events-none max-w-sm w-full"></div>
+
   <!-- Hidden File Inputs -->
   <input type="file" id="csvFileInput" accept=".csv,.json,text/csv,application/json" class="hidden" onchange="handleFileImport(event)">
   <input type="file" id="fyersFileInput" accept=".csv,text/csv" class="hidden" onchange="handleFyersFileImport(event)">
@@ -2325,25 +2328,25 @@
           </div>
           <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800">
             <span class="text-[10px] text-slate-400 uppercase font-bold block">Unique Stocks</span>
-            <span id="tab5UniqueStocksStat" class="text-lg font-black font-mono text-emerald-400 mt-0.5 block">0</span>
-            <span class="text-[10px] text-slate-500">Under institutional radar</span>
+            <span id="tab5UniqueStocksStat" class="text-lg font-black font-mono text-cyan-300 mt-0.5 block">0</span>
+            <span class="text-[10px] text-slate-500">Under session radar</span>
           </div>
           <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800">
-            <span class="text-[10px] text-slate-400 uppercase font-bold block">Momentum Leader</span>
-            <span id="tab5MomentumLeaderStat" class="text-lg font-black font-mono text-amber-300 mt-0.5 block">--</span>
-            <span class="text-[10px] text-slate-500">Highest alert frequency</span>
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">✨ New Stocks Today</span>
+            <span id="tab5NewStocksStat" class="text-lg font-black font-mono text-emerald-400 mt-0.5 block">0</span>
+            <span class="text-[10px] text-slate-500">First-time triggers today</span>
           </div>
           <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800">
-            <span class="text-[10px] text-slate-400 uppercase font-bold block">Execution Window</span>
-            <span class="text-lg font-black font-mono text-blue-400 mt-0.5 block">09:15–10:30 AM</span>
-            <span class="text-[10px] text-slate-500">NSE 1-min momentum</span>
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">⚡ Multi-Scan Confluence</span>
+            <span id="tab5ConfluenceStocksStat" class="text-lg font-black font-mono text-purple-400 mt-0.5 block">0</span>
+            <span class="text-[10px] text-slate-500">&ge;2 Scanners overlapping</span>
           </div>
         </div>
       </section>
 
       <!-- TOP RANKED MOMENTUM STOCKS PODIUM -->
       <section class="glass-card rounded-2xl p-5 shadow-2xl border border-slate-800">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 pb-3 mb-4 border-b border-slate-800">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 pb-3 mb-3 border-b border-slate-800">
           <div class="flex items-center gap-2">
             <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
               <span>🔥</span> Frequency Leaderboard (Top Momentum Stocks)
@@ -2351,6 +2354,23 @@
             <span id="tab5TopStocksCountBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">0 tracked</span>
           </div>
           <span class="text-[11px] text-slate-400">Multiple alerts = Continuous institutional breakout surge. Click stock to view 1m chart.</span>
+        </div>
+
+        <!-- Category & Confluence Filter Strip -->
+        <div class="flex items-center gap-2 flex-wrap pb-3 mb-4 border-b border-slate-800/60 text-xs">
+          <span class="text-[10px] uppercase font-bold text-slate-500 mr-1 select-none">Filter:</span>
+          <button onclick="setRadarCategoryFilter('all')" id="radarFilter_all" class="radar-filter-btn px-2.5 py-1 rounded-lg font-bold bg-emerald-600 text-white transition shadow text-xs">
+            🔥 All (<span id="filterAllCount">0</span>)
+          </button>
+          <button onclick="setRadarCategoryFilter('confluence')" id="radarFilter_confluence" class="radar-filter-btn px-2.5 py-1 rounded-lg font-bold bg-slate-800 text-purple-300 hover:text-white border border-purple-500/30 transition text-xs flex items-center gap-1">
+            <span>⚡ Multi-Scan Confluence</span> (<span id="filterConfluenceCount">0</span>)
+          </button>
+          <button onclick="setRadarCategoryFilter('new')" id="radarFilter_new" class="radar-filter-btn px-2.5 py-1 rounded-lg font-bold bg-slate-800 text-emerald-300 hover:text-white border border-emerald-500/30 transition text-xs flex items-center gap-1">
+            <span>✨ New Stocks Today</span> (<span id="filterNewCount">0</span>)
+          </button>
+          <button onclick="setRadarCategoryFilter('retrigger')" id="radarFilter_retrigger" class="radar-filter-btn px-2.5 py-1 rounded-lg font-bold bg-slate-800 text-amber-300 hover:text-white border border-amber-500/30 transition text-xs flex items-center gap-1">
+            <span>🔁 Re-Triggers 2x+</span> (<span id="filterRetriggerCount">0</span>)
+          </button>
         </div>
 
         <div id="tab5PodiumGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3.5">
@@ -5042,6 +5062,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     let activeRadarSymbol = 'RELIANCE';
     let activeRadarPrice = 2500.00;
     let tab5SearchQuery = '';
+    let radarCategoryFilter = 'all';
 
     function scrollToScannerFeed() {
       switchTab(5);
@@ -5089,6 +5110,171 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       });
     }
 
+    // High-fidelity Web Audio Synthesizer for Distinct Acoustic Chimes (Zero external dependencies)
+    function playScannerAcousticChime(type) {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        if (ctx.state === 'suspended') {
+          ctx.resume();
+        }
+        const now = ctx.currentTime;
+
+        if (type === 'confluence') {
+          // Urgent, triumphant harmonic chord (C6 - G6 - C7)
+          [1046.50, 1567.98, 2093.00].forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+            gain.gain.setValueAtTime(0.18, now + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.08 + 0.6);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.08);
+            osc.stop(now + idx * 0.08 + 0.65);
+          });
+        } else if (type === 'new') {
+          // Crisp rising double-tone notification chime (E5 - A5)
+          [659.25, 880.00].forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.09);
+            gain.gain.setValueAtTime(0.2, now + idx * 0.09);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.09 + 0.5);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.09);
+            osc.stop(now + idx * 0.09 + 0.55);
+          });
+        } else {
+          // Rapid momentum chirp (G5 to B5)
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(783.99, now);
+          osc.frequency.exponentialRampToValueAtTime(987.77, now + 0.16);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        }
+      } catch (err) {
+        console.debug('Acoustic chime suppressed until user gesture:', err);
+      }
+    }
+
+    // Floating Non-Blocking HUD Toast Card for Inbound Scanner Alerts
+    function showScannerToastNotification(alert) {
+      const container = document.getElementById('scannerToastContainer');
+      if (!container) return;
+
+      const toastId = 'toast_' + Math.random().toString(36).substring(2, 9);
+      const scanShort = (alert.scan_name || '1m Alert').replace(/^Sprut Trading - /i, '');
+      const hasConfluence = alert.has_confluence || (alert.stocks && alert.stocks.some(s => (s.confluence_count || 1) >= 2));
+      const hasNew = alert.has_new_stocks || (alert.stocks && alert.stocks.some(s => s.is_new));
+
+      let badgeHtml = '';
+      let borderClass = 'border-slate-700 bg-slate-900/95';
+      let titleIcon = '⚡';
+
+      if (hasConfluence) {
+        badgeHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-purple-500/25 text-purple-300 border border-purple-500/50 animate-pulse tracking-wide">⚡ CONFLUENCE</span>';
+        borderClass = 'border-purple-500/80 bg-gradient-to-br from-purple-950/95 via-slate-900/95 to-slate-950 shadow-2xl shadow-purple-950/70 ring-1 ring-purple-500/60';
+        titleIcon = '⚡⚡';
+      } else if (hasNew) {
+        badgeHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 tracking-wide">✨ NEW STOCK</span>';
+        borderClass = 'border-emerald-500/80 bg-gradient-to-br from-emerald-950/95 via-slate-900/95 to-slate-950 shadow-2xl shadow-emerald-950/60 ring-1 ring-emerald-500/50';
+        titleIcon = '✨';
+      } else {
+        badgeHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-amber-500/25 text-amber-300 border border-amber-500/50 tracking-wide">🔁 RE-TRIGGER</span>';
+        borderClass = 'border-amber-500/70 bg-gradient-to-br from-amber-950/95 via-slate-900/95 to-slate-950 shadow-xl shadow-amber-950/50 ring-1 ring-amber-500/50';
+        titleIcon = '🔥';
+      }
+
+      const stocksHtml = (alert.stocks || []).map(s => {
+        const isNewStock = s.is_new || s.count === 1;
+        const isConf = (s.confluence_count || 1) >= 2;
+        const px = s.price > 0 ? `₹${parseFloat(s.price).toFixed(2)}` : 'Mkt';
+        const tag = isConf ? `⚡ ${s.confluence_count}x Scans` : isNewStock ? '✨ NEW' : `🔁 ${s.count}x Surge`;
+        const tagClass = isConf 
+          ? 'bg-purple-500/30 text-purple-300 border-purple-500/60 font-black' 
+          : isNewStock 
+          ? 'bg-emerald-500/30 text-emerald-300 border-emerald-500/60 font-bold' 
+          : 'bg-amber-500/30 text-amber-300 border-amber-500/60 font-bold';
+
+        return `
+          <div class="flex items-center justify-between py-1.5 border-b border-slate-800/80 last:border-b-0 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="font-black text-white font-mono tracking-wider cursor-pointer hover:text-emerald-400 transition" onclick="selectStockForChart('${escapeHtml(s.symbol)}', ${s.price || 0}); switchTab(5);">${escapeHtml(s.symbol)}</span>
+              <span class="font-mono text-emerald-400 text-[11px] font-semibold">${px}</span>
+              <span class="px-1.5 py-0.2 rounded text-[9px] border ${tagClass}">${tag}</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="prefillTradeFromScanner('${escapeHtml(s.symbol)}', ${s.price || 0}, '${escapeHtml(alert.scan_name || '')}')" class="px-2 py-0.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] transition shadow pointer-events-auto" title="Pre-fill execution form">⚡ Trade</button>
+              <button onclick="selectStockForChart('${escapeHtml(s.symbol)}', ${s.price || 0}); switchTab(5);" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] transition border border-slate-700 pointer-events-auto" title="View 1m chart">📈</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const toast = document.createElement('div');
+      toast.id = toastId;
+      toast.className = `p-3.5 rounded-xl border ${borderClass} backdrop-blur-md transition-all duration-300 transform translate-x-6 opacity-0 pointer-events-auto`;
+      toast.innerHTML = `
+        <div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-800 text-xs">
+          <div class="flex items-center gap-1.5">
+            <span class="text-sm select-none">${titleIcon}</span>
+            <span class="font-bold text-slate-200 truncate max-w-[160px]" title="${escapeHtml(alert.scan_name || '1m Alert')}">${escapeHtml(scanShort)}</span>
+            ${badgeHtml}
+          </div>
+          <button onclick="document.getElementById('${toastId}')?.remove()" class="text-slate-400 hover:text-white text-base leading-none px-1 cursor-pointer">&times;</button>
+        </div>
+        <div class="space-y-0.5">
+          ${stocksHtml}
+        </div>
+        <div class="mt-2.5 pt-1.5 border-t border-slate-800/60 flex items-center justify-between text-[10px] text-slate-400 font-mono">
+          <span>🕒 ${escapeHtml(alert.triggered_at || 'Just now')}</span>
+          <span class="text-emerald-400 cursor-pointer hover:underline font-bold" onclick="switchTab(5)">Open Radar Tab 5 &rarr;</span>
+        </div>
+      `;
+
+      container.prepend(toast);
+
+      // Slide in animation
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-x-6', 'opacity-0');
+        toast.classList.add('translate-x-0', 'opacity-100');
+      });
+
+      // Auto dismiss after 9 seconds
+      setTimeout(() => {
+        if (toast && toast.parentNode) {
+          toast.classList.add('opacity-0', 'translate-x-6');
+          setTimeout(() => toast.remove(), 350);
+        }
+      }, 9000);
+    }
+
+    function setRadarCategoryFilter(cat) {
+      radarCategoryFilter = cat;
+      const filters = ['all', 'confluence', 'new', 'retrigger'];
+      filters.forEach(f => {
+        const btn = document.getElementById(`radarFilter_${f}`);
+        if (!btn) return;
+        if (f === cat) {
+          btn.className = 'radar-filter-btn px-2.5 py-1 rounded-lg font-bold bg-emerald-600 text-white transition shadow text-xs';
+        } else {
+          btn.className = 'radar-filter-btn px-2.5 py-1 rounded-lg font-bold bg-slate-800 text-slate-400 hover:text-white border border-slate-700/60 transition text-xs flex items-center gap-1';
+        }
+      });
+      renderTopStocksPodium(topScannerStocks);
+    }
+
     async function fetchScannerAlerts() {
       try {
         const resp = await fetch('/api/scanner/alerts');
@@ -5129,14 +5315,28 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           // Tab 5 Stat Cards update
           const statAlerts = document.getElementById('tab5TotalAlertsStat');
           const statUnique = document.getElementById('tab5UniqueStocksStat');
-          const statLeader = document.getElementById('tab5MomentumLeaderStat');
+          const statNew = document.getElementById('tab5NewStocksStat');
+          const statConf = document.getElementById('tab5ConfluenceStocksStat');
+
+          const confCount = (topScannerStocks || []).filter(s => (s.confluence_count || 1) >= 2).length;
+          const newCount = (topScannerStocks || []).filter(s => s.is_new || s.count === 1).length;
+          const retrigCount = (topScannerStocks || []).filter(s => s.count >= 2).length;
+
           if (statAlerts) statAlerts.textContent = data.total_alerts || 0;
           if (statUnique) statUnique.textContent = data.unique_stocks_count || 0;
-          if (statLeader && topScannerStocks.length > 0) {
-            statLeader.textContent = `${topScannerStocks[0].symbol} (${topScannerStocks[0].count}x)`;
-          } else if (statLeader) {
-            statLeader.textContent = '--';
-          }
+          if (statNew) statNew.textContent = data.new_stocks_count !== undefined ? data.new_stocks_count : newCount;
+          if (statConf) statConf.textContent = data.confluence_stocks_count !== undefined ? data.confluence_stocks_count : confCount;
+
+          // Filter button counters
+          const fAll = document.getElementById('filterAllCount');
+          const fConf = document.getElementById('filterConfluenceCount');
+          const fNew = document.getElementById('filterNewCount');
+          const fRetrig = document.getElementById('filterRetriggerCount');
+
+          if (fAll) fAll.textContent = (topScannerStocks || []).length;
+          if (fConf) fConf.textContent = data.confluence_stocks_count !== undefined ? data.confluence_stocks_count : confCount;
+          if (fNew) fNew.textContent = data.new_stocks_count !== undefined ? data.new_stocks_count : newCount;
+          if (fRetrig) fRetrig.textContent = retrigCount;
 
           renderTopStocksPodium(topScannerStocks);
           renderAlertsStream(allScannerAlerts);
@@ -5147,13 +5347,34 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     }
 
     function onNewScannerAlertReceived(alert) {
-      if (typeof playSoundChime === 'function') {
-        playSoundChime('bell');
+      const hasConfluence = alert.has_confluence || (alert.stocks && alert.stocks.some(s => (s.confluence_count || 1) >= 2));
+      const hasNew = alert.has_new_stocks || (alert.stocks && alert.stocks.some(s => s.is_new));
+
+      // 1. Acoustic chime based on alert category
+      if (hasConfluence) {
+        playScannerAcousticChime('confluence');
+      } else if (hasNew) {
+        playScannerAcousticChime('new');
+      } else {
+        playScannerAcousticChime('retrigger');
       }
+
+      // 2. High-visibility Toast Notification Card
+      showScannerToastNotification(alert);
+
+      // 3. Spoken voice announcement
       if (scannerVoiceAlerts && typeof speakCoach === 'function' && alert.stocks && alert.stocks.length > 0) {
-        const topSym = alert.stocks[0].symbol;
+        const topStock = alert.stocks[0];
+        const sym = topStock.symbol;
         const scanShort = (alert.scan_name || "Breakout").replace(/Sprut Trading - /gi, "");
-        speakCoach(`Radar alert on ${topSym}. ${scanShort}.`);
+
+        if (hasConfluence) {
+          speakCoach(`Confluence alert on ${sym}! Overlapping in multiple scanners.`);
+        } else if (hasNew) {
+          speakCoach(`New stock alert! ${sym} on ${scanShort}.`);
+        } else {
+          speakCoach(`Momentum surge! ${sym} re-triggered ${topStock.count || 2} times.`);
+        }
       }
     }
 
@@ -5225,38 +5446,66 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const countLabel = document.getElementById('tab5TopStocksCountBadge');
       if (!container) return;
 
-      if (countLabel) countLabel.textContent = `${stocks.length} tracked`;
+      let list = stocks || [];
 
-      if (!stocks || stocks.length === 0) {
+      // Category filter application
+      if (radarCategoryFilter === 'confluence') {
+        list = list.filter(s => (s.confluence_count || 1) >= 2);
+      } else if (radarCategoryFilter === 'new') {
+        list = list.filter(s => s.is_new || s.count === 1);
+      } else if (radarCategoryFilter === 'retrigger') {
+        list = list.filter(s => s.count >= 2);
+      }
+
+      if (countLabel) countLabel.textContent = `${list.length} displayed`;
+
+      if (!list || list.length === 0) {
+        let emptyMsg = 'No alerts recorded today yet. Click "Test Alert Pulse" above to test the radar.';
+        if (radarCategoryFilter === 'confluence') emptyMsg = 'No multi-scanner confluence stocks detected yet. Confluence triggers when a stock appears in 2+ scanners.';
+        else if (radarCategoryFilter === 'new') emptyMsg = 'No first-time stocks in this category view.';
+        else if (radarCategoryFilter === 'retrigger') emptyMsg = 'No 2x+ re-triggered stocks yet.';
+
         container.innerHTML = `
           <div class="p-5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-center col-span-full py-8">
             <span class="text-3xl block mb-2">📡</span>
             <p class="text-xs text-slate-300 font-medium">Listening for 1-minute Chartink breakout alerts on <code class="text-emerald-400 font-mono bg-slate-950 px-1.5 py-0.5 rounded">/new-stocks</code></p>
-            <p class="text-[11px] text-slate-500 mt-1">No alerts received yet today. Click "Test Alert Pulse" above to test the radar.</p>
+            <p class="text-[11px] text-slate-500 mt-1">${escapeHtml(emptyMsg)}</p>
           </div>
         `;
         return;
       }
 
       // Automatically select top stock for chart if currently default
-      if (stocks.length > 0 && activeRadarSymbol === 'RELIANCE' && stocks[0].symbol !== 'RELIANCE') {
-        selectStockForChart(stocks[0].symbol, stocks[0].latest_price);
+      if (list.length > 0 && activeRadarSymbol === 'RELIANCE' && list[0].symbol !== 'RELIANCE') {
+        selectStockForChart(list[0].symbol, list[0].latest_price);
       }
 
-      const medals = ['🥇', '🥈', '🥉', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th'];
+      const medals = ['🥇', '🥈', '🥉', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th', '13th', '14th', '15th', '16th'];
 
-      container.innerHTML = stocks.map((s, idx) => {
+      container.innerHTML = list.map((s, idx) => {
         const medal = medals[idx] || `#${idx + 1}`;
-        const borderStyle = idx === 0 
-          ? 'border-amber-400/60 bg-gradient-to-b from-amber-500/15 via-slate-900/90 to-slate-950 shadow-xl shadow-amber-950/40 ring-1 ring-amber-400/40' 
-          : idx === 1
-          ? 'border-slate-300/40 bg-gradient-to-b from-slate-300/10 via-slate-900/90 to-slate-950 shadow-md'
-          : idx === 2
-          ? 'border-amber-700/50 bg-gradient-to-b from-amber-800/10 via-slate-900/90 to-slate-950'
-          : 'border-slate-800/80 bg-slate-900/80';
+        const isConf = (s.confluence_count || 1) >= 2;
+        const isNewStock = s.is_new || s.count === 1;
+
+        let borderStyle = 'border-slate-800/80 bg-slate-900/80';
+        let badgeHtml = '';
+
+        if (isConf) {
+          borderStyle = 'border-purple-500/70 bg-gradient-to-b from-purple-950/40 via-slate-900/90 to-slate-950 shadow-xl shadow-purple-950/40 ring-1 ring-purple-500/50';
+          badgeHtml = `<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-black bg-purple-500/25 text-purple-300 border border-purple-500/50 animate-pulse">⚡ ${s.confluence_count}x CONFLUENCE</span>`;
+        } else if (isNewStock) {
+          borderStyle = 'border-emerald-500/60 bg-gradient-to-b from-emerald-950/30 via-slate-900/90 to-slate-950 shadow-md ring-1 ring-emerald-500/40';
+          badgeHtml = `<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">✨ NEW TODAY</span>`;
+        } else if (idx === 0) {
+          borderStyle = 'border-amber-400/60 bg-gradient-to-b from-amber-500/15 via-slate-900/90 to-slate-950 shadow-xl shadow-amber-950/40 ring-1 ring-amber-400/40';
+          badgeHtml = `<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/25 text-amber-300 border border-amber-500/40 animate-pulse">🔥 ${s.count}x SURGE</span>`;
+        } else {
+          borderStyle = 'border-slate-800/80 bg-slate-900/80';
+          badgeHtml = `<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${s.count >= 3 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse' : 'bg-slate-800 text-slate-300 border border-slate-700'}">🔁 ${s.count}x Alert${s.count > 1 ? 's' : ''}</span>`;
+        }
 
         const priceText = s.latest_price > 0 ? `₹${parseFloat(s.latest_price).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'Mkt Price';
-        const scanTag = s.scans && s.scans.length > 0 ? s.scans[0] : '1m Breakout';
+        const scanTag = s.scans && s.scans.length > 0 ? s.scans.map(sc => sc.replace(/^Sprut Trading - /i, '')).join(' + ') : '1m Breakout';
         const isSelected = activeRadarSymbol === s.symbol;
 
         return `
@@ -5266,9 +5515,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
                 <span class="text-base select-none">${medal}</span>
                 <span class="font-black text-white text-sm font-mono tracking-wide group-hover:text-emerald-400 transition">${escapeHtml(s.symbol)}</span>
               </div>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${s.count >= 3 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse' : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'}">
-                🔥 ${s.count}x Alert${s.count > 1 ? 's' : ''}
-              </span>
+              ${badgeHtml}
             </div>
 
             <div class="mt-2.5 flex items-baseline justify-between">
@@ -5277,7 +5524,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
                 <span class="font-mono font-black text-emerald-400 text-sm">${priceText}</span>
               </div>
               <div class="text-right">
-                <span class="text-[10px] text-slate-400 block truncate max-w-[110px]" title="${escapeHtml(scanTag)}">${escapeHtml(scanTag)}</span>
+                <span class="text-[10px] text-slate-400 block truncate max-w-[120px]" title="${escapeHtml(scanTag)}">${escapeHtml(scanTag)}</span>
                 <span class="text-[10px] font-mono text-slate-500">${s.last_seen ? escapeHtml(s.last_seen.split(' ')[1]) : ''}</span>
               </div>
             </div>
@@ -5325,27 +5572,47 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       container.innerHTML = filtered.map(a => {
         const timeText = a.triggered_at || (a.received_at ? a.received_at.split(' ')[1] : 'Just now');
         const scanName = a.scan_name || '1m Alert';
+        const hasConf = a.has_confluence || (a.stocks && a.stocks.some(s => (s.confluence_count || 1) >= 2));
+        const hasNew = a.has_new_stocks || (a.stocks && a.stocks.some(s => s.is_new));
+
+        let cardTag = '';
+        if (hasConf) {
+          cardTag = '<span class="bg-purple-500/20 text-purple-300 border border-purple-500/40 px-1.5 py-0.5 rounded text-[10px] font-bold">⚡ Confluence</span>';
+        } else if (hasNew) {
+          cardTag = '<span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.5 rounded text-[10px] font-bold">✨ New</span>';
+        }
 
         const stockPills = (a.stocks || []).map(stk => {
           const px = stk.price > 0 ? `₹${parseFloat(stk.price).toFixed(2)}` : '';
-          const cnt = stk.count > 1 ? `<span class="bg-amber-500/20 text-amber-300 px-1 rounded text-[9px] font-bold">🔥 ${stk.count}x</span>` : '';
+          const isConfStock = (stk.confluence_count || 1) >= 2;
+          const isNewStock = stk.is_new || stk.count === 1;
+
+          let badge = '';
+          if (isConfStock) {
+            badge = `<span class="bg-purple-500/25 text-purple-300 px-1 rounded text-[9px] font-bold">⚡ ${stk.confluence_count}x</span>`;
+          } else if (isNewStock) {
+            badge = `<span class="bg-emerald-500/25 text-emerald-300 px-1 rounded text-[9px] font-bold">✨ new</span>`;
+          } else if (stk.count > 1) {
+            badge = `<span class="bg-amber-500/20 text-amber-300 px-1 rounded text-[9px] font-bold">🔥 ${stk.count}x</span>`;
+          }
 
           return `
             <div class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-500 text-xs transition cursor-pointer" onclick="selectStockForChart('${escapeHtml(stk.symbol)}', ${stk.price || 0})">
               <span class="font-bold text-white font-mono hover:text-emerald-400 transition" title="Click to view chart">${escapeHtml(stk.symbol)}</span>
               ${px ? `<span class="text-emerald-400 font-mono text-[11px] font-semibold">${px}</span>` : ''}
-              ${cnt}
+              ${badge}
               <button onclick="event.stopPropagation(); prefillTradeFromScanner('${escapeHtml(stk.symbol)}', ${stk.price || 0}, '${escapeHtml(scanName)}')" class="text-emerald-400 hover:text-white transition text-xs font-bold" title="Pre-fill trade form">⚡</button>
             </div>
           `;
         }).join('');
 
         return `
-          <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 hover:border-slate-700 transition">
+          <div class="p-3.5 rounded-xl bg-slate-950/80 border ${hasConf ? 'border-purple-500/40' : 'border-slate-800'} hover:border-slate-700 transition">
             <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-900 text-xs">
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">🕒 ${escapeHtml(timeText)}</span>
                 <span class="font-semibold text-white">${escapeHtml(scanName)}</span>
+                ${cardTag}
               </div>
               <span class="text-[11px] font-mono text-slate-500">${a.stocks ? a.stocks.length : 0} stock${a.stocks && a.stocks.length > 1 ? 's' : ''} triggered</span>
             </div>
@@ -5449,16 +5716,32 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       document.body.removeChild(link);
     }
 
+    // Rotating multi-scanner simulation to test confluence and new vs re-trigger differentiation
+    let simScanIndex = 0;
     async function simulateTestChartinkAlert() {
-      const sampleStocks = [
-        { sym: 'RELIANCE', price: 2515.50 },
-        { sym: 'CYIENT', price: 1242.00 },
-        { sym: 'TATASTEEL', price: 154.20 },
-        { sym: 'SBIN', price: 612.00 }
+      const scanners = [
+        { name: 'Sprut Trading - Vwap BO', url: 'sprut-trading-vwap-bo' },
+        { name: 'Sprut Trading - 9EMA Pullback Breakout', url: 'sprut-trading-9ema-pullback' },
+        { name: 'Sprut Trading - RVOL Expansion Volume Surge', url: 'sprut-trading-rvol-surge' }
       ];
 
-      // Pick 2 stocks to test frequency counter
-      const chosen = [sampleStocks[Math.floor(Math.random() * sampleStocks.length)], sampleStocks[Math.floor(Math.random() * sampleStocks.length)]];
+      const sampleStocks = [
+        { sym: 'CYIENT', price: 1242.00 },
+        { sym: 'RELIANCE', price: 2515.50 },
+        { sym: 'TATASTEEL', price: 154.20 },
+        { sym: 'SBIN', price: 612.00 },
+        { sym: 'INFY', price: 1485.00 },
+        { sym: 'OMNI', price: 88.50 }
+      ];
+
+      const currentScan = scanners[simScanIndex % scanners.length];
+      simScanIndex++;
+
+      // Pick 2 stocks (at least one persistent like CYIENT or RELIANCE to trigger confluence and repeat counts)
+      const primaryStock = (simScanIndex % 2 === 0) ? sampleStocks[0] : sampleStocks[1];
+      const secondStock = sampleStocks[Math.floor(Math.random() * sampleStocks.length)];
+      const chosen = [primaryStock, secondStock];
+
       const stocksStr = chosen.map(c => c.sym).join(', ');
       const pricesStr = chosen.map(c => c.price.toFixed(2)).join(', ');
 
@@ -5466,9 +5749,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         stocks: stocksStr,
         trigger_prices: pricesStr,
         triggered_at: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-        scan_name: 'Sprut Trading - Vwap BO',
-        scan_url: 'sprut-trading-vwap-bo',
-        alert_name: 'Alert for Sprut Trading - Vwap BO',
+        scan_name: currentScan.name,
+        scan_url: currentScan.url,
+        alert_name: `Alert for ${currentScan.name}`,
         webhook_url: `${window.location.origin}/new-stocks`
       };
 
