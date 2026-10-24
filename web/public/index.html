@@ -5510,18 +5510,6 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         }
       }
     }
-            renderTopStocksPodium([]);
-            renderAlertsStream([]);
-            const headerCount = document.getElementById('headerScannerCount');
-            const headerLeader = document.getElementById('headerScannerTopLeader');
-            if (headerCount) headerCount.textContent = '0';
-            if (headerLeader) headerLeader.classList.add('hidden');
-          }
-        } catch (e) {
-          alert("Error clearing feed: " + e.message);
-        }
-      }
-    }
 
     async function loadTrades() {
       checkCloudBackupStatus();
@@ -8323,7 +8311,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       if (e.key === 'p' || e.key === 'P') {
         e.preventDefault();
         togglePlaybookDrawer();
-      } else if (['1', '2', '3', '4'].includes(e.key) && !e.ctrlKey && !e.altKey && !e.metaKey) {
+      } else if (['1', '2', '3', '4', '5'].includes(e.key) && !e.ctrlKey && !e.altKey && !e.metaKey) {
         e.preventDefault();
         switchTab(parseInt(e.key));
       } else if (e.key === 'Escape') {
@@ -9515,7 +9503,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       } else if (e.key === '?' || (e.shiftKey && e.key === '/')) {
         e.preventDefault();
         openHotkeyModal();
-      } else if (['1', '2', '3', '4'].includes(e.key)) {
+      } else if (['1', '2', '3', '4', '5'].includes(e.key)) {
         e.preventDefault();
         if (typeof switchTab === 'function') switchTab(parseInt(e.key));
       }
@@ -9967,6 +9955,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           renderCognitiveFatigueRadar(trades);
         } else if (tabNum === 4) {
           computeKellyExpectancy(trades);
+        } else if (tabNum === 5) {
+          if (typeof fetchScannerAlerts === 'function') fetchScannerAlerts();
         }
       });
     }
