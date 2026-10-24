@@ -1,0 +1,6 @@
+Trade_ID,Date,Time,Symbol,Direction,Entry_Price,Stop_Price,Target_Price,Exit_Price,Qty,Checklist_Score,Rule_Violation,Lesson
+T-001,2026-10-20,09:25,RELIANCE,Long,2500.00,2495.00,2511.00,2511.00,100,5,N,Patient entry on 9EMA pullback; exit at 2.2R target.
+T-002,2026-10-20,10:05,TCS,Short,3500.00,3510.00,3478.00,3510.00,50,5,N,Respected stop loss immediately; entered 30m cooldown.
+T-003,2026-10-21,09:40,INFY,Long,1450.00,1445.00,1461.00,1461.00,100,5,N,1m momentum breakout confirmed by 5m trend; target hit.
+T-004,2026-10-22,09:30,SBIN,Long,780.00,778.00,784.50,784.50,250,5,N,Clean opening breakout re-test; target 2.25R captured.
+T-005,2026-10-22,10:15,HDFCBANK,Short,1680.00,1685.00,1668.00,1685.00,100,5,N,Setup failed normally; respected stop without revenge trading.
