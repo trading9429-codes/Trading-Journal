@@ -1332,25 +1332,26 @@ workbook_xml = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
   </sheets>
 </workbook>"""
 
-out_path = "/home/sunny/.gemini/antigravity/scratch/trader-reset-system/deliverables/D3_Tracking_Spreadsheet.xlsx"
-sst_xml = sst.to_xml()
+if __name__ == "__main__":
+    out_path = os.environ.get("XLSX_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "deliverables", "D3_Tracking_Spreadsheet.xlsx"))
+    sst_xml = sst.to_xml()
 
-with zipfile.ZipFile(out_path, 'w', zipfile.ZIP_DEFLATED) as z:
-    z.writestr('[Content_Types].xml', content_types)
-    z.writestr('_rels/.rels', root_rels)
-    z.writestr('xl/_rels/workbook.xml.rels', wb_rels)
-    z.writestr('xl/workbook.xml', workbook_xml)
-    z.writestr('xl/styles.xml', styles_xml)
-    z.writestr('xl/sharedStrings.xml', sst_xml)
-    z.writestr('xl/worksheets/_rels/sheet1.xml.rels', sheet1_rels)
-    z.writestr('xl/worksheets/sheet1.xml', sheet0_xml) # Dashboard
-    z.writestr('xl/worksheets/sheet2.xml', sheet_quick_xml) # Quick_Log (Fast Entry)
-    z.writestr('xl/worksheets/sheet3.xml', sheet1_xml) # Trade_Log (Master)
-    z.writestr('xl/worksheets/sheet4.xml', sheet2_xml) # Daily_Scorecard
-    z.writestr('xl/worksheets/sheet5.xml', sheet3_xml) # Weekly_Review
-    z.writestr('xl/worksheets/sheet6.xml', sheet4_xml) # Journal
-    z.writestr('xl/drawings/drawing1.xml', drawing_xml)
-    z.writestr('xl/drawings/_rels/drawing1.xml.rels', drawing_rels)
-    z.writestr('xl/charts/chart1.xml', chart1_pie_xml)
+    with zipfile.ZipFile(out_path, 'w', zipfile.ZIP_DEFLATED) as z:
+        z.writestr('[Content_Types].xml', content_types)
+        z.writestr('_rels/.rels', root_rels)
+        z.writestr('xl/_rels/workbook.xml.rels', wb_rels)
+        z.writestr('xl/workbook.xml', workbook_xml)
+        z.writestr('xl/styles.xml', styles_xml)
+        z.writestr('xl/sharedStrings.xml', sst_xml)
+        z.writestr('xl/worksheets/_rels/sheet1.xml.rels', sheet1_rels)
+        z.writestr('xl/worksheets/sheet1.xml', sheet0_xml) # Dashboard
+        z.writestr('xl/worksheets/sheet2.xml', sheet_quick_xml) # Quick_Log (Fast Entry)
+        z.writestr('xl/worksheets/sheet3.xml', sheet1_xml) # Trade_Log (Master)
+        z.writestr('xl/worksheets/sheet4.xml', sheet2_xml) # Daily_Scorecard
+        z.writestr('xl/worksheets/sheet5.xml', sheet3_xml) # Weekly_Review
+        z.writestr('xl/worksheets/sheet6.xml', sheet4_xml) # Journal
+        z.writestr('xl/drawings/drawing1.xml', drawing_xml)
+        z.writestr('xl/drawings/_rels/drawing1.xml.rels', drawing_rels)
+        z.writestr('xl/charts/chart1.xml', chart1_pie_xml)
 
-print(f"Spreadsheet V2 with Charts and Quick_Log generated successfully at: {out_path}")
+    print(f"Spreadsheet V2 with Charts and Quick_Log generated successfully at: {out_path}")
