@@ -64,6 +64,12 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
                 "market_hours": is_market_hours,
                 "keepalive": "active"
             })
+        elif path == "/api/scanner/alerts":
+            try:
+                from scanner_service import scanner_manager
+                self._send_json(scanner_manager.get_scanner_data())
+            except Exception as e:
+                self._send_json({"error": str(e), "alerts": [], "top_stocks": []}, status=500)
         else:
             # Serve static files from PUBLIC_DIR
             super().do_GET()
@@ -137,6 +143,20 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
                 self._send_json({"success": success, "message": msg, "backup_status": status})
             except Exception as e:
                 self._send_json({"success": False, "error": str(e)}, status=500)
+        elif path == "/new-stocks" or path == "/api/webhook/chartink":
+            try:
+                from scanner_service import scanner_manager
+                res = scanner_manager.process_webhook(payload)
+                self._send_json(res)
+            except Exception as e:
+                self._send_json({"status": "error", "message": str(e)}, status=500)
+        elif path == "/api/scanner/clear":
+            try:
+                from scanner_service import scanner_manager
+                res = scanner_manager.clear_data()
+                self._send_json(res)
+            except Exception as e:
+                self._send_json({"status": "error", "message": str(e)}, status=500)
         else:
             self.send_error(404, "Endpoint not found.")
 
