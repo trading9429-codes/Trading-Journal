@@ -1062,8 +1062,11 @@
           <!-- Row 2: Setup Name, Date, Entry Time, Exit Time, Urgency Slider -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-center bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
             <div>
-              <label class="block text-slate-400 text-[11px] font-semibold uppercase tracking-wider mb-1">Setup Type</label>
-              <select id="setup_name" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white text-xs">
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-slate-400 text-[11px] font-semibold uppercase tracking-wider">Setup Type</label>
+                <span id="setupEdgePill" class="text-[9px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">Edge: 3.64 PF &bull; 50% WR</span>
+              </div>
+              <select id="setup_name" onchange="updateSetupEdgePreview()" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white text-xs">
                 <option value="1m Pullback to 9EMA">1m Pullback to 9EMA (Core Edge)</option>
                 <option value="Opening Range Breakout (ORB)">Opening Range Breakout (ORB)</option>
                 <option value="1m VWAP Bounce">1m VWAP Bounce / Trend Contin.</option>
@@ -1499,6 +1502,57 @@
         </div>
       </div>
 
+      <!-- INSTITUTIONAL EDGE & PAYOFF METRICS (4 ADVANCED METRIC CARDS) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Van Tharp SQN (System Quality Number) -->
+        <div class="glass-card rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Van Tharp SQN</span>
+              <span id="sqnQualityBadge" class="text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Solid Edge</span>
+            </div>
+            <div class="text-xl font-black font-mono mt-1 text-white" id="statSQN">--</div>
+          </div>
+          <div class="text-[10px] text-slate-500 mt-2" id="statSQNSub">Sample: 0 trades &bull; Sizing Readiness</div>
+        </div>
+
+        <!-- Payoff Ratio & Edge Cushion -->
+        <div class="glass-card rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Payoff Ratio</span>
+              <span id="payoffEdgeBadge" class="text-[9px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">+0.0% Cushion</span>
+            </div>
+            <div class="text-xl font-black font-mono mt-1 text-cyan-300" id="statPayoffRatio">0.00x</div>
+          </div>
+          <div class="text-[10px] text-slate-500 mt-2" id="statPayoffSub">Avg Win ₹0 &bull; Avg Loss ₹0</div>
+        </div>
+
+        <!-- Monetary Expectancy (₹/Trade) & Tail Risk Asymmetry -->
+        <div class="glass-card rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Expectancy (₹/Trade)</span>
+              <span id="tailAsymmetryBadge" class="text-[9px] font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300">Asymmetry: 0x</span>
+            </div>
+            <div class="text-xl font-black font-mono mt-1 text-indigo-400" id="statExpectancyRupees">₹0.00</div>
+          </div>
+          <div class="text-[10px] text-slate-500 mt-2" id="statTailSub">Max Win: ₹0 &bull; Max Loss: ₹0</div>
+        </div>
+
+        <!-- Capital Velocity (R/min) & Time Efficiency -->
+        <div class="glass-card rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Capital Velocity</span>
+              <span id="velocityBadge" class="text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Efficient Fills</span>
+            </div>
+            <div class="text-xl font-black font-mono mt-1 text-emerald-400" id="statCapitalVelocity">+0.00 R/min</div>
+          </div>
+          <div class="text-[10px] text-slate-500 mt-2" id="statVelocitySub">Winner hold velocity vs loser duration</div>
+        </div>
+      </div>
+
       <!-- SPACIOUS MAIN CHARTS: CUMULATIVE EQUITY & DONUT DIAGNOSTICS -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- High-Resolution Wide Equity Curve -->
@@ -1571,6 +1625,61 @@
     <!-- ========================================== -->
     <div id="tabContent3" class="hidden mt-6 space-y-6">
       
+      <!-- AUTOMATED DESK EDGE DIAGNOSIS & PRESCRIPTIONS (AI COACHING BRIEF) -->
+      <section class="glass-card rounded-2xl p-5 border border-purple-500/30 bg-gradient-to-r from-purple-950/30 via-slate-900/90 to-slate-950 shadow-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2">
+          <div class="flex items-center gap-2.5">
+            <span class="text-xl">🧠</span>
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span>Automated Desk Edge Diagnosis &amp; Prescriptions</span>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">Live Quant Audit</span>
+              </h3>
+              <p class="text-[11px] text-slate-400">Synthesized statistical health check across your trade sample size</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 font-mono text-xs">
+            <span class="text-slate-400">Desk Edge Score:</span>
+            <span id="tab3DeskHealthBadge" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">94/100 Prime</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 mt-3.5 text-xs">
+          <!-- Primary Edge Anchor -->
+          <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+            <div class="flex items-center gap-1.5 text-emerald-400 font-bold mb-1">
+              <span>🟢</span>
+              <span>Primary Edge Anchor</span>
+            </div>
+            <p id="edgeDiagnosisPrimary" class="text-slate-300 leading-relaxed font-sans text-[11px]">
+              Analyzing execution data across setups and session timeframes...
+            </p>
+          </div>
+
+          <!-- Leak Under Radar -->
+          <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+            <div class="flex items-center gap-1.5 text-amber-400 font-bold mb-1">
+              <span>🟡</span>
+              <span>Leak Under Radar</span>
+            </div>
+            <p id="edgeDiagnosisLeak" class="text-slate-300 leading-relaxed font-sans text-[11px]">
+              Monitoring exit slippage, premature take-profit, and adverse excursions...
+            </p>
+          </div>
+
+          <!-- Session Prescription -->
+          <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+            <div class="flex items-center gap-1.5 text-blue-400 font-bold mb-1">
+              <span>🎯</span>
+              <span>Next Session Prescription</span>
+            </div>
+            <p id="edgeDiagnosisPrescription" class="text-slate-300 leading-relaxed font-sans text-[11px]">
+              Pre-set stop loss before market entry; honor planned target &ge; 2.2R.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <!-- Top Section: Behavioral Leak Diagnostics (Hold Duration, Streak Tracker, Tilt Correlation) -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
@@ -4837,6 +4946,36 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       }
     }
 
+    function updateSetupEdgePreview() {
+      const select = document.getElementById('setup_name');
+      const pill = document.getElementById('setupEdgePill');
+      if (!select || !pill) return;
+      const val = select.value;
+
+      const matching = (tradesData || []).filter(t => t.setup_name === val);
+      if (matching.length === 0) {
+        if (val.includes('Off-Plan')) {
+          pill.textContent = 'Rule Breach Alert';
+          pill.className = 'text-[9px] font-mono font-bold text-rose-400 bg-rose-500/10 px-1.5 py-0.2 rounded border border-rose-500/20';
+        } else {
+          pill.textContent = 'Playbook Setup';
+          pill.className = 'text-[9px] font-mono font-bold text-blue-400 bg-blue-500/10 px-1.5 py-0.2 rounded border border-blue-500/20';
+        }
+        return;
+      }
+
+      const wins = matching.filter(t => (parseFloat(t.net_pnl) || 0) > 0).length;
+      const wr = Math.round((wins / matching.length) * 100);
+      const grossW = matching.filter(t => (parseFloat(t.net_pnl) || 0) > 0).reduce((s, t) => s + (parseFloat(t.net_pnl) || 0), 0);
+      const grossL = matching.filter(t => (parseFloat(t.net_pnl) || 0) < 0).reduce((s, t) => s + Math.abs(parseFloat(t.net_pnl) || 0), 0);
+      const pf = grossL > 0 ? (grossW / grossL).toFixed(2) : (grossW > 0 ? '99.0' : '0.00');
+
+      pill.textContent = `Edge: ${pf} PF \u2022 ${wr}% WR (${matching.length} trds)`;
+      pill.className = wr >= 50 
+        ? 'text-[9px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20' 
+        : 'text-[9px] font-mono font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20';
+    }
+
     // --- Submit Trade ---
     async function submitTrade(e) {
       e.preventDefault();
@@ -7026,6 +7165,152 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             ? 'text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20' 
             : 'text-xs font-mono font-bold text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20';
         }
+
+        // 1. Van Tharp System Quality Number (SQN)
+        const sqnElem = document.getElementById('statSQN');
+        const sqnBadge = document.getElementById('sqnQualityBadge');
+        const sqnSub = document.getElementById('statSQNSub');
+        if (sqnElem) {
+          let sqn = 0;
+          if (trades.length >= 2 && stdR > 0) {
+            sqn = Math.sqrt(trades.length) * (meanR / stdR);
+          } else if (trades.length === 1 && stdR > 0) {
+            sqn = meanR;
+          }
+
+          sqnElem.textContent = trades.length > 0 ? sqn.toFixed(2) : '--';
+          if (sqnBadge) {
+            if (trades.length === 0) {
+              sqnBadge.textContent = 'Awaiting Sample';
+              sqnBadge.className = 'text-[9px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400';
+            } else if (sqn >= 3.0) {
+              sqnBadge.textContent = 'Institutional Prime';
+              sqnBadge.className = 'text-[9px] font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30';
+            } else if (sqn >= 2.0) {
+              sqnBadge.textContent = 'Solid Edge';
+              sqnBadge.className = 'text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+            } else if (sqn >= 1.0) {
+              sqnBadge.textContent = 'Developing Edge';
+              sqnBadge.className = 'text-[9px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30';
+            } else {
+              sqnBadge.textContent = 'Tighten Execution';
+              sqnBadge.className = 'text-[9px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30';
+            }
+          }
+          if (sqnSub) sqnSub.textContent = `Sample: ${trades.length} fills &bull; ${sqn >= 2.0 ? 'Ready for Phase 3 sizing' : 'Focus on Phase 1–2 discipline'}`;
+        }
+
+        // 2. Payoff Ratio & Edge Cushion
+        const payoffElem = document.getElementById('statPayoffRatio');
+        const payoffBadge = document.getElementById('payoffEdgeBadge');
+        const payoffSub = document.getElementById('statPayoffSub');
+        const avgWinRupees = totalWins > 0 ? (grossProfit / totalWins) : 0;
+        const avgLossRupees = totalLosses > 0 ? (grossLoss / totalLosses) : 0;
+        const payoffRatioRupees = avgLossRupees > 0 ? (avgWinRupees / avgLossRupees) : (avgWinRupees > 0 ? 9.99 : 0);
+        const breakevenWR = payoffRatioRupees > 0 ? (1.0 / (1.0 + payoffRatioRupees)) * 100 : 50;
+        const edgeCushion = winRate - breakevenWR;
+
+        if (payoffElem) {
+          payoffElem.textContent = payoffRatioRupees > 0 ? `${payoffRatioRupees.toFixed(2)}x` : '--';
+          if (payoffBadge) {
+            payoffBadge.textContent = `${edgeCushion >= 0 ? '+' : ''}${edgeCushion.toFixed(1)}% Cushion`;
+            payoffBadge.className = edgeCushion >= 0 ? 'text-[9px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-mono' : 'text-[9px] font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-mono';
+          }
+          if (payoffSub) {
+            payoffSub.textContent = `Avg Win ₹${Math.round(avgWinRupees).toLocaleString('en-IN')} &bull; Avg Loss ₹${Math.round(avgLossRupees).toLocaleString('en-IN')}`;
+          }
+        }
+
+        // 3. Monetary Expectancy (₹/Trade) & Tail Risk Asymmetry
+        const expRsElem = document.getElementById('statExpectancyRupees');
+        const tailBadge = document.getElementById('tailAsymmetryBadge');
+        const tailSub = document.getElementById('statTailSub');
+        const expectancyRs = trades.length > 0 ? (totalNet / trades.length) : 0;
+        const winAmounts = trades.filter(t => (parseFloat(t.net_pnl) || 0) > 0).map(t => parseFloat(t.net_pnl) || 0);
+        const lossAmounts = trades.filter(t => (parseFloat(t.net_pnl) || 0) < 0).map(t => Math.abs(parseFloat(t.net_pnl) || 0));
+        const maxWinRupees = winAmounts.length > 0 ? Math.max(...winAmounts) : 0;
+        const maxLossRupees = lossAmounts.length > 0 ? Math.max(...lossAmounts) : 0;
+        const tailAsym = maxLossRupees > 0 ? (maxWinRupees / maxLossRupees) : (maxWinRupees > 0 ? 9.9 : 1.0);
+
+        if (expRsElem) {
+          expRsElem.textContent = `${expectancyRs >= 0 ? '+' : ''}₹${Math.round(expectancyRs).toLocaleString('en-IN')}`;
+          expRsElem.className = expectancyRs >= 0 ? 'text-xl font-black font-mono mt-1 text-indigo-400' : 'text-xl font-black font-mono mt-1 text-rose-400';
+          if (tailBadge) {
+            tailBadge.textContent = `${tailAsym.toFixed(1)}x Tail Ratio`;
+            tailBadge.className = tailAsym >= 2.0 ? 'text-[9px] font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300' : 'text-[9px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300';
+          }
+          if (tailSub) {
+            tailSub.textContent = `Max Win: ₹${Math.round(maxWinRupees).toLocaleString('en-IN')} &bull; Max Loss: ₹${Math.round(maxLossRupees).toLocaleString('en-IN')}`;
+          }
+        }
+
+        // 4. Capital Velocity (R/min) & Time Efficiency
+        const velElem = document.getElementById('statCapitalVelocity');
+        const velBadge = document.getElementById('velocityBadge');
+        const velSub = document.getElementById('statVelocitySub');
+        const totalWinMins = winHoldTotal || 1;
+        const winRTotal = trades.filter(t => (parseFloat(t.net_pnl) || 0) > 0).reduce((s, t) => s + Math.max(0, parseFloat(t.r_multiple) || 0), 0);
+        const winVelocity = totalWinMins > 0 ? (winRTotal / totalWinMins) : 0;
+
+        if (velElem) {
+          velElem.textContent = `${winVelocity >= 0 ? '+' : ''}${winVelocity.toFixed(2)} R/min`;
+          if (velBadge) {
+            velBadge.textContent = winVelocity >= 0.20 ? 'Fast Impulses' : 'Steady Accumulation';
+            velBadge.className = winVelocity >= 0.20 ? 'text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300' : 'text-[9px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300';
+          }
+          if (velSub) {
+            velSub.textContent = `Avg Hold: ${avgWinHold.toFixed(1)}m Win vs ${avgLossHold.toFixed(1)}m Loss`;
+          }
+        }
+
+        // 5. Automated Desk Edge Diagnosis (Tab 3 AI Coaching Brief)
+        const primaryDiag = document.getElementById('edgeDiagnosisPrimary');
+        const leakDiag = document.getElementById('edgeDiagnosisLeak');
+        const prescripDiag = document.getElementById('edgeDiagnosisPrescription');
+        const healthBadge = document.getElementById('tab3DeskHealthBadge');
+
+        if (primaryDiag && leakDiag && prescripDiag) {
+          if (trades.length === 0) {
+            primaryDiag.textContent = "No trades logged in current filter period. 1-minute Chartink radar is listening on /new-stocks.";
+            leakDiag.textContent = "Zero demerit breaches recorded. Capital preservation protocols active.";
+            prescripDiag.textContent = "Execute only setups with Planned RR >= 2.2 and pre-committed hard stops.";
+            if (healthBadge) healthBadge.textContent = "100/100 Ready";
+          } else {
+            const setupStats = {};
+            trades.forEach(t => {
+              const s = t.setup_name || "1m Breakout";
+              if (!setupStats[s]) setupStats[s] = { count: 0, pnl: 0, r: 0 };
+              setupStats[s].count++;
+              setupStats[s].pnl += (parseFloat(t.net_pnl) || 0);
+              setupStats[s].r += (parseFloat(t.r_multiple) || 0);
+            });
+            const bestSetup = Object.entries(setupStats).sort((a,b) => b[1].pnl - a[1].pnl)[0];
+            const bestName = bestSetup ? bestSetup[0] : "9EMA Pullback";
+            const bestPnL = bestSetup ? bestSetup[1].pnl : 0;
+
+            primaryDiag.innerHTML = `<strong class="text-white">${escapeHtml(bestName)}</strong> is your primary edge producing <strong class="text-emerald-400">₹${Math.round(bestPnL).toLocaleString('en-IN')}</strong> (${profitFactor.toFixed(2)} PF). Payoff ratio stands at <strong class="text-cyan-300">${payoffRatioRupees.toFixed(2)}x</strong>.`;
+
+            if (violations > 0) {
+              leakDiag.innerHTML = `<span class="text-rose-400 font-bold">${violations} rule violation(s)</span> detected. Off-plan trades dilute institutional edge. Respect mandatory 30m loss cooldown.`;
+            } else if (asymmetryRatio < 1.5) {
+              leakDiag.innerHTML = `Hold duration asymmetry is <strong class="text-amber-400">${asymmetryRatio.toFixed(2)}x</strong> (target &ge; 1.5x). Ensure winning trades are allowed to reach full 2.2R targets without early panic manual cuts.`;
+            } else {
+              leakDiag.innerHTML = `<span class="text-emerald-400 font-bold">Zero rule violations!</span> Hold duration asymmetry is optimal at <strong class="text-emerald-400">${asymmetryRatio.toFixed(2)}x</strong> with clean stop loss execution.`;
+            }
+
+            prescripDiag.innerHTML = `Pre-set your stop loss before order fill. Maximize capital velocity on 1-min momentum breakouts. Honor the 2 trades/day hard circuit ceiling.`;
+
+            if (healthBadge) {
+              const healthScore = Math.max(50, Math.min(100, Math.round(disciplineScore * 0.5 + Math.min(100, winRate * 1.5) * 0.3 + Math.min(100, (profitFactor / 3.0) * 100) * 0.2)));
+              healthBadge.textContent = `${healthScore}/100 ${healthScore >= 90 ? 'Prime' : (healthScore >= 75 ? 'Disciplined' : 'Needs Guardrails')}`;
+              healthBadge.className = healthScore >= 90 
+                ? 'px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30' 
+                : 'px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30';
+            }
+          }
+        }
+
+        updateSetupEdgePreview();
       }
 
       // Charts render
