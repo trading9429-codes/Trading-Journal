@@ -133,23 +133,45 @@
       .no-print { display: none !important; }
     }
 
-    /* Combat Mode HUD (Minimalist Execution Window 09:15–10:30 AM) */
-    body.combat-mode #phaseTrackerSection,
-    body.combat-mode #tradesLedgerSection,
-    body.combat-mode #screenshotDropzoneContainer,
+    /* Combat Mode HUD: ONLY Fast Intraday Trade Logger is displayed */
+    body.combat-mode {
+      overflow-x: hidden;
+      background: #030712 !important;
+    }
+    body.combat-mode #appSidebar,
+    body.combat-mode header,
+    body.combat-mode #windowClosedBanner,
+    body.combat-mode #cooldownBanner,
+    body.combat-mode #circuitBreakerBanner,
+    body.combat-mode #tabContent1 > *:not(#combatBanner):not(#executionFormCard),
     body.combat-mode #tabContent2,
     body.combat-mode #tabContent3,
-    body.combat-mode #tabContent4 {
+    body.combat-mode #tabContent4,
+    body.combat-mode #tabContent5,
+    body.combat-mode #bottomDockMetrics,
+    body.combat-mode button[onclick="openHotkeyModal()"],
+    body.combat-mode #scannerToastContainer {
       display: none !important;
+    }
+    body.combat-mode #mainAppShell {
+      margin-left: 0 !important;
+      padding: 1.5rem 1rem !important;
+      width: 100% !important;
+      max-width: 920px !important;
+      margin: 0 auto !important;
+      min-height: 100vh !important;
     }
     body.combat-mode #combatBanner {
       display: flex !important;
+      margin-bottom: 1.25rem !important;
     }
     body.combat-mode #executionFormCard {
-      max-width: 900px;
+      display: block !important;
+      width: 100% !important;
+      max-width: 900px !important;
       margin: 0 auto !important;
-      border: 2px solid rgba(245, 158, 11, 0.6) !important;
-      box-shadow: 0 0 45px rgba(245, 158, 11, 0.25), inset 0 0 20px rgba(245, 158, 11, 0.05) !important;
+      border: 2px solid rgba(245, 158, 11, 0.7) !important;
+      box-shadow: 0 0 50px rgba(245, 158, 11, 0.25), inset 0 0 20px rgba(245, 158, 11, 0.05) !important;
       animation: combatPulse 3s infinite ease-in-out;
     }
     @keyframes combatPulse {
@@ -611,9 +633,12 @@
 
       <!-- Quick Action: + Log Trade CTA inside Sidebar -->
       <div class="p-3">
-        <button onclick="openTradeSyncSlideOver()" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-600/25 cursor-pointer">
-          <span class="text-base leading-none font-black">+</span>
-          <span class="sidebar-label">Log Trade</span>
+        <button onclick="openTradeSyncSlideOver()" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-between gap-2 transition shadow-lg shadow-emerald-600/25 cursor-pointer" title="Quick Log Trade Popup (Shortcut: L or T)">
+          <div class="flex items-center gap-2">
+            <span class="text-base leading-none font-black">+</span>
+            <span class="sidebar-label">Log Trade</span>
+          </div>
+          <kbd class="sidebar-label text-[9px] bg-black/35 border border-emerald-400/30 px-1.5 py-0.5 rounded text-emerald-200 font-mono">L</kbd>
         </button>
       </div>
 
@@ -817,10 +842,11 @@
 
       <!-- ZONE 3: Actions & Controls Hub (Right) -->
       <div class="flex items-center gap-2">
-        <!-- Primary Action: + Log Trade -->
-        <button onclick="openTradeSyncSlideOver()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider flex items-center gap-1.5 transition shadow-lg shadow-emerald-600/30 cursor-pointer" title="Quick Log Trade (Shortcut: T)">
+        <!-- Primary Action: + Log Trade (Shortcut: L / T) -->
+        <button onclick="openTradeSyncSlideOver()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider flex items-center gap-2 transition shadow-lg shadow-emerald-600/30 cursor-pointer" title="Quick Log Trade Popup (Shortcut: L or T)">
           <span class="text-sm font-black leading-none">+</span>
           <span>Log Trade</span>
+          <kbd class="px-1.5 py-0.2 rounded bg-black/35 border border-emerald-400/30 text-[9px] font-mono text-emerald-200">L</kbd>
         </button>
 
         <!-- AI Desk Coach Button -->
@@ -4308,12 +4334,12 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Execution &amp; Direction</span>
           <div class="grid grid-cols-2 gap-2">
             <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
-              <span class="text-slate-300">Set Direction: LONG</span>
-              <kbd class="hotkey-badge">L</kbd>
+              <span class="text-emerald-300 font-bold">Quick Log Trade Popup</span>
+              <kbd class="hotkey-badge text-emerald-300 border-emerald-500/40">L / T</kbd>
             </div>
             <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
-              <span class="text-slate-300">Set Direction: SHORT</span>
-              <kbd class="hotkey-badge">S</kbd>
+              <span class="text-slate-300">Set Direction: LONG / SHORT</span>
+              <kbd class="hotkey-badge">Alt+L / Alt+S</kbd>
             </div>
             <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
               <span class="text-slate-300">Focus Symbol Input</span>
@@ -11770,9 +11796,14 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         toggleSidebarCollapse();
         return;
       }
-      if ((e.key === 't' || e.key === 'T') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      if ((e.key === 't' || e.key === 'T' || e.key === 'l' || e.key === 'L') && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
-        openTradeSyncSlideOver();
+        if (typeof isCombatMode !== 'undefined' && isCombatMode) {
+          const sym = document.getElementById('symbol');
+          if (sym) { sym.focus(); sym.select(); }
+        } else {
+          openTradeSyncSlideOver();
+        }
         return;
       }
       if ((e.key === 'v' || e.key === 'V') && !e.ctrlKey && !e.metaKey && !e.altKey) {
@@ -13134,7 +13165,13 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         if (typeof switchTab === 'function') switchTab(1);
         if (btn) btn.className = "px-3 py-2 rounded-lg bg-amber-500 text-black font-extrabold text-xs flex items-center gap-1.5 transition shadow-lg shadow-amber-500/30";
         if (label) label.textContent = "Combat ON";
-        playFeedbackSound('click');
+        if (typeof playFeedbackSound === 'function') playFeedbackSound('click');
+        setTimeout(() => {
+          const form = document.getElementById('executionFormCard');
+          if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const sym = document.getElementById('symbol');
+          if (sym) { sym.focus(); sym.select(); }
+        }, 150);
       } else {
         body.classList.remove('combat-mode');
         if (btn) btn.className = "px-3 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-bold text-xs flex items-center gap-1.5 transition shadow-sm";
@@ -13168,6 +13205,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         const m = document.getElementById(id);
         if (m) m.classList.add('hidden');
       });
+      if (typeof closeTradeSyncSlideOver === 'function') closeTradeSyncSlideOver();
+      if (typeof togglePlaybookDrawer === 'function') togglePlaybookDrawer(false);
     }
 
     window.addEventListener('keydown', (e) => {
@@ -13182,16 +13221,28 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       if (isInput) return; // Do not intercept typing inside form inputs
 
       const k = e.key.toLowerCase();
-      if (k === 'l') {
+      if ((k === 'l' || k === 't') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        if (typeof isCombatMode !== 'undefined' && isCombatMode) {
+          const sym = document.getElementById('symbol');
+          if (sym) { sym.focus(); sym.select(); }
+        } else {
+          openTradeSyncSlideOver();
+        }
+      } else if (e.altKey && k === 'l') {
         e.preventDefault();
         if (typeof setTradeDirection === 'function') setTradeDirection('Long');
-      } else if (k === 's') {
+      } else if (e.altKey && k === 's') {
         e.preventDefault();
         if (typeof setTradeDirection === 'function') setTradeDirection('Short');
       } else if (k === 'n') {
         e.preventDefault();
-        const sym = document.getElementById('symbol');
-        if (sym) { sym.focus(); sym.select(); }
+        if (typeof isCombatMode !== 'undefined' && isCombatMode) {
+          const sym = document.getElementById('symbol');
+          if (sym) { sym.focus(); sym.select(); }
+        } else {
+          openTradeSyncSlideOver();
+        }
       } else if (k === 'h') {
         e.preventDefault();
         toggleCombatMode();
@@ -13717,7 +13768,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       { id: 'tab3', category: 'Views', title: 'Switch to Tab 3: Edge Attribution & Leak Matrix', hotkey: '3', action: () => switchTab(3) },
       { id: 'tab4', category: 'Views', title: 'Switch to Tab 4: Quant Risk & Monte Carlo Sim', hotkey: '4', action: () => switchTab(4) },
       { id: 'tab5', category: 'Views', title: 'Switch to Tab 5: 1-Min Chartink Webhook Radar', hotkey: '5', action: () => switchTab(5) },
-      { id: 'long', category: 'Execution', title: 'Set Direction: LONG (Buy)', hotkey: 'L', action: () => setTradeDirection('Long') },
+      { id: 'quick_log', category: 'Execution', title: 'Quick Log Trade Popup (Slide-Over Drawer)', hotkey: 'L / T', action: () => openTradeSyncSlideOver() },
+      { id: 'long', category: 'Execution', title: 'Set Direction: LONG (Buy)', hotkey: 'Alt+L', action: () => setTradeDirection('Long') },
       { id: 'short', category: 'Execution', title: 'Set Direction: SHORT (Sell)', hotkey: 'S', action: () => setTradeDirection('Short') },
       { id: 'combat', category: 'Execution', title: 'Toggle Combat Mode HUD (Minimalist)', hotkey: 'H', action: () => toggleCombatMode() },
       { id: 'sym', category: 'Execution', title: 'Focus Stock Symbol Input', hotkey: 'N', action: () => { const s = document.getElementById('symbol'); if (s) { s.focus(); s.select(); } } },
