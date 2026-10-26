@@ -4465,7 +4465,21 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             <p class="text-xs text-slate-400">6-Point Institutional Pre-Flight Gate &bull; Eliminate emotional carryover before market open</p>
           </div>
         </div>
-        <button onclick="closePreMarketReadinessModal()" class="text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+        <button onclick="closePreMarketReadinessModal()" class="text-slate-400 hover:text-white text-2xl font-bold" title="Close">&times;</button>
+      </div>
+
+      <!-- Onload Lockout Alert Notice -->
+      <div id="readinessLockBanner" class="hidden mt-3 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center justify-center font-bold text-sm">🔒</div>
+          <div>
+            <span class="text-amber-200 font-bold block">Execution Desk Locked: Pre-Flight Certification Required</span>
+            <span class="text-slate-400 text-[11px]">Pass all 6 institutional checks below to unlock live order execution.</span>
+          </div>
+        </div>
+        <button onclick="dismissReadinessGateToReadOnly()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-[11px] whitespace-nowrap transition cursor-pointer" title="Dismiss lock to inspect past trades in read-only mode">
+          👀 View-Only
+        </button>
       </div>
 
       <!-- Readiness Progress Bar -->
@@ -6473,10 +6487,29 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       }
     }
 
-    function checkDailyCircuitBreaker() {
+    function getActiveSessionDate() {
       const now = new Date();
       const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      if (typeof tradesData === 'undefined' || !tradesData || tradesData.length === 0) return todayStr;
+      
       const todayTrades = tradesData.filter(t => t.date === todayStr);
+      if (todayTrades.length > 0) return todayStr;
+      
+      // If today has 0 trades, check latest recorded session date
+      const latestTrade = tradesData[tradesData.length - 1];
+      if (latestTrade && latestTrade.date) {
+        const curMinutes = now.getHours() * 60 + now.getMinutes();
+        // If before 09:15 AM IST market open or no trades logged today, bind to latest session
+        if (curMinutes < (9 * 60 + 15) || todayTrades.length === 0) {
+          return latestTrade.date;
+        }
+      }
+      return todayStr;
+    }
+
+    function checkDailyCircuitBreaker() {
+      const sessionDate = typeof getActiveSessionDate === 'function' ? getActiveSessionDate() : new Date().toISOString().split('T')[0];
+      const todayTrades = tradesData.filter(t => t.date === sessionDate);
       const todayLosses = todayTrades.filter(t => t.outcome === 'Loss');
       
       const headerStatus = document.getElementById('headerDailyStatusText');
@@ -10445,7 +10478,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       try { applyDashboardVisibility(); } catch(e) { console.warn("Visibility init error:", e); }
       try { initSidebarState(); } catch(e) { console.warn("Sidebar init error:", e); }
       try { updateZenModeUI(); } catch(e) { console.warn("Zen UI init error:", e); }
-      try { if (typeof checkPreFlightStatusToday === 'function') checkPreFlightStatusToday(); } catch(e) {}
+      try { if (typeof checkPreFlightStatusToday === 'function') checkPreFlightStatusToday(true); } catch(e) {}
       try { if (typeof renderDailyLockboxHUD === 'function') renderDailyLockboxHUD(); } catch(e) {}
       try { if (typeof renderTab1MiniCalendar === 'function') renderTab1MiniCalendar(); } catch(e) {}
     });
@@ -10707,28 +10740,36 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     let tiltCountdownInterval = null;
     let tiltLockDismissed = false;
 
-    function triggerTiltBreakerLockout(reason) {
+    function triggerTiltBreakerLockout(reason, forceSessionDate = null) {
       if (tiltLockDismissed) return;
       const modal = document.getElementById('tiltBreakerModal');
       if (!modal) return;
 
-      document.getElementById('tiltLockReasonText').textContent = reason || 'Daily Quota Reached';
+      const sessionDate = forceSessionDate || (typeof getActiveSessionDate === 'function' ? getActiveSessionDate() : new Date().toISOString().split('T')[0]);
+      const reasonEl = document.getElementById('tiltLockReasonText');
+      if (reasonEl) reasonEl.textContent = reason || 'Daily Quota Reached';
       
-      const today = new Date().toISOString().split('T')[0];
-      const todayTrades = tradesData.filter(t => t.date === today);
-      const todayNetPnL = todayTrades.reduce((acc, t) => acc + (parseFloat(t.net_pnl) || 0), 0);
+      const sessionTrades = tradesData.filter(t => t.date === sessionDate);
+      const sessionNetPnL = sessionTrades.reduce((acc, t) => acc + (parseFloat(t.net_pnl) || 0), 0);
       
-      document.getElementById('tiltTodayTradesCount').textContent = `${todayTrades.length} / 2`;
+      const countEl = document.getElementById('tiltTodayTradesCount');
+      if (countEl) countEl.textContent = `${sessionTrades.length} / 2`;
+      
       const pnlElem = document.getElementById('tiltTodayNetPnL');
-      pnlElem.textContent = `₹${todayNetPnL.toFixed(2)}`;
-      pnlElem.className = todayNetPnL >= 0 ? 'text-base font-bold font-mono text-emerald-400' : 'text-base font-bold font-mono text-rose-400';
+      if (pnlElem) {
+        pnlElem.textContent = (sessionNetPnL >= 0 ? '+' : '') + '₹' + Math.round(sessionNetPnL).toLocaleString('en-IN');
+        pnlElem.className = sessionNetPnL >= 0 ? 'text-base font-bold font-mono text-emerald-400' : 'text-base font-bold font-mono text-rose-400';
+      }
 
       const discScore = Math.max(0, 100 - (penaltyStrikes * 20));
-      document.getElementById('tiltDisciplineScore').textContent = `${discScore}%`;
+      const scoreEl = document.getElementById('tiltDisciplineScore');
+      if (scoreEl) scoreEl.textContent = `${discScore}%`;
 
       modal.classList.remove('hidden');
 
-      speakCoach("Execution limit reached. Terminal locked. Capital is preserved for tomorrow.");
+      if (typeof speakCoach === 'function') {
+        speakCoach("Execution limit reached. Terminal locked. Capital is preserved for tomorrow.");
+      }
 
       updateNextMarketCountdown();
       if (tiltCountdownInterval) clearInterval(tiltCountdownInterval);
@@ -12485,15 +12526,31 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       return now.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
     }
 
-    function openPreMarketReadinessModal() {
-      checkPreFlightStatusToday();
+    function openPreMarketReadinessModal(isLocked = false) {
+      checkPreFlightStatusToday(false);
       const modal = document.getElementById('preMarketReadinessModal');
-      if (modal) modal.classList.remove('hidden');
+      if (modal) {
+        modal.classList.remove('hidden');
+        const lockBanner = document.getElementById('readinessLockBanner');
+        if (lockBanner) {
+          if (isLocked) lockBanner.classList.remove('hidden');
+          else lockBanner.classList.add('hidden');
+        }
+      }
     }
 
     function closePreMarketReadinessModal() {
       const modal = document.getElementById('preMarketReadinessModal');
       if (modal) modal.classList.add('hidden');
+    }
+
+    function dismissReadinessGateToReadOnly() {
+      const todayKey = getTodayDateKey();
+      sessionStorage.setItem('premarket_gate_dismissed_' + todayKey, 'true');
+      closePreMarketReadinessModal();
+      if (typeof showSystemToast === 'function') {
+        showSystemToast('👀 <strong>View-Only Mode:</strong> Reviewing dashboard in read-only mode. Live orders require Pre-Flight Certification.', 'info');
+      }
     }
 
     function updateReadinessProgress() {
@@ -12558,7 +12615,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       updatePreFlightButtonUI(false);
     }
 
-    function checkPreFlightStatusToday() {
+    function checkPreFlightStatusToday(triggerModal = false) {
       const todayKey = getTodayDateKey();
       const certifiedTime = localStorage.getItem('premarket_certified_' + todayKey);
       const isCertified = !!certifiedTime;
@@ -12572,6 +12629,14 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       }
       updateReadinessProgress();
       updatePreFlightButtonUI(isCertified);
+
+      // On-load locked gate: if not certified for today, not dismissed, and circuit breaker not active
+      if (triggerModal && !isCertified && !tiltLockDismissed) {
+        const dismissed = sessionStorage.getItem('premarket_gate_dismissed_' + todayKey);
+        if (!dismissed) {
+          openPreMarketReadinessModal(true);
+        }
+      }
     }
 
     function updatePreFlightButtonUI(isCertified) {
@@ -14888,8 +14953,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const container = document.getElementById('dailyLockboxHud');
       if (!container) return;
 
-      const todayStr = typeof getISTDateString === 'function' ? getISTDateString() : new Date().toISOString().split('T')[0];
-      const todayTrades = tradesData.filter(t => t.date === todayStr);
+      const sessionDate = typeof getActiveSessionDate === 'function' ? getActiveSessionDate() : (typeof getISTDateString === 'function' ? getISTDateString() : new Date().toISOString().split('T')[0]);
+      const todayTrades = tradesData.filter(t => t.date === sessionDate);
       const maxTrades = activePhase === 1 ? 1 : 2;
       const tradeCount = todayTrades.length;
       const isLocked = tradeCount >= maxTrades;
