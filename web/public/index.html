@@ -776,6 +776,12 @@
           <span>Log Impulse</span>
           <span id="headerCapitalSavedBadge" class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full font-mono">+₹0</span>
         </button>
+        <!-- AI Institutional Desk Risk Partner Button -->
+        <button onclick="openAICoachModal()" id="aiCoachHeaderBtn" class="px-3 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-lg shadow-cyan-600/25 cursor-pointer" title="AI Institutional Desk Risk Partner &amp; Real-time Coach (Hotkey: Ctrl+J)">
+          <span>🤖</span>
+          <span>AI Risk Partner</span>
+          <kbd class="hotkey-badge text-[9px] px-1 py-0 bg-blue-950/60 text-cyan-200 border-cyan-500/40 hidden md:inline">Ctrl+J</kbd>
+        </button>
         <!-- 09:00 AM IST Pre-Flight Readiness Protocol Button -->
         <button onclick="openPreMarketReadinessModal()" id="preFlightBtn" class="px-3 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 font-medium text-xs flex items-center gap-1.5 transition shadow-sm" title="09:00–09:10 AM IST Pre-Market Readiness Routine">
           <span id="preFlightIcon">🛡️</span>
@@ -3594,6 +3600,22 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           </div>
         </div>
 
+        <!-- AI Executive Session Debrief Strip -->
+        <div class="bg-gradient-to-r from-blue-950/40 via-slate-900 to-cyan-950/40 p-3.5 rounded-xl border border-cyan-500/30 space-y-2 text-xs">
+          <div class="flex items-center justify-between pb-1 border-b border-slate-800">
+            <span class="font-bold text-cyan-300 uppercase text-[10px] tracking-wider flex items-center gap-1.5">
+              <span>🤖</span>
+              <span>AI Executive Session Debrief (Desk Manager)</span>
+            </span>
+            <button type="button" onclick="generateEODScorecardAIDebrief()" class="text-[10px] text-cyan-400 hover:text-white underline font-mono flex items-center gap-1 cursor-pointer">
+              <span>⚡ Generate AI Debrief</span>
+            </button>
+          </div>
+          <div id="eodCardAIDebriefContent" class="text-[11px] text-slate-300 leading-relaxed font-sans space-y-1">
+            <p class="text-slate-500 italic">Click &ldquo;Generate AI Debrief&rdquo; to analyze this session with the institutional risk model...</p>
+          </div>
+        </div>
+
         <!-- Trades Summary Table -->
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs font-mono">
@@ -4539,6 +4561,164 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- MODAL: INTERACTIVE AI DESK RISK PARTNER (CHAT COACH) -->
+  <!-- ======================================================= -->
+  <div id="aiDeskCoachModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl w-full max-w-2xl border border-cyan-500/40 shadow-2xl p-6 relative max-h-[92vh] flex flex-col bg-slate-950">
+      
+      <!-- Top Action Bar -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-cyan-600/30">
+            🤖
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+              <span>Institutional Desk Risk Partner</span>
+              <span class="text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="aiEngineStatusLabel">Quant Engine Active</span>
+              </span>
+            </h3>
+            <p class="text-xs text-slate-400">Real-time mindset resets, rule enforcement &amp; statistical edge advisor</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <!-- Voice read aloud toggle -->
+          <button onclick="toggleAIVoiceRead()" id="aiVoiceToggleBtn" class="px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 hover:text-white text-xs transition cursor-pointer" title="Toggle Spoken Voice Audio">
+            <span id="aiVoiceIcon">🔊</span>
+          </button>
+          <!-- Settings gear (Bring Your Own Key) -->
+          <button onclick="openAISettingsModal()" class="px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 hover:text-cyan-300 text-xs transition cursor-pointer" title="AI Settings &amp; API Key">
+            ⚙️
+          </button>
+          <button onclick="closeAICoachModal()" class="text-slate-400 hover:text-white text-2xl font-bold p-1 leading-none">&times;</button>
+        </div>
+      </div>
+
+      <!-- Quick Prompt Pills -->
+      <div class="flex items-center gap-1.5 overflow-x-auto py-2.5 border-b border-slate-800/80 scrollbar-none flex-shrink-0">
+        <button onclick="sendQuickAIPrompt('Review my execution today and diagnose edge')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 text-[11px] font-mono whitespace-nowrap transition cursor-pointer">
+          ⚡ Review Today
+        </button>
+        <button onclick="sendQuickAIPrompt('I took a loss and feel urge to revenge trade. Reset my mindset right now.')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-rose-300 border border-rose-500/30 text-[11px] font-mono whitespace-nowrap transition cursor-pointer">
+          🛑 Halt Tilt / Reset
+        </button>
+        <button onclick="sendQuickAIPrompt('What is my biggest statistical profit leak in my journal?')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-300 border border-amber-500/30 text-[11px] font-mono whitespace-nowrap transition cursor-pointer">
+          📊 Biggest Leak?
+        </button>
+        <button onclick="sendQuickAIPrompt('Can I take a 3rd trade today?')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-purple-300 border border-purple-500/30 text-[11px] font-mono whitespace-nowrap transition cursor-pointer">
+          🎯 Can I Trade Again?
+        </button>
+      </div>
+
+      <!-- Chat Messages Scroll Area -->
+      <div id="aiChatMessagesContainer" class="flex-1 overflow-y-auto py-4 space-y-3.5 min-h-[280px] max-h-[420px] pr-1">
+        <!-- Initial Welcome Message from Desk Risk Manager -->
+        <div class="flex items-start gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-cyan-600/30 border border-cyan-500/40 flex items-center justify-center text-cyan-300 text-sm flex-shrink-0">
+            🤖
+          </div>
+          <div class="p-3.5 rounded-2xl rounded-tl-sm bg-slate-900/90 border border-slate-800 text-slate-200 text-xs leading-relaxed max-w-[85%] space-y-1.5">
+            <p><strong>Senior Desk Risk Manager Online.</strong></p>
+            <p>I am linked directly into your live execution journal, 1-minute Chartink radar, and neurodivergent mindset matrix.</p>
+            <p class="text-slate-400">Ask me anything: analyze a trade, audit your daily risk ceiling, or request an instant mindset reset when FOMO hits.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Bar -->
+      <form onsubmit="submitAIChatMessage(event)" class="mt-3 pt-3 border-t border-slate-800/80 flex items-center gap-2 flex-shrink-0">
+        <input type="text" id="aiChatInput" placeholder="Ask your Risk Manager (e.g. 'I want to revenge trade' or 'Audit my edge')..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-sans">
+        <button type="submit" id="aiChatSendBtn" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs uppercase transition shadow-lg shadow-cyan-600/20 flex items-center gap-1.5 cursor-pointer">
+          <span>Send</span>
+          <span>&rarr;</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: 1-CLICK AI TRADE AUTOPSY -->
+  <!-- ================================= -->
+  <div id="aiTradeAutopsyModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl w-full max-w-2xl border border-cyan-500/40 shadow-2xl p-6 relative max-h-[92vh] overflow-y-auto bg-slate-950">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-cyan-600/30">
+            🔬
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+              <span id="autopsyModalTradeTitle">Trade Autopsy: T-001 &bull; CYIENT</span>
+              <span id="autopsyModalGradeBadge" class="text-xs font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded">Grade: A</span>
+            </h3>
+            <p class="text-xs text-slate-400">Institutional quantitative execution &amp; psychological bias autopsy</p>
+          </div>
+        </div>
+        <button onclick="closeTradeAutopsyModal()" class="text-slate-400 hover:text-white text-2xl font-bold p-1 leading-none">&times;</button>
+      </div>
+
+      <!-- Autopsy Content Container -->
+      <div id="autopsyModalBody" class="mt-4 p-4 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-200 text-xs leading-relaxed space-y-3 font-sans">
+        <div class="flex items-center justify-center py-8 text-cyan-400 font-mono gap-2">
+          <span class="animate-spin text-xl">⏳</span>
+          <span>Computing quantitative risk autopsy...</span>
+        </div>
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="mt-5 pt-3 border-t border-slate-800 flex items-center justify-between">
+        <button onclick="readAutopsyAloud()" class="text-xs text-cyan-400 hover:underline flex items-center gap-1.5 cursor-pointer">
+          <span>🔊</span>
+          <span>Read Autopsy Aloud</span>
+        </button>
+        <button onclick="closeTradeAutopsyModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition cursor-pointer">
+          Close Autopsy
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AI SETTINGS & BRING YOUR OWN KEY -->
+  <!-- ======================================= -->
+  <div id="aiSettingsModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl w-full max-w-md border border-cyan-500/40 shadow-2xl p-6 relative bg-slate-950">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">⚙️</span>
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider">AI Coach Settings (BYOK)</h3>
+        </div>
+        <button onclick="closeAISettingsModal()" class="text-slate-400 hover:text-white text-2xl font-bold p-1 leading-none">&times;</button>
+      </div>
+
+      <div class="mt-4 space-y-3.5 text-xs text-slate-300">
+        <div class="p-3 rounded-xl bg-blue-950/30 border border-blue-500/20 text-blue-200 text-[11px] leading-relaxed">
+          💡 <strong>Zero Setup Required:</strong> The built-in <strong>Desk Quant Engine</strong> works 100% free with no API keys. Optionally paste a free Google Gemini or OpenAI key below to unlock conversational frontier intelligence.
+        </div>
+
+        <div>
+          <label class="block text-[10px] text-slate-400 font-semibold uppercase mb-1">AI Model Provider</label>
+          <select id="aiProviderSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-cyan-500">
+            <option value="gemini">Google Gemini (Gemini 1.5 Flash - Free Tier)</option>
+            <option value="openai">OpenAI (GPT-4o-mini)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] text-slate-400 font-semibold uppercase mb-1">API Key (Optional)</label>
+          <input type="password" id="aiApiKeyInput" placeholder="AIzaSy... or sk-proj..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-cyan-500">
+          <p class="text-[10px] text-slate-500 mt-1">Saved strictly in your browser's private localStorage.</p>
+        </div>
+
+        <button onclick="saveAISettings()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-cyan-600/30 cursor-pointer">
+          Save AI Preferences
+        </button>
+      </div>
     </div>
   </div>
 
@@ -9311,6 +9491,12 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     window.addEventListener('keydown', (e) => {
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
 
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'j' || e.key === 'J')) {
+        e.preventDefault();
+        openAICoachModal();
+        return;
+      }
+
       if (e.key === 'p' || e.key === 'P') {
         e.preventDefault();
         togglePlaybookDrawer();
@@ -9513,6 +9699,10 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             `;
           }).join('');
         }
+      }
+
+      if (typeof generateEODScorecardAIDebrief === 'function') {
+        generateEODScorecardAIDebrief();
       }
     }
 
@@ -11202,6 +11392,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       { id: 'breathing', category: 'Mindset', title: 'Launch 5-Minute Box Breathing Timer', hotkey: 'B', action: () => openPreMarketFocusModal() },
       { id: 'dossier', category: 'Reports', title: 'Open Monthly Institutional Dossier (PDF)', hotkey: 'M', action: () => openMonthlyDossierModal() },
       { id: 'scorecard', category: 'Reports', title: 'Generate EOD Execution Scorecard (PNG)', action: () => openEODCardModal() },
+      { id: 'ai_coach', category: 'AI Intelligence', title: 'Open AI Desk Risk Partner (Chat Coach & Tilt Reset)', hotkey: 'Ctrl+J', action: () => openAICoachModal() },
+      { id: 'impulse', category: 'Dopamine Valve', title: 'Log Impulse Trade in Sandbox (+50 XP)', action: () => openImpulseModal() },
+      { id: 'gamification', category: 'Discipline', title: 'View Process Discipline Rank, XP & Badges', action: () => openDisciplineBadgesModal() },
       { id: 'fyers', category: 'Import', title: 'Import FYERS Trades (Offline Copy-Paste)', action: () => openFyersIngestModal() },
       { id: 'alerts', category: 'Alerts', title: 'Test Audio Siren & Desktop Notification', action: () => toggleDesktopNotifications() },
       { id: 'theme_obsidian', category: 'Themes', title: 'Theme: Obsidian Blue (Default)', action: () => switchTheme('obsidian') },
@@ -11982,10 +12175,13 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
             <!-- Card Action Footer -->
             <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
-              <button onclick="openTradingViewChart('${escapeHtml(t.symbol)}')" class="text-[11px] text-blue-400 hover:underline flex items-center gap-1 font-semibold">
+              <button onclick="openTradingViewChart('${escapeHtml(t.symbol)}')" class="text-[11px] text-blue-400 hover:underline flex items-center gap-1 font-semibold cursor-pointer">
                 <span>📈 TradingView</span>
               </button>
-              <button onclick="inspectTradeModal('${escapeHtml(t.id)}')" class="text-[11px] text-slate-400 hover:text-white underline">
+              <button onclick="openTradeAutopsyModal('${escapeHtml(t.id)}')" class="text-[11px] text-cyan-400 hover:text-cyan-300 font-bold flex items-center gap-1 cursor-pointer">
+                <span>🤖 AI Autopsy</span>
+              </button>
+              <button onclick="inspectTradeModal('${escapeHtml(t.id)}')" class="text-[11px] text-slate-400 hover:text-white underline cursor-pointer">
                 Audit Details &rarr;
               </button>
             </div>
@@ -12060,6 +12256,328 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       }
     }
 
+
+    // ==========================================
+    // AI DESK RISK PARTNER & TRADE AUTOPSY ENGINE
+    // ==========================================
+
+    let aiVoiceReadEnabled = false;
+    let aiConversationHistory = [];
+    let currentAutopsyText = "";
+
+    function getAISettings() {
+      return {
+        provider: localStorage.getItem('trader_ai_provider') || 'gemini',
+        apiKey: localStorage.getItem('trader_ai_api_key') || ''
+      };
+    }
+
+    function openAISettingsModal() {
+      const modal = document.getElementById('aiSettingsModal');
+      const providerSel = document.getElementById('aiProviderSelect');
+      const apiKeyInp = document.getElementById('aiApiKeyInput');
+      const settings = getAISettings();
+      if (providerSel) providerSel.value = settings.provider;
+      if (apiKeyInp) apiKeyInp.value = settings.apiKey;
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeAISettingsModal() {
+      const modal = document.getElementById('aiSettingsModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function saveAISettings() {
+      const provider = document.getElementById('aiProviderSelect').value;
+      const apiKey = document.getElementById('aiApiKeyInput').value.trim();
+      localStorage.setItem('trader_ai_provider', provider);
+      localStorage.setItem('trader_ai_api_key', apiKey);
+
+      const statusLabel = document.getElementById('aiEngineStatusLabel');
+      if (statusLabel) {
+        statusLabel.textContent = apiKey ? `${provider.toUpperCase()} AI Active` : 'Quant Engine Active';
+      }
+
+      closeAISettingsModal();
+      alert('AI preferences saved! ' + (apiKey ? 'Frontier LLM intelligence connected.' : 'Using free built-in Quant Risk Engine.'));
+    }
+
+    function toggleAIVoiceRead() {
+      aiVoiceReadEnabled = !aiVoiceReadEnabled;
+      const icon = document.getElementById('aiVoiceIcon');
+      if (icon) icon.textContent = aiVoiceReadEnabled ? '🔊' : '🔇';
+      const btn = document.getElementById('aiVoiceToggleBtn');
+      if (btn) btn.className = aiVoiceReadEnabled 
+        ? 'px-2 py-1 rounded-lg bg-cyan-600/30 border border-cyan-500/50 text-cyan-300 text-xs transition cursor-pointer'
+        : 'px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 hover:text-white text-xs transition cursor-pointer';
+      if (typeof speakCoach === 'function' && aiVoiceReadEnabled) {
+        speakCoach('Spoken AI coach audio enabled.');
+      }
+    }
+
+    function openAICoachModal() {
+      const modal = document.getElementById('aiDeskCoachModal');
+      if (!modal) return;
+      const settings = getAISettings();
+      const statusLabel = document.getElementById('aiEngineStatusLabel');
+      if (statusLabel) {
+        statusLabel.textContent = settings.apiKey ? `${settings.provider.toUpperCase()} Active` : 'Quant Engine Active';
+      }
+      modal.classList.remove('hidden');
+      const inp = document.getElementById('aiChatInput');
+      if (inp) inp.focus();
+    }
+
+    function closeAICoachModal() {
+      const modal = document.getElementById('aiDeskCoachModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function sendQuickAIPrompt(promptText) {
+      const inp = document.getElementById('aiChatInput');
+      if (inp) {
+        inp.value = promptText;
+        submitAIChatMessage(new Event('submit'));
+      }
+    }
+
+    async function submitAIChatMessage(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const inp = document.getElementById('aiChatInput');
+      if (!inp) return;
+      const msg = inp.value.trim();
+      if (!msg) return;
+
+      inp.value = '';
+      appendChatMessage('user', msg);
+
+      const container = document.getElementById('aiChatMessagesContainer');
+      const typingId = 'typing_' + Date.now();
+      if (container) {
+        container.innerHTML += `
+          <div id="${typingId}" class="flex items-start gap-2.5">
+            <div class="w-7 h-7 rounded-lg bg-cyan-600/30 border border-cyan-500/40 flex items-center justify-center text-cyan-300 text-sm flex-shrink-0">
+              🤖
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 text-slate-400 text-xs flex items-center gap-2">
+              <span class="animate-pulse">Analyzing risk parameters &amp; execution ledger...</span>
+            </div>
+          </div>
+        `;
+        container.scrollTop = container.scrollHeight;
+      }
+
+      try {
+        const settings = getAISettings();
+        const payload = {
+          message: msg,
+          history: aiConversationHistory,
+          trades: tradesData,
+          api_key: settings.apiKey || null,
+          provider: settings.provider
+        };
+
+        const res = await fetch('/api/ai/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+
+        if (res.ok) {
+          const data = await res.json();
+          const reply = data.reply || 'Risk parameter checked.';
+          aiConversationHistory.push({ role: 'user', content: msg });
+          aiConversationHistory.push({ role: 'assistant', content: reply });
+          appendChatMessage('assistant', reply, data.source);
+
+          if (aiVoiceReadEnabled && typeof speakCoach === 'function') {
+            const cleanText = reply.replace(/[#*`_]/g, '').slice(0, 180);
+            speakCoach(cleanText);
+          }
+        } else {
+          appendChatMessage('assistant', '⚠️ Unable to connect to Risk Engine. Check terminal connection.');
+        }
+      } catch (err) {
+        console.error('AI chat error:', err);
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+        appendChatMessage('assistant', '⚠️ Risk Engine temporarily offline.');
+      }
+    }
+
+    function appendChatMessage(role, text, source) {
+      const container = document.getElementById('aiChatMessagesContainer');
+      if (!container) return;
+
+      const isUser = role === 'user';
+      const formattedText = text
+        .replace(/### (.*)/g, '<h4 class="font-bold text-white text-xs mt-1">$1</h4>')
+        .replace(/#### (.*)/g, '<h5 class="font-semibold text-cyan-300 text-xs mt-1">$1</h5>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
+        .replace(/`(.*?)`/g, '<code class="bg-slate-950 px-1 py-0.5 rounded text-cyan-300 font-mono">$1</code>');
+      formattedText = formattedText.split('\n\n').join('<br><br>').split('\n').join('<br>');
+
+      const sourceBadge = source === 'frontier_llm'
+        ? '<span class="text-[9px] font-mono text-cyan-400 bg-cyan-950 px-1 rounded border border-cyan-800">Frontier LLM</span>'
+        : '<span class="text-[9px] font-mono text-slate-400 bg-slate-950 px-1 rounded border border-slate-800">Quant Rule Engine</span>';
+
+      if (isUser) {
+        container.innerHTML += `
+          <div class="flex items-start justify-end gap-2.5">
+            <div class="p-3.5 rounded-2xl rounded-tr-sm bg-blue-600/30 border border-blue-500/40 text-blue-100 text-xs leading-relaxed max-w-[85%] font-sans">
+              ${escapeHtml(text)}
+            </div>
+            <div class="w-7 h-7 rounded-lg bg-blue-600/40 border border-blue-400/40 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+              👤
+            </div>
+          </div>
+        `;
+      } else {
+        container.innerHTML += `
+          <div class="flex items-start gap-2.5">
+            <div class="w-7 h-7 rounded-lg bg-cyan-600/30 border border-cyan-500/40 flex items-center justify-center text-cyan-300 text-sm flex-shrink-0">
+              🤖
+            </div>
+            <div class="p-3.5 rounded-2xl rounded-tl-sm bg-slate-900/90 border border-slate-800 text-slate-200 text-xs leading-relaxed max-w-[85%] space-y-1.5 font-sans">
+              <div class="flex items-center justify-between pb-1 border-b border-slate-800/80">
+                <span class="font-bold text-cyan-300 text-[11px]">Desk Risk Partner</span>
+                ${sourceBadge}
+              </div>
+              <div>${formattedText}</div>
+            </div>
+          </div>
+        `;
+      }
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // --- 1-CLICK AI TRADE AUTOPSY ---
+    async function openTradeAutopsyModal(tradeId) {
+      const modal = document.getElementById('aiTradeAutopsyModal');
+      const body = document.getElementById('autopsyModalBody');
+      const title = document.getElementById('autopsyModalTradeTitle');
+      const gradeBadge = document.getElementById('autopsyModalGradeBadge');
+
+      if (!modal || !body) return;
+
+      const trade = tradesData.find(t => t.id === tradeId) || tradesData[0];
+      if (!trade) {
+        alert('Trade not found.');
+        return;
+      }
+
+      const gradeObj = computeExecutionGrade(trade);
+      if (title) title.innerHTML = `Trade Autopsy: <strong class="text-cyan-300">${trade.id}</strong> &bull; ${trade.symbol}`;
+      if (gradeBadge) {
+        gradeBadge.textContent = `Grade: ${gradeObj.grade}`;
+        gradeBadge.className = `text-xs font-mono font-bold bg-${gradeObj.color}-500/20 text-${gradeObj.color}-400 border border-${gradeObj.color}-500/30 px-2 py-0.5 rounded`;
+      }
+
+      body.innerHTML = `
+        <div class="flex items-center justify-center py-8 text-cyan-400 font-mono gap-2">
+          <span class="animate-spin text-xl">⏳</span>
+          <span>Computing quantitative risk autopsy for ${escapeHtml(trade.symbol)}...</span>
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+
+      try {
+        const settings = getAISettings();
+        const payload = {
+          trade: trade,
+          api_key: settings.apiKey || null,
+          provider: settings.provider
+        };
+
+        const res = await fetch('/api/ai/autopsy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          currentAutopsyText = data.analysis || '';
+          const formatted = currentAutopsyText
+            .replace(/### (.*)/g, '<h3 class="text-sm font-extrabold text-white mt-1 border-b border-slate-800 pb-1">$1</h3>')
+            .replace(/#### (.*)/g, '<h4 class="text-xs font-bold text-cyan-300 mt-2">$1</h4>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
+            .replace(/`(.*?)`/g, '<code class="bg-slate-950 px-1.5 py-0.5 rounded text-cyan-300 font-mono text-[11px] border border-slate-800">$1</code>');
+          formatted = formatted.split('\n\n').join('<br><br>').split('\n').join('<br>');
+
+          body.innerHTML = `
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-[10px] text-slate-500 font-mono">
+              <span>Model Source: <strong class="text-cyan-400">${data.source === 'frontier_llm' ? settings.provider.toUpperCase() : 'Institutional Quant Rule Engine'}</strong></span>
+              <span>Hold: ${trade.hold_duration || 0}m &bull; Return: ${trade.r_multiple}R</span>
+            </div>
+            <div>${formatted}</div>
+          `;
+        } else {
+          body.innerHTML = `<div class="p-4 text-center text-rose-400">Unable to generate autopsy from server.</div>`;
+        }
+      } catch (err) {
+        console.error('Autopsy error:', err);
+        body.innerHTML = `<div class="p-4 text-center text-rose-400">Error generating autopsy analysis.</div>`;
+      }
+    }
+
+    function closeTradeAutopsyModal() {
+      const modal = document.getElementById('aiTradeAutopsyModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function readAutopsyAloud() {
+      if (!currentAutopsyText || typeof speakCoach !== 'function') return;
+      const clean = currentAutopsyText.replace(/[#*`_]/g, '').slice(0, 350);
+      speakCoach(clean);
+    }
+
+    // --- AI DAILY EOD SCORECARD DEBRIEF ---
+    async function generateEODScorecardAIDebrief() {
+      const container = document.getElementById('eodCardAIDebriefContent');
+      if (!container) return;
+
+      const targetDate = activeScorecardDate || getTodayLocalDateStr();
+      container.innerHTML = `<div class="text-cyan-400 font-mono flex items-center gap-1.5 py-1"><span class="animate-spin">⏳</span> Analyzing session performance with Desk Risk Manager...</div>`;
+
+      try {
+        const settings = getAISettings();
+        const payload = {
+          date: targetDate,
+          trades: tradesData,
+          api_key: settings.apiKey || null,
+          provider: settings.provider
+        };
+
+        const res = await fetch('/api/ai/session-debrief', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const debrief = data.debrief || '';
+          const formatted = debrief
+            .replace(/### (.*)/g, '<h4 class="font-bold text-cyan-300 text-xs mb-1">$1</h4>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>');
+          formatted = formatted.split('\n\n').join('<br><br>').split('\n').join('<br>');
+
+          container.innerHTML = formatted;
+        } else {
+          container.innerHTML = `<span class="text-rose-400">Could not generate AI debrief.</span>`;
+        }
+      } catch (err) {
+        console.error('Session debrief error:', err);
+        container.innerHTML = `<span class="text-rose-400">Error connecting to Risk Engine.</span>`;
+      }
+    }
+
   </script>
   <!-- ========================================== -->
   <!-- 7. FLOATING INSTITUTIONAL BOTTOM STATUS DOCK -->
@@ -12091,6 +12609,11 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
     <!-- Right: Quick Navigation & Palette Pills -->
     <div class="flex items-center gap-2">
+      <!-- 1-Click AI Risk Partner Launcher -->
+      <button onclick="openAICoachModal()" class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-[10px] flex items-center gap-1 transition shadow-sm cursor-pointer" title="AI Desk Risk Partner (Hotkey: Ctrl+J)">
+        <span>🤖 AI Risk Desk</span>
+        <kbd class="hotkey-badge text-[8px] px-1 py-0 bg-blue-950/60 text-cyan-200 border-cyan-500/40">Ctrl+J</kbd>
+      </button>
       <button onclick="toggleCombatMode()" id="dockCombatBtn" class="px-2 py-0.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold flex items-center gap-1 transition cursor-pointer" title="Toggle Combat Mode HUD (Hotkey: H)">
         <span>🎯 Combat</span>
         <kbd class="hotkey-badge text-[9px] px-1 py-0">H</kbd>

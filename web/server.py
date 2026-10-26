@@ -178,6 +178,39 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
                 self._send_json(res)
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
+        elif path == "/api/ai/autopsy":
+            try:
+                from ai_service import ai_service
+                trade_data = payload.get("trade", {})
+                api_key = payload.get("api_key")
+                provider = payload.get("provider", "gemini")
+                res = ai_service.generate_trade_autopsy(trade_data, custom_api_key=api_key, provider=provider)
+                self._send_json(res)
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
+        elif path == "/api/ai/session-debrief":
+            try:
+                from ai_service import ai_service
+                session_date = payload.get("date", "ALL")
+                trades = payload.get("trades") or manager.get_trades()
+                api_key = payload.get("api_key")
+                provider = payload.get("provider", "gemini")
+                res = ai_service.generate_session_debrief(session_date, trades, custom_api_key=api_key, provider=provider)
+                self._send_json(res)
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
+        elif path == "/api/ai/chat":
+            try:
+                from ai_service import ai_service
+                message = payload.get("message", "")
+                history = payload.get("history", [])
+                trades_context = payload.get("trades") or manager.get_trades()
+                api_key = payload.get("api_key")
+                provider = payload.get("provider", "gemini")
+                res = ai_service.chat_with_coach(message, history, trades_context, custom_api_key=api_key, provider=provider)
+                self._send_json(res)
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
         else:
             self.send_error(404, "Endpoint not found.")
 
