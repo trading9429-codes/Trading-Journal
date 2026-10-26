@@ -653,34 +653,70 @@
           <div class="sidebar-label text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono">Execution Systems</div>
         </div>
 
-        <button onclick="openImpulseModal()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-fuchsia-300 hover:bg-fuchsia-950/30 transition cursor-pointer">
+        <button onclick="openImpulseModal()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-fuchsia-300 hover:bg-fuchsia-950/30 transition cursor-pointer" title="Dopamine Relief Valve (+50 XP)">
           <span class="text-base flex-shrink-0">⚡</span>
           <span class="sidebar-label font-sans">Impulse Sandbox</span>
-          <span id="sidebarImpulseXP" class="sidebar-label ml-auto text-[9px] bg-fuchsia-500/20 text-fuchsia-300 px-1.5 py-0.2 rounded font-mono">+50 XP</span>
+          <span id="headerCapitalSavedBadge" class="sidebar-label ml-auto text-[9px] bg-fuchsia-500/20 text-fuchsia-300 px-1.5 py-0.2 rounded font-mono">+50 XP</span>
         </button>
 
-        <button onclick="openAICoachModal()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-cyan-300 hover:bg-cyan-950/30 transition cursor-pointer">
+        <button onclick="openAICoachModal()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-cyan-300 hover:bg-cyan-950/30 transition cursor-pointer" title="AI Risk Partner (Ctrl+J)">
           <span class="text-base flex-shrink-0">🤖</span>
           <span class="sidebar-label font-sans">AI Risk Partner</span>
           <kbd class="sidebar-label ml-auto text-[9px] bg-slate-900 px-1 py-0.2 text-cyan-300 rounded font-mono border border-cyan-500/30">Ctrl+J</kbd>
         </button>
 
-        <button onclick="togglePlaybookDrawer()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-purple-300 hover:bg-purple-950/30 transition cursor-pointer">
+        <button onclick="togglePlaybookDrawer()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-purple-300 hover:bg-purple-950/30 transition cursor-pointer" title="Strategy Playbook (P)">
           <span class="text-base flex-shrink-0">📖</span>
           <span class="sidebar-label font-sans">Strategy Playbook</span>
           <kbd class="sidebar-label ml-auto text-[9px] bg-slate-900 px-1 py-0.2 text-purple-300 rounded font-mono">P</kbd>
         </button>
 
-        <button onclick="openPreMarketReadinessModal()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-emerald-300 hover:bg-emerald-950/30 transition cursor-pointer">
-          <span class="text-base flex-shrink-0">🛡️</span>
+        <button onclick="openPreMarketReadinessModal()" id="preFlightBtn" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-emerald-300 hover:bg-emerald-950/30 transition cursor-pointer" title="09:00 AM IST Pre-Flight Routine">
+          <span id="preFlightIcon" class="text-base flex-shrink-0">🛡️</span>
           <span class="sidebar-label font-sans">Pre-Flight Routine</span>
-          <span class="sidebar-label ml-auto text-[9px] text-slate-500">D2</span>
+          <span id="preFlightStatusPill" class="sidebar-label ml-auto text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-200 uppercase font-mono font-bold hidden">Ready</span>
         </button>
 
-        <button onclick="openMonthlyDossierModal()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-slate-300 hover:bg-slate-900 transition cursor-pointer">
+        <button onclick="openEODCardModal()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-teal-300 hover:bg-teal-950/30 transition cursor-pointer" title="Daily Execution Scorecard &amp; PNG Export">
+          <span class="text-base flex-shrink-0">🏆</span>
+          <span class="sidebar-label font-sans">Daily Scorecard</span>
+          <span class="sidebar-label ml-auto text-[9px] text-teal-400 bg-teal-500/10 px-1.5 py-0.2 rounded font-mono">EOD</span>
+        </button>
+
+        <button onclick="openMonthlyDossierModal()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-slate-300 hover:bg-slate-900 transition cursor-pointer" title="Monthly Performance Dossier PDF">
           <span class="text-base flex-shrink-0">📑</span>
           <span class="sidebar-label font-sans">Monthly Dossier</span>
           <span class="sidebar-label ml-auto text-[9px] text-slate-500">PDF</span>
+        </button>
+
+        <div class="pt-3 pb-1 px-3">
+          <div class="sidebar-label text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono">Broker &amp; Data Vault</div>
+        </div>
+
+        <button onclick="openFyersIngestModal()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-orange-300 hover:bg-orange-950/30 transition cursor-pointer" title="Instant FYERS Tradebook Sync">
+          <span class="text-base flex-shrink-0">⚡</span>
+          <span class="sidebar-label font-sans">FYERS Sync</span>
+          <span class="sidebar-label ml-auto text-[9px] text-orange-400 bg-orange-500/10 px-1.5 py-0.2 rounded font-mono">API</span>
+        </button>
+
+        <button onclick="triggerImport()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-slate-300 hover:bg-slate-900 transition cursor-pointer" title="Import Trades CSV">
+          <span class="text-base flex-shrink-0">📁</span>
+          <span class="sidebar-label font-sans">Import CSV</span>
+        </button>
+
+        <button onclick="exportTradesCSV()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-emerald-300 hover:bg-emerald-950/30 transition cursor-pointer" title="Export Trades CSV">
+          <span class="text-base flex-shrink-0">💾</span>
+          <span class="sidebar-label font-sans">Export CSV</span>
+        </button>
+
+        <button onclick="openWebhookModal()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-sky-300 hover:bg-sky-950/30 transition cursor-pointer" title="Configure Telegram/WhatsApp Alerts">
+          <span class="text-base flex-shrink-0">⚙️</span>
+          <span class="sidebar-label font-sans">Webhooks</span>
+        </button>
+
+        <button onclick="backupDatabaseVault()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-slate-400 hover:text-white hover:bg-slate-900 transition cursor-pointer" title="Download JSON Database Vault Backup">
+          <span class="text-base flex-shrink-0">🛡️</span>
+          <span class="sidebar-label font-sans">Backup Vault</span>
         </button>
       </nav>
     </div>
@@ -706,6 +742,10 @@
         <button onclick="openWeeklyReviewModal()" class="py-1.5 px-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold transition cursor-pointer" title="Weekly Governance Review (D5)">
           <span>📝</span>
         </button>
+        <button onclick="toggleDesktopNotifications()" id="desktopAlertsToggleBtn" class="py-1.5 px-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-[11px] font-semibold transition cursor-pointer" title="Toggle Desktop Alerts &amp; Siren">
+          <span id="desktopAlertsIcon">🔔</span>
+          <span id="desktopAlertsLabel" class="hidden">Alerts</span>
+        </button>
         <button onclick="openAISettingsModal()" class="py-1.5 px-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-[11px] font-semibold transition cursor-pointer" title="AI Settings (BYOK)">
           <span>⚙️</span>
         </button>
@@ -719,17 +759,17 @@
   <div id="mainAppShell" class="flex-1 md:ml-64 flex flex-col min-h-screen transition-all duration-300 pb-16">
 
     <!-- Top TradeSync Application Bar -->
-    <header class="sticky top-0 z-30 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/90 px-4 lg:px-6 py-2.5 flex items-center justify-between gap-4 shadow-sm">
+    <header class="sticky top-0 z-30 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/90 px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-3 shadow-sm">
       <!-- Left: Mobile Menu Toggle + View Title / Breadcrumbs -->
       <div class="flex items-center gap-3">
-        <button onclick="toggleSidebarCollapse()" class="md:hidden p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 cursor-pointer">
+        <button onclick="toggleSidebarCollapse()" class="md:hidden p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 cursor-pointer" title="Toggle Sidebar">
           ☰
         </button>
         <div>
           <div class="flex items-center gap-2">
             <h2 id="topBarViewTitle" class="text-sm font-extrabold text-white tracking-tight flex items-center gap-1.5 font-sans">
               <span>📊</span>
-              <span>Dashboard Overview</span>
+              <span>Dashboard</span>
             </h2>
             <div id="topBarPhaseBadge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold cursor-pointer" onclick="switchTab(1)">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -739,8 +779,8 @@
         </div>
       </div>
 
-      <!-- Center: IST Market Clock & Execution Window -->
-      <div class="hidden lg:flex items-center gap-2.5 text-xs font-mono">
+      <!-- Center: IST Market Clock, Window & Auto-Vault Pill -->
+      <div class="hidden xl:flex items-center gap-2.5 text-xs font-mono">
         <div class="bg-slate-900/90 border border-slate-800 px-3 py-1 rounded-lg flex items-center gap-2">
           <span class="text-slate-400">🕒 IST:</span>
           <span id="headerLiveISTClock" class="font-bold text-white text-xs">--:--:-- IST</span>
@@ -749,10 +789,38 @@
           <span id="headerWindowDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span id="headerWindowText">Window Active</span>
         </div>
+        <!-- IndexedDB Sync Pill -->
+        <div id="indexedDbSyncPill" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800 font-mono text-[10px] text-slate-400" title="Offline IndexedDB Auto-Vault active">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="indexedDbSyncText">Auto-Vault</span>
+        </div>
       </div>
 
-      <!-- Right: Real-time Today P&L Ticker + Action CTAs -->
+      <!-- Right: Controls, Gamification, Real-time P&L Ticker & Actions -->
       <div class="flex items-center gap-2">
+        <!-- Theme Selector -->
+        <select id="themeSelector" onchange="switchTheme(this.value)" class="hidden sm:block bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-300 font-mono focus:outline-none focus:border-blue-500 transition cursor-pointer" title="Switch Theme">
+          <option value="obsidian">🌌 Obsidian</option>
+          <option value="bloomberg">⚡ Bloomberg</option>
+          <option value="linear">📐 Linear</option>
+          <option value="nordic">❄️ Nordic</option>
+        </select>
+
+        <!-- Density Toggle -->
+        <button onclick="toggleDensityMode()" id="densityToggleBtn" class="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-mono transition cursor-pointer" title="Toggle Compact Density Mode">
+          <span id="densityIcon">📐</span>
+          <span id="densityLabel" class="hidden xl:inline text-[10px]">Compact</span>
+        </button>
+
+        <!-- Discipline Streak & XP Pill -->
+        <button onclick="openDisciplineBadgesModal()" id="disciplineXpPill" class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 hover:from-amber-500/20 hover:to-orange-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold shadow-sm transition cursor-pointer" title="Process Gamification: View Discipline Level, XP &amp; Badges">
+          <span>🔥</span>
+          <span id="headerStreakText">0d Streak</span>
+          <span class="text-slate-600">|</span>
+          <span id="headerLevelText">⭐ Lvl 1</span>
+          <span class="text-[10px] text-amber-400 font-sans font-normal" id="headerXpText">(0 XP)</span>
+        </button>
+
         <!-- Live Today Net P&L Pill -->
         <div id="topBarTodayPnLPill" class="px-3 py-1 rounded-xl bg-slate-900/95 border border-slate-800 text-xs font-mono flex items-center gap-1.5 shadow-sm">
           <span class="text-[10px] text-slate-400 uppercase font-semibold">Today:</span>
@@ -782,7 +850,7 @@
 
   <!-- Live Trading Window Closed Alert Banner (When past 10:30 AM IST) -->
   <div id="windowClosedBanner" class="hidden bg-gradient-to-r from-indigo-950/90 via-slate-900 to-indigo-950/90 border-b border-indigo-500/40 px-4 py-2.5 text-center text-xs font-semibold text-indigo-200">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+    <div class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
       <div class="flex items-center gap-2">
         <span class="text-base">🛑</span>
         <span><strong>09:15–10:30 AM IST TRADING WINDOW CLOSED:</strong> Intraday momentum edge closes at 10:30 AM. Preserving capital. Real-time entries locked.</span>
@@ -796,7 +864,7 @@
 
   <!-- Cooldown Active Alert Banner -->
   <div id="cooldownBanner" class="hidden bg-gradient-to-r from-amber-950/80 via-amber-900/60 to-amber-950/80 border-b border-amber-500/40 px-4 py-2.5 text-center text-xs font-semibold text-amber-200">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+    <div class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
       <div class="flex items-center gap-2">
         <span class="text-base">⚠️</span>
         <span><strong>MANDATORY 30-MIN LOSS COOLDOWN ACTIVE:</strong> Loss registered. Step away from your screens immediately. Next trade entry is locked for <span id="cooldownCountdownSpan" class="font-mono font-bold text-amber-300 text-sm">30:00</span>.</span>
@@ -807,7 +875,7 @@
 
   <!-- Daily Circuit Breaker Banner -->
   <div id="circuitBreakerBanner" class="hidden bg-gradient-to-r from-red-950/90 via-rose-900/80 to-red-950/90 border-b border-red-500/50 px-4 py-2.5 text-center text-xs font-semibold text-rose-200">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+    <div class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
       <div class="flex items-center gap-2">
         <span class="text-base">🚨</span>
         <span><strong>BROKER KILL SWITCH ENGAGED:</strong> Daily limit reached (<span id="circuitReasonText">2 Trades Max / 2 Losses Max</span>). Rule 3 strictly requires terminal shutdown. Walk away!</span>
@@ -816,144 +884,21 @@
     </div>
   </div>
 
-  <!-- Main Container -->
-  <main class="max-w-7xl mx-auto px-4 lg:px-8 mt-6">
-    <!-- Top Tab Navigation Controls & Action Strip (4 SPACIOUS TABS) -->
-    <div class="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
-      <!-- Single Unified Tab View Selector Dropdown (Zero Duplication) -->
-      <div class="flex items-center gap-2.5">
-        <label for="tabSelectorDropdown" class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap">
-          <span>📑</span>
-          <span>View:</span>
-        </label>
-        <div class="relative min-w-[280px] sm:min-w-[340px]">
-          <select id="tabSelectorDropdown" onchange="switchTab(parseInt(this.value))" class="w-full bg-slate-900/95 hover:bg-slate-800 border-2 border-blue-500/60 hover:border-blue-400 text-white font-bold text-xs sm:text-sm rounded-xl px-4 py-2.5 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition shadow-lg shadow-blue-950/40 font-sans">
-            <option value="1">📊 Tab 1: Dashboard (Overview &amp; Scorecard)</option>
-            <option value="2">📈 Tab 2: Advanced Analytics (Curves &amp; Quant Ratios)</option>
-            <option value="3">🎯 Tab 3: Attribution &amp; Leaks (Strategy &amp; Excursions)</option>
-            <option value="4">🎲 Tab 4: Quant Risk &amp; Sim (Monte Carlo &amp; Stress Test)</option>
-            <option value="5">📡 Tab 5: Chartink Radar (1-Min Live Webhook Feed)</option>
-          </select>
-          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-blue-400 font-black text-xs">
-            ▼
-          </div>
-        </div>
-      </div>
-
-      <!-- Global Actions Strip -->
-      <div class="flex items-center gap-2 w-full xl:w-auto justify-end flex-wrap">
-        <!-- Command Palette Quick Launcher -->
-        <button onclick="openCommandPalette()" class="px-3 py-2 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 font-medium text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer" title="Global Command Palette (Hotkey: Ctrl+K / Cmd+K)">
-          <span>⌘</span>
-          <span class="hidden md:inline">Palette</span>
-          <kbd class="hotkey-badge text-[9px] px-1 py-0">Ctrl+K</kbd>
-        </button>
-        <!-- Pro Terminal Theme Selector -->
-        <select id="themeSelector" onchange="switchTheme(this.value)" class="bg-slate-900 border border-slate-700 hover:border-slate-600 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 font-mono focus:outline-none focus:border-blue-500 transition cursor-pointer" title="Switch Institutional Color Palette">
-          <option value="obsidian">🌌 Obsidian</option>
-          <option value="bloomberg">⚡ Bloomberg</option>
-          <option value="linear">📐 Linear</option>
-          <option value="nordic">❄️ Nordic</option>
-        </select>
-        <!-- Density Mode Toggle Button -->
-        <button onclick="toggleDensityMode()" id="densityToggleBtn" class="px-2.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-mono transition cursor-pointer" title="Toggle Compact Pro Density Mode">
-          <span id="densityIcon">📐</span>
-          <span id="densityLabel">Compact</span>
-        </button>
-        <!-- Combat Mode Minimalist HUD Button -->
-        <button onclick="toggleCombatMode()" id="combatModeBtn" class="px-3 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-bold text-xs flex items-center gap-1.5 transition shadow-sm" title="Toggle Minimalist Combat Execution HUD (Hotkey: H)">
-          <span>🎯</span>
-          <span id="combatModeLabel">Combat HUD</span>
-          <kbd class="hotkey-badge text-[9px] px-1 py-0 bg-amber-950/60 text-amber-300 border-amber-500/40">H</kbd>
-        </button>
-        <!-- Hotkey Cheatsheet & Soundpack Settings Button -->
-        <button onclick="openHotkeyModal()" class="px-2.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono text-xs flex items-center gap-1.5 transition shadow-sm" title="Keyboard Shortcuts &amp; Soundpack (Hotkey: ?)">
-          <span>⌨️</span>
-          <span>[?]</span>
-        </button>
-        <!-- IndexedDB Offline Auto-Vault Status Badge -->
-        <div id="indexedDbSyncPill" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 font-mono text-[10px] text-slate-400" title="Offline IndexedDB Auto-Vault active &bull; Keystrokes &amp; trades preserved">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="indexedDbSyncText">Auto-Vault</span>
-        </div>
-        <!-- Process Gamification: Discipline Level & XP Pill -->
-        <button onclick="openDisciplineBadgesModal()" id="disciplineXpPill" class="px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-500/40 text-xs font-mono font-bold flex items-center gap-1.5 shadow-sm transition cursor-pointer" title="Process Gamification: View Discipline Level, XP & Badges">
-          <span>🔥</span>
-          <span id="headerStreakText">4d Streak</span>
-          <span class="text-slate-500">|</span>
-          <span id="headerLevelText">⭐ Lvl 3</span>
-          <span class="text-[10px] text-amber-400 font-sans font-normal" id="headerXpText">(850 XP)</span>
-        </button>
-        <!-- Dopamine Relief Valve: Impulse Sandbox Button -->
-        <button onclick="openImpulseModal()" class="px-3 py-2 rounded-lg bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-lg shadow-fuchsia-600/25 cursor-pointer" title="Dopamine Relief Valve: Defuse boredom or FOMO impulses without risking real capital (+50 XP)">
-          <span>⚡</span>
-          <span>Log Impulse</span>
-          <span id="headerCapitalSavedBadge" class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full font-mono">+₹0</span>
-        </button>
-                <!-- Dashboard Customizer (Show/Hide Metrics & Charts) -->
-        <button onclick="openDashboardCustomizerModal()" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 border border-teal-500/30 font-medium text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer" title="Customize Dashboard Metrics & Charts (Show/Hide Toggles)">
-          <span>🎛️</span>
-          <span>Customize View</span>
-        </button>
-        <!-- AI Institutional Desk Risk Partner Button -->
-        <button onclick="openAICoachModal()" id="aiCoachHeaderBtn" class="px-3 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-lg shadow-cyan-600/25 cursor-pointer" title="AI Institutional Desk Risk Partner &amp; Real-time Coach (Hotkey: Ctrl+J)">
-          <span>🤖</span>
-          <span>AI Risk Partner</span>
-          <kbd class="hotkey-badge text-[9px] px-1 py-0 bg-blue-950/60 text-cyan-200 border-cyan-500/40 hidden md:inline">Ctrl+J</kbd>
-        </button>
-        <!-- 09:00 AM IST Pre-Flight Readiness Protocol Button -->
-        <button onclick="openPreMarketReadinessModal()" id="preFlightBtn" class="px-3 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 font-medium text-xs flex items-center gap-1.5 transition shadow-sm" title="09:00–09:10 AM IST Pre-Market Readiness Routine">
-          <span id="preFlightIcon">🛡️</span>
-          <span>Pre-Flight (D2)</span>
-          <span id="preFlightStatusPill" class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-200 uppercase font-mono font-bold hidden">Ready</span>
-        </button>
-        <!-- Institutional Monthly Dossier PDF Report Button -->
-        <button onclick="openMonthlyDossierModal()" class="px-3 py-2 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 font-medium text-xs flex items-center gap-1.5 transition shadow-sm" title="1-Click Institutional Performance Dossier &amp; PDF Export">
-          <span>📑</span>
-          <span>Monthly Dossier</span>
-        </button>
-        <!-- Native Desktop Alerts & Web Audio Risk Siren Toggle -->
-        <button onclick="toggleDesktopNotifications()" id="desktopAlertsToggleBtn" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-medium text-xs flex items-center gap-1.5 transition shadow-sm" title="Toggle Native Desktop Push &amp; 880Hz Audio Risk Siren">
-          <span id="desktopAlertsIcon">🔔</span>
-          <span id="desktopAlertsLabel">Desktop Alerts</span>
-        </button>
-        <button onclick="openWebhookModal()" class="px-3 py-2 rounded-lg bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/30 font-medium text-xs flex items-center gap-1.5 transition shadow-sm" title="Configure Telegram/WhatsApp Accountability Alerts">
-          <span>⚙️</span>
-          <span>Webhooks</span>
-        </button>
-        <button onclick="openFyersIngestModal()" class="px-3 py-2 rounded-lg bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-lg shadow-orange-600/20" title="Quickly Import Trades via Copy-Paste or CSV">
-          <span>⚡</span>
-          <span>Import FYERS Trades</span>
-        </button>
-        <button onclick="openWeeklyReviewModal()" class="px-3 py-2 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 font-medium text-xs flex items-center gap-1.5 transition">
-          <span>📝</span>
-          <span>Weekly Review (D5)</span>
-        </button>
-        <button onclick="openEODCardModal()" class="px-3 py-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-lg shadow-emerald-600/20" title="Generate End-of-Day Execution Scorecard &amp; PNG Export">
-          <span>🏆</span>
-          <span>Daily Scorecard</span>
-        </button>
-        <button onclick="triggerImport()" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-medium text-xs flex items-center gap-1.5 transition">
-          <span>📁</span>
-          <span>Import CSV</span>
-        </button>
-        <button onclick="exportTradesCSV()" class="px-3 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 font-medium text-xs flex items-center gap-1.5 transition">
-          <span>💾</span>
-          <span>Export CSV</span>
-        </button>
-        <button onclick="backupDatabaseVault()" class="px-2.5 py-2 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition" title="Download timestamped JSON Database Vault backup">
-          <span>🛡️ Backup</span>
-        </button>
-        <button onclick="triggerVaultRestore()" class="px-2.5 py-2 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 text-xs transition" title="Restore state from JSON Database Vault">
-          <span>🔄 Restore</span>
-        </button>
-      </div>
-    </div>
+  <!-- Main Container (Fluid, 1600px Max-Width for Clean Professional Layout) -->
+  <main class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-5 flex-1">
+    <!-- Hidden tab dropdown fallback to guarantee legacy JS compatibility -->
+    <select id="tabSelectorDropdown" class="hidden">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
 
     <!-- ========================================== -->
     <!-- TAB 1: LIVE EXECUTION & TRADE LOG -->
     <!-- ========================================== -->
-    <div id="tabContent1" class="mt-4 space-y-6">
+    <div id="tabContent1" class="mt-2 space-y-6">
 
       <!-- TRADESYNC HIGH-IMPACT EXECUTIVE KPI STRIP -->
       <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1793,7 +1738,6 @@
         </div>
       </div>
 
-      </div>
       </div>
 
             <!-- ADVANCED QUANTITATIVE HEDGE-FUND RATIOS (4 KEY CARDS) -->
@@ -5816,6 +5760,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     function toggleSidebarCollapse() {
       const sidebar = document.getElementById('appSidebar');
       const mainShell = document.getElementById('mainAppShell');
+      const dock = document.getElementById('institutionalBottomDock');
       const icon = document.getElementById('sidebarToggleIcon');
       if (!sidebar || !mainShell) return;
 
@@ -5826,6 +5771,10 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         sidebar.classList.add('w-64');
         mainShell.classList.remove('md:ml-20');
         mainShell.classList.add('md:ml-64');
+        if (dock) {
+          dock.classList.remove('md:left-20');
+          dock.classList.add('md:left-64');
+        }
         if (icon) icon.textContent = '«';
         localStorage.setItem('trader_sidebar_collapsed', 'false');
       } else {
@@ -5834,6 +5783,10 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         sidebar.classList.add('w-20');
         mainShell.classList.remove('md:ml-64');
         mainShell.classList.add('md:ml-20');
+        if (dock) {
+          dock.classList.remove('md:left-64');
+          dock.classList.add('md:left-20');
+        }
         if (icon) icon.textContent = '»';
         localStorage.setItem('trader_sidebar_collapsed', 'true');
       }
@@ -5844,6 +5797,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       if (saved === 'true') {
         const sidebar = document.getElementById('appSidebar');
         const mainShell = document.getElementById('mainAppShell');
+        const dock = document.getElementById('institutionalBottomDock');
         const icon = document.getElementById('sidebarToggleIcon');
         if (sidebar && mainShell) {
           sidebar.classList.add('sidebar-collapsed');
@@ -5851,6 +5805,10 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           sidebar.classList.add('w-20');
           mainShell.classList.remove('md:ml-64');
           mainShell.classList.add('md:ml-20');
+          if (dock) {
+            dock.classList.remove('md:left-64');
+            dock.classList.add('md:left-20');
+          }
           if (icon) icon.textContent = '»';
         }
       }
@@ -6038,11 +5996,11 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
       // Synchronize Top Bar View Title
       const titleMap = {
-        1: { icon: '📊', title: 'Dashboard Overview & Scorecard' },
-        2: { icon: '📈', title: 'Advanced Analytics, Curves & Quant Ratios' },
-        3: { icon: '🎯', title: 'Attribution, Leaks & Strategy Matrix' },
-        4: { icon: '🎲', title: 'Quant Risk & Monte Carlo Simulation' },
-        5: { icon: '📡', title: '1-Minute Chartink Webhook Radar' }
+        1: { icon: '📊', title: 'Dashboard' },
+        2: { icon: '📈', title: 'Advanced Analytics' },
+        3: { icon: '🎯', title: 'Attribution & Leaks' },
+        4: { icon: '🎲', title: 'Quant Risk & Sim' },
+        5: { icon: '📡', title: 'Chartink Radar' }
       };
       const titleEl = document.getElementById('topBarViewTitle');
       if (titleEl && titleMap[tabNum]) {
@@ -14279,7 +14237,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
   <!-- ========================================== -->
   <!-- 7. FLOATING INSTITUTIONAL BOTTOM STATUS DOCK -->
   <!-- ========================================== -->
-  <div id="institutionalBottomDock" class="fixed bottom-0 inset-x-0 z-40 bg-slate-950/90 backdrop-blur-md border-t border-slate-800 px-4 py-2 hidden sm:flex items-center justify-between text-xs font-mono text-slate-400 shadow-2xl">
+  <div id="institutionalBottomDock" class="fixed bottom-0 left-0 md:left-64 right-0 z-40 bg-slate-950/95 backdrop-blur-md border-t border-slate-800 px-4 sm:px-6 py-2 hidden sm:flex items-center justify-between text-xs font-mono text-slate-400 shadow-2xl transition-all duration-300">
     <!-- Left: Live Clock & Network Ping -->
     <div class="flex items-center gap-3">
       <span class="flex items-center gap-1.5 text-slate-200 font-bold">
@@ -14311,13 +14269,14 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         <span>🤖 AI Risk Desk</span>
         <kbd class="hotkey-badge text-[8px] px-1 py-0 bg-blue-950/60 text-cyan-200 border-cyan-500/40">Ctrl+J</kbd>
       </button>
-            <!-- Dashboard Customizer Launcher -->
+      <!-- Dashboard Customizer Launcher -->
       <button onclick="openDashboardCustomizerModal()" class="px-2 py-0.5 rounded bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 text-[10px] font-bold flex items-center gap-1 transition cursor-pointer" title="Customize Dashboard Metrics & Charts (Hotkey: V)">
         <span>🎛️ Layout</span>
         <kbd class="hotkey-badge text-[8px] px-1 py-0 bg-teal-950/60 text-teal-200 border-teal-500/40">V</kbd>
       </button>
-      <button onclick="toggleCombatMode()" id="dockCombatBtn" class="px-2 py-0.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold flex items-center gap-1 transition cursor-pointer" title="Toggle Combat Mode HUD (Hotkey: H)">
-        <span>🎯 Combat</span>
+      <button onclick="toggleCombatMode()" id="combatModeBtn" class="px-2 py-0.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold flex items-center gap-1 transition cursor-pointer" title="Toggle Combat Mode HUD (Hotkey: H)">
+        <span>🎯</span>
+        <span id="combatModeLabel">Combat</span>
         <kbd class="hotkey-badge text-[9px] px-1 py-0">H</kbd>
       </button>
       <button onclick="openCommandPalette()" class="px-2 py-0.5 rounded bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] font-bold flex items-center gap-1 transition cursor-pointer" title="Open Command Palette (Hotkey: Ctrl+K / Cmd+K)">
