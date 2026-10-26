@@ -819,6 +819,20 @@
           <span class="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700 font-sans">Z</span>
         </button>
 
+        <!-- Focus Soundscapes Desk (Brown Noise, 10Hz Binaural, 432Hz Bell) -->
+        <button onclick="toggleSoundscapesModal()" id="soundscapesToggleBtn" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-purple-300 hover:text-white border border-purple-500/30 text-xs font-mono font-bold transition cursor-pointer" title="Focus Soundscapes Desk: Ambient Brown Noise, Alpha Waves &amp; Mindfulness Chimes for deep focus">
+          <span>🎧</span>
+          <span id="soundscapesBtnText" class="hidden xl:inline text-[11px]">Soundscapes</span>
+          <span id="soundscapesWaveIcon" class="hidden w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+        </button>
+
+        <!-- Pre-Market 60-Second Readiness Gate -->
+        <button onclick="openPreMarketReadinessModal()" id="headerPreFlightPill" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold transition cursor-pointer" title="Pre-Flight Mental &amp; Risk Readiness Gate (Shortcut: Shift+P)">
+          <span id="headerPreFlightIcon">☀️</span>
+          <span id="headerPreFlightText">Pre-Flight Check</span>
+          <span class="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-sans">+25 XP</span>
+        </button>
+
         <!-- Discipline Streak & XP Pill -->
         <button onclick="openDisciplineBadgesModal()" id="disciplineXpPill" class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 hover:from-amber-500/20 hover:to-orange-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold shadow-sm transition cursor-pointer" title="Process Gamification: View Discipline Level, XP &amp; Badges">
           <span>🔥</span>
@@ -977,6 +991,11 @@
           <div class="text-2xl font-black font-mono text-emerald-400 mt-2" id="kpiDisciplineScore">100%</div>
           <div class="text-[10px] text-slate-400 mt-1 font-mono truncate" id="kpiDemeritsSub">0 Demerit Strikes &bull; Clean</div>
         </div>
+      </section>
+
+      <!-- 2-TRADE DAILY LOCKBOX HUD (RULE 3 DISCIPLINE SENTINEL) -->
+      <section id="dailyLockboxHud" class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-800 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 shadow-xl transition-all duration-300">
+        <!-- Dynamically rendered via renderDailyLockboxHUD() -->
       </section>
 
 
@@ -1588,6 +1607,37 @@
             </div>
           </div>
         </form>
+      </section>
+
+      <!-- TAB 1 MINI MONTHLY CALENDAR P&L HEATMAP WIDGET -->
+      <section id="tab1MiniCalendarSection" class="glass-card rounded-2xl p-5 border border-slate-800/90 bg-slate-950/80 shadow-2xl">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3.5 border-b border-slate-800/80 gap-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm">
+              📅
+            </div>
+            <div>
+              <h3 class="text-xs sm:text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                <span>30-Day Execution Protocol Heatmap</span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" id="dashCalendarSummaryBadge">
+                  Live History
+                </span>
+              </h3>
+              <p class="text-[10px] text-slate-400">Click any day tile to inspect daily executions, rule adherence &amp; journal lessons</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 font-mono text-xs">
+            <span class="text-slate-400 text-[10px]">P&amp;L Horizon:</span>
+            <span class="font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20" id="dashCalendarTotalPnLBadge">
+              ₹0.00
+            </span>
+          </div>
+        </div>
+
+        <!-- 30-Day Compact Grid Container -->
+        <div class="mt-4 grid grid-cols-5 sm:grid-cols-6 md:grid-cols-10 lg:grid-cols-15 gap-1.5 sm:gap-2" id="tab1MiniCalendarGrid">
+          <!-- Dynamically populated via renderTab1MiniCalendar() -->
+        </div>
       </section>
 
       <!-- Active Trades Ledger & Filters -->
@@ -3899,6 +3949,84 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         </button>
         <button onclick="closeBreathingPacerModal()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-xs font-medium transition cursor-pointer">
           Dismiss
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: FOCUS SOUNDSCAPES DESK -->
+  <!-- ========================================== -->
+  <div id="soundscapesModal" class="fixed inset-0 z-[110] bg-slate-950/85 backdrop-blur-xl hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card bg-slate-900/95 rounded-3xl max-w-md w-full border border-purple-500/40 p-6 shadow-2xl relative text-center">
+      <button onclick="toggleSoundscapesModal(false)" class="absolute top-5 right-5 w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer">✕</button>
+
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 font-mono text-xs font-bold uppercase tracking-wider mb-2">
+        <span>🎧</span>
+        <span>Cognitive Audio Anchor</span>
+      </div>
+
+      <h2 class="text-xl font-black text-white uppercase tracking-wide">Focus Soundscapes Desk</h2>
+      <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
+        Procedurally synthesized Web Audio to calm amygdala hyperactivity and stimulate alpha brainwaves during market hours.
+      </p>
+
+      <!-- Sound Preset Selectors -->
+      <div class="mt-6 space-y-2.5 text-left">
+        <!-- Preset 1: Brown Noise -->
+        <div onclick="selectSoundscape('brown')" id="soundCard_brown" class="sound-card p-3 rounded-xl border border-slate-800 hover:border-purple-500/40 bg-slate-950/70 hover:bg-purple-950/20 cursor-pointer transition flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">🌊</span>
+            <div>
+              <div class="text-xs font-bold text-white">Brown Noise (Oceanic Rumble)</div>
+              <p class="text-[10px] text-slate-400">Deep low-frequency rumble; blocks external auditory distractions</p>
+            </div>
+          </div>
+          <span class="sound-status-badge text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">Ready</span>
+        </div>
+
+        <!-- Preset 2: 10 Hz Binaural Alpha Waves -->
+        <div onclick="selectSoundscape('binaural')" id="soundCard_binaural" class="sound-card p-3 rounded-xl border border-slate-800 hover:border-purple-500/40 bg-slate-950/70 hover:bg-purple-950/20 cursor-pointer transition flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">🧠</span>
+            <div>
+              <div class="text-xs font-bold text-white">10 Hz Binaural Alpha Entrainment</div>
+              <p class="text-[10px] text-slate-400">Dual 200Hz/210Hz sine waves; induces relaxed, high-clarity focus</p>
+            </div>
+          </div>
+          <span class="sound-status-badge text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">Ready</span>
+        </div>
+
+        <!-- Preset 3: 432 Hz Zen Tibetan Bell -->
+        <div onclick="selectSoundscape('bell')" id="soundCard_bell" class="sound-card p-3 rounded-xl border border-slate-800 hover:border-purple-500/40 bg-slate-950/70 hover:bg-purple-950/20 cursor-pointer transition flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">🔔</span>
+            <div>
+              <div class="text-xs font-bold text-white">432 Hz Mindfulness Chime</div>
+              <p class="text-[10px] text-slate-400">Resonant Tibetan bell every 45s; anchors present-moment patience</p>
+            </div>
+          </div>
+          <span class="sound-status-badge text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">Ready</span>
+        </div>
+      </div>
+
+      <!-- Volume Slider -->
+      <div class="mt-5 p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-left">
+        <div class="flex items-center justify-between text-xs text-slate-300 font-mono mb-2">
+          <span>Master Volume</span>
+          <span id="soundscapeVolLabel" class="text-purple-300 font-bold">40%</span>
+        </div>
+        <input type="range" id="soundscapeVolumeSlider" min="0" max="100" value="40" oninput="setSoundscapeVolume(this.value)" class="w-full accent-purple-500 cursor-pointer">
+      </div>
+
+      <!-- Master Action Controls -->
+      <div class="mt-5 flex items-center gap-3 justify-center">
+        <button id="soundscapePlayPauseBtn" onclick="toggleActiveSoundscape()" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition flex items-center justify-center gap-2 cursor-pointer">
+          <span id="soundscapeBtnIcon">▶️</span>
+          <span id="soundscapeBtnActionText">Start Ambient Audio</span>
+        </button>
+        <button onclick="toggleSoundscapesModal(false)" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-xs font-medium transition cursor-pointer">
+          Minimize
         </button>
       </div>
     </div>
@@ -7811,7 +7939,15 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 cursor-pointer" onclick="openTradeModal('${t.id}')">
             <td class="py-2.5 px-3 font-bold text-blue-400">${t.id}</td>
             <td class="py-2.5 px-3 text-slate-400 font-sans text-[11px]">${t.date} <span class="text-emerald-400/80 font-mono text-[10px] font-bold">(${getTradeWeekday(t.date, t.day)})</span> <span class="text-slate-500">&bull;</span> ${t.time}</td>
-            <td class="py-2.5 px-3 font-bold text-white flex items-center gap-1.5">${t.symbol} ${t.screenshot ? '<span class="text-[11px]" title="Chart attached">📷</span>' : ''}</td>
+            <td class="py-2.5 px-3 font-bold text-white">
+              <div class="flex items-center gap-1.5">
+                <span>${t.symbol}</span>
+                ${t.screenshot ? '<span class="text-[11px]" title="Chart attached">📷</span>' : ''}
+              </div>
+              <button onclick="quickCycleTradeSetup('${t.id}', event)" class="mt-0.5 text-[9px] font-mono font-medium px-1.5 py-0.2 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition block text-left truncate max-w-[130px]" title="Click to quickly switch strategy setup">
+                ${escapeHtml(t.setup_name || '9EMA Pullback')} ▾
+              </button>
+            </td>
             <td class="py-2.5 px-3">
               <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${t.direction === 'Long' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-rose-950 text-rose-400 border border-rose-800'}">
                 ${t.direction}
@@ -7843,14 +7979,19 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             <td class="py-2.5 px-3 text-center">
               <div class="flex items-center justify-center gap-1.5">
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-sans font-bold ${badgeClass}">${t.outcome}</span>
-                <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-black ${(typeof computeExecutionGrade === 'function' && computeExecutionGrade(t).grade.startsWith('A')) ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : ((typeof computeExecutionGrade === 'function' && computeExecutionGrade(t).grade === 'B') ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30' : 'bg-rose-500/15 text-rose-400 border border-rose-500/30')}" title="Execution Grade: ${typeof computeExecutionGrade === 'function' ? computeExecutionGrade(t).label + ' (' + computeExecutionGrade(t).reason + ')' : ''}">${typeof computeExecutionGrade === 'function' ? computeExecutionGrade(t).grade : 'A'}</span>
+                <button onclick="quickCycleTradeGrade('${t.id}', event)" class="px-1.5 py-0.5 rounded text-[10px] font-mono font-black ${(t.execution_grade || (typeof computeExecutionGrade === 'function' ? computeExecutionGrade(t).grade : 'A')).startsWith('A') ? 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30' : (((t.execution_grade || 'B') === 'B') ? 'bg-blue-500/15 hover:bg-blue-500/25 text-blue-400 border border-blue-500/30' : 'bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30')} cursor-pointer transition" title="1-Click: Click to cycle execution grade (A+ -> A -> B -> C)">
+                  ${t.execution_grade || (typeof computeExecutionGrade === 'function' ? computeExecutionGrade(t).grade : 'A')}
+                </button>
               </div>
             </td>
             <td class="py-2.5 px-3 text-center" onclick="event.stopPropagation()">
-              <button onclick="openTradeModal('${t.id}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[10px] font-sans font-semibold mr-1">
+              <button onclick="quickEditTradeLesson('${t.id}', event)" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[10px] font-sans font-semibold mr-1 cursor-pointer" title="Quick edit journal lesson / mental note">
+                📝
+              </button>
+              <button onclick="openTradeModal('${t.id}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[10px] font-sans font-semibold mr-1 cursor-pointer" title="Inspect full trade &amp; price action ladder">
                 🔍
               </button>
-              <button onclick="deleteTrade('${t.id}')" class="px-2 py-1 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 rounded text-[10px] font-sans font-semibold">
+              <button onclick="deleteTrade('${t.id}')" class="px-2 py-1 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 rounded text-[10px] font-sans font-semibold cursor-pointer" title="Delete trade">
                 ✕
               </button>
             </td>
@@ -9105,6 +9246,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       if (currentTab === 1) {
         renderDashboardEquityChart(trades);
         renderDashboardDonutCharts(totalWins, totalLosses, trades.length - totalClosed, violations, trades.length);
+        if (typeof renderDailyLockboxHUD === 'function') renderDailyLockboxHUD();
+        if (typeof renderTab1MiniCalendar === 'function') renderTab1MiniCalendar();
       } else if (currentTab === 2) {
         renderRCurveChart(trades);
         renderUnderwaterChart(trades);
@@ -10298,6 +10441,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       try { applyDashboardVisibility(); } catch(e) { console.warn("Visibility init error:", e); }
       try { initSidebarState(); } catch(e) { console.warn("Sidebar init error:", e); }
       try { updateZenModeUI(); } catch(e) { console.warn("Zen UI init error:", e); }
+      try { if (typeof checkPreFlightStatusToday === 'function') checkPreFlightStatusToday(); } catch(e) {}
+      try { if (typeof renderDailyLockboxHUD === 'function') renderDailyLockboxHUD(); } catch(e) {}
+      try { if (typeof renderTab1MiniCalendar === 'function') renderTab1MiniCalendar(); } catch(e) {}
     });
 
     // ==========================================
@@ -12383,10 +12529,17 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       updatePreFlightButtonUI(true);
       closePreMarketReadinessModal();
 
+      if (typeof addDisciplineXP === 'function') {
+        addDisciplineXP(25, 'Pre-Market Readiness Certified');
+        if (typeof showXPToast === 'function') {
+          showXPToast(25, '☀️ Pre-Market 60s Readiness Certified');
+        }
+      }
+
       if (typeof speakCoach === 'function') {
         speakCoach("Pre-market readiness certified. Your desk is unlocked. Trade with precision and honor your risk ceiling.");
       }
-      alert('✅ PRE-MARKET READINESS CERTIFIED!\n\nYou have verified physical composure, structural levels, and risk ceilings. Execution desk is unlocked.');
+      showSystemToast('✅ <strong>Pre-Market Certified:</strong> Physical composure &amp; risk ceilings confirmed. Desk unlocked (+25 XP awarded)!', 'success');
     }
 
     function resetReadinessChecklist() {
@@ -12421,6 +12574,18 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const pill = document.getElementById('preFlightStatusPill');
       const badge = document.getElementById('readinessStatusBadge');
       const btn = document.getElementById('preFlightBtn');
+      const headerPill = document.getElementById('headerPreFlightPill');
+      const headerText = document.getElementById('headerPreFlightText');
+
+      if (headerPill && headerText) {
+        if (isCertified) {
+          headerPill.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-mono font-bold transition cursor-pointer shadow-sm";
+          headerText.textContent = "Pre-Flight: Ready";
+        } else {
+          headerPill.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold transition cursor-pointer";
+          headerText.textContent = "Pre-Flight (+25 XP)";
+        }
+      }
 
       if (isCertified) {
         if (pill) {
@@ -14704,6 +14869,510 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         addDisciplineXP(20, '15-Min Market Patience Milestone');
         showXPToast(20, '🧘 15-Min Patience Milestone: Capital Preserved');
       }
+    }
+
+    // =========================================================================
+    // ADVANCED UI/UX IMPROVEMENTS PACK:
+    // 1. 2-Trade Daily Lockbox HUD (Rule 3 Discipline Sentinel)
+    // 2. Mini Monthly Calendar P&L Heatmap Widget on Tab 1
+    // 3. Inline Quick-Tagging in Trades Ledger (Grades, Setups & Lessons)
+    // 4. Focus Soundscapes Desk (Procedural Brown Noise, Binaural Beats & Chimes)
+    // =========================================================================
+
+    // --- 1. 2-TRADE DAILY LOCKBOX HUD ENGINE ---
+    function renderDailyLockboxHUD() {
+      const container = document.getElementById('dailyLockboxHud');
+      if (!container) return;
+
+      const todayStr = typeof getISTDateString === 'function' ? getISTDateString() : new Date().toISOString().split('T')[0];
+      const todayTrades = tradesData.filter(t => t.date === todayStr);
+      const maxTrades = activePhase === 1 ? 1 : 2;
+      const tradeCount = todayTrades.length;
+      const isLocked = tradeCount >= maxTrades;
+      const isZen = typeof isZenModeActive !== 'undefined' && isZenModeActive;
+
+      const t1 = todayTrades[0] || null;
+      const t2 = todayTrades[1] || null;
+
+      container.className = isLocked
+        ? "glass-card rounded-2xl p-4 sm:p-5 border-2 border-rose-500/50 bg-gradient-to-r from-rose-950/60 via-slate-900 to-rose-950/60 shadow-2xl shadow-rose-950/50 transition-all duration-300"
+        : "glass-card rounded-2xl p-4 sm:p-5 border border-slate-800 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 shadow-xl transition-all duration-300";
+
+      let lockHeader = `
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3.5 border-b border-slate-800/80 gap-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg ${isLocked ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'} flex items-center justify-center font-bold text-sm">
+              ${isLocked ? '🔒' : '🛡️'}
+            </div>
+            <div>
+              <h3 class="text-xs sm:text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                <span>Daily Execution Lockbox</span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${isLocked ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30 animate-pulse' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'}">
+                  ${isLocked ? 'TERMINAL LOCKED' : `${tradeCount}/${maxTrades} Trades Used`}
+                </span>
+              </h3>
+              <p class="text-[10px] text-slate-400">Rule 3 strictly enforces a max 2 trades execution ceiling. Walking away compounds your edge.</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 font-mono text-xs">
+            <span class="text-slate-400 text-[10px]">Session Status:</span>
+            <span class="font-bold ${isLocked ? 'text-rose-400' : 'text-emerald-400'}">
+              ${isLocked ? 'Day Complete • Capital Protected' : 'Execution Window Active'}
+            </span>
+          </div>
+        </div>
+      `;
+
+      let slot1Html = '';
+      if (t1) {
+        const isWin = t1.outcome === 'Win';
+        const rVal = parseFloat(t1.r_multiple || 0);
+        const pnlVal = parseFloat(t1.net_pnl || 0);
+        slot1Html = `
+          <div onclick="openTradeModal('${t1.id}')" class="p-3.5 rounded-xl border border-slate-800 bg-slate-900/90 hover:border-slate-700 cursor-pointer transition flex items-center justify-between gap-3 shadow-inner">
+            <div class="flex items-center gap-3">
+              <span class="w-7 h-7 rounded-lg ${isWin ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'} flex items-center justify-center font-mono font-black text-xs">#1</span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-black text-white text-xs">${t1.symbol}</span>
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${t1.direction === 'Long' ? 'bg-emerald-950 text-emerald-400' : 'bg-rose-950 text-rose-400'}">${t1.direction}</span>
+                  <span class="text-[10px] text-slate-500 font-mono">${t1.time} IST</span>
+                </div>
+                <div class="text-[10px] text-slate-400 font-sans mt-0.5">${escapeHtml(t1.setup_name || 'Standard Setup')}</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="font-mono font-black text-xs ${isWin ? 'text-emerald-400' : 'text-rose-400'}">${isZen ? (rVal >= 0 ? '+' : '') + rVal.toFixed(2) + 'R' : (pnlVal >= 0 ? '+₹' : '-₹') + Math.abs(pnlVal).toFixed(2)}</span>
+              <span class="block text-[9px] font-mono text-slate-400">${t1.outcome} (${rVal >= 0 ? '+' : ''}${rVal.toFixed(2)}R)</span>
+            </div>
+          </div>
+        `;
+      } else {
+        slot1Html = `
+          <div class="p-3.5 rounded-xl border border-dashed border-emerald-500/40 bg-emerald-950/10 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <span class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-mono font-black text-xs">#1</span>
+              <div>
+                <div class="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>SLOT 1 READY</span>
+                </div>
+                <p class="text-[10px] text-slate-400">Waiting for 9EMA Pullback or ORB setup confluence</p>
+              </div>
+            </div>
+            <button onclick="openTradeSyncSlideOver()" class="px-2.5 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/40 text-emerald-200 border border-emerald-500/40 text-[10px] font-mono font-bold transition">
+              + Fill Slot 1
+            </button>
+          </div>
+        `;
+      }
+
+      let slot2Html = '';
+      if (maxTrades < 2) {
+        slot2Html = `
+          <div class="p-3.5 rounded-xl border border-slate-800 bg-slate-950/40 flex items-center justify-between gap-3 opacity-60">
+            <div class="flex items-center gap-3">
+              <span class="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 flex items-center justify-center font-mono font-bold text-xs">#2</span>
+              <div>
+                <div class="text-xs font-bold text-slate-400">SLOT 2 LOCKED IN PHASE 1</div>
+                <p class="text-[10px] text-slate-500">Days 1–3 enforce a strict 1-trade ceiling for dopamine regulation</p>
+              </div>
+            </div>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-500">Phase 1 Cap</span>
+          </div>
+        `;
+      } else if (t2) {
+        const isWin = t2.outcome === 'Win';
+        const rVal = parseFloat(t2.r_multiple || 0);
+        const pnlVal = parseFloat(t2.net_pnl || 0);
+        slot2Html = `
+          <div onclick="openTradeModal('${t2.id}')" class="p-3.5 rounded-xl border border-slate-800 bg-slate-900/90 hover:border-slate-700 cursor-pointer transition flex items-center justify-between gap-3 shadow-inner">
+            <div class="flex items-center gap-3">
+              <span class="w-7 h-7 rounded-lg ${isWin ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'} flex items-center justify-center font-mono font-black text-xs">#2</span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-black text-white text-xs">${t2.symbol}</span>
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${t2.direction === 'Long' ? 'bg-emerald-950 text-emerald-400' : 'bg-rose-950 text-rose-400'}">${t2.direction}</span>
+                  <span class="text-[10px] text-slate-500 font-mono">${t2.time} IST</span>
+                </div>
+                <div class="text-[10px] text-slate-400 font-sans mt-0.5">${escapeHtml(t2.setup_name || 'Standard Setup')}</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="font-mono font-black text-xs ${isWin ? 'text-emerald-400' : 'text-rose-400'}">${isZen ? (rVal >= 0 ? '+' : '') + rVal.toFixed(2) + 'R' : (pnlVal >= 0 ? '+₹' : '-₹') + Math.abs(pnlVal).toFixed(2)}</span>
+              <span class="block text-[9px] font-mono text-slate-400">${t2.outcome} (${rVal >= 0 ? '+' : ''}${rVal.toFixed(2)}R)</span>
+            </div>
+          </div>
+        `;
+      } else if (t1) {
+        slot2Html = `
+          <div class="p-3.5 rounded-xl border border-dashed border-amber-500/40 bg-amber-950/10 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <span class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center font-mono font-black text-xs">#2</span>
+              <div>
+                <div class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                  <span>SLOT 2 READY (FINAL EXECUTION)</span>
+                </div>
+                <p class="text-[10px] text-slate-400">Strictly 1 trade remaining for today. Only take an A+ setup.</p>
+              </div>
+            </div>
+            <button onclick="openTradeSyncSlideOver()" class="px-2.5 py-1 rounded-lg bg-amber-600/30 hover:bg-amber-600/40 text-amber-200 border border-amber-500/40 text-[10px] font-mono font-bold transition">
+              + Fill Slot 2
+            </button>
+          </div>
+        `;
+      } else {
+        slot2Html = `
+          <div class="p-3.5 rounded-xl border border-slate-800 bg-slate-950/40 flex items-center justify-between gap-3 opacity-60">
+            <div class="flex items-center gap-3">
+              <span class="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 flex items-center justify-center font-mono font-bold text-xs">#2</span>
+              <div>
+                <div class="text-xs font-bold text-slate-400">SLOT 2 RESERVED</div>
+                <p class="text-[10px] text-slate-500">Unlocks after Trade 1 is executed and reviewed</p>
+              </div>
+            </div>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-500">Reserved</span>
+          </div>
+        `;
+      }
+
+      container.innerHTML = `
+        ${lockHeader}
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+          ${slot1Html}
+          ${slot2Html}
+        </div>
+      `;
+    }
+
+    // --- 2. TAB 1 MINI MONTHLY CALENDAR P&L HEATMAP ---
+    function renderTab1MiniCalendar() {
+      const grid = document.getElementById('tab1MiniCalendarGrid');
+      if (!grid) return;
+
+      const trades = typeof tradesData !== 'undefined' ? tradesData : [];
+      const tradesByDate = {};
+      trades.forEach(t => {
+        if (!t.date) return;
+        const dStr = t.date.split('T')[0];
+        if (!tradesByDate[dStr]) tradesByDate[dStr] = [];
+        tradesByDate[dStr].push(t);
+      });
+
+      const sortedDates = Object.keys(tradesByDate).sort();
+      let greenDays = 0;
+      let redDays = 0;
+      let totalPnl = 0;
+      let totalR = 0;
+      const isZen = typeof isZenModeActive !== 'undefined' && isZenModeActive;
+
+      let tilesHtml = '';
+      for (let day = 1; day <= 30; day++) {
+        const dateStr = sortedDates[day - 1] || null;
+        const dayTrades = dateStr ? tradesByDate[dateStr] : [];
+        const hasTrades = dayTrades.length > 0;
+
+        let dayPnl = 0;
+        let dayR = 0;
+        if (hasTrades) {
+          dayTrades.forEach(t => {
+            dayPnl += parseFloat(t.net_pnl || 0);
+            dayR += parseFloat(t.r_multiple || 0);
+          });
+          totalPnl += dayPnl;
+          totalR += dayR;
+          if (dayPnl > 0) greenDays++;
+          else if (dayPnl < 0) redDays++;
+        }
+
+        let bgClass = 'bg-slate-900/40 border-slate-800/80 text-slate-500';
+        let pnlText = '--';
+        if (hasTrades) {
+          if (dayPnl > 0) {
+            bgClass = 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300 shadow-sm shadow-emerald-950/50 hover:bg-emerald-900/50';
+            pnlText = isZen ? `+${dayR.toFixed(1)}R` : `+₹${Math.round(dayPnl / 1000)}k`;
+          } else {
+            bgClass = 'bg-rose-950/40 border-rose-500/40 text-rose-300 shadow-sm shadow-rose-950/50 hover:bg-rose-900/50';
+            pnlText = isZen ? `${dayR.toFixed(1)}R` : `-₹${Math.abs(Math.round(dayPnl / 1000))}k`;
+          }
+        }
+
+        tilesHtml += `
+          <div onclick="openCalendarDayModal(${day})" class="p-2 rounded-xl border ${bgClass} cursor-pointer transition text-center flex flex-col justify-between min-h-[58px]" title="${dateStr || `Day ${day}`}: ${hasTrades ? `${dayTrades.length} Trades (${dayPnl >= 0 ? '+' : ''}₹${dayPnl.toFixed(2)})` : 'No Trades'}">
+            <span class="text-[9px] font-mono font-bold block ${hasTrades ? (dayPnl > 0 ? 'text-emerald-400' : 'text-rose-400') : 'text-slate-600'}">D-${day}</span>
+            <span class="text-[10px] font-mono font-black block truncate mt-0.5">${pnlText}</span>
+          </div>
+        `;
+      }
+
+      grid.innerHTML = tilesHtml;
+
+      const sumBadge = document.getElementById('dashCalendarSummaryBadge');
+      if (sumBadge) {
+        sumBadge.textContent = `${greenDays} Green • ${redDays} Red Days`;
+      }
+      const pnlBadge = document.getElementById('dashCalendarTotalPnLBadge');
+      if (pnlBadge) {
+        pnlBadge.textContent = isZen ? `${totalR >= 0 ? '+' : ''}${totalR.toFixed(2)} R` : `${totalPnl >= 0 ? '+₹' : '-₹'}${Math.abs(Math.round(totalPnl)).toLocaleString('en-IN')}`;
+        pnlBadge.className = totalPnl >= 0
+          ? 'font-bold font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20'
+          : 'font-bold font-mono text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20';
+      }
+    }
+
+    // --- 3. INLINE QUICK-TAGGING IN TRADES LEDGER ---
+    function quickCycleTradeGrade(tradeId, event) {
+      if (event) event.stopPropagation();
+      const trade = tradesData.find(t => t.id === tradeId);
+      if (!trade) return;
+
+      const grades = ['A+', 'A', 'B', 'C'];
+      const current = trade.execution_grade || (typeof computeExecutionGrade === 'function' ? computeExecutionGrade(trade).grade : 'A');
+      const idx = grades.indexOf(current);
+      const nextGrade = grades[(idx + 1) % grades.length];
+
+      trade.execution_grade = nextGrade;
+      saveTradesLocally();
+      renderTradesTable();
+      syncTradesWithBackend();
+
+      showSystemToast(`⭐ <strong>${trade.symbol} Grade Updated:</strong> Execution Grade set to ${nextGrade}.`, 'success');
+      playFeedbackSound('click');
+    }
+
+    function quickCycleTradeSetup(tradeId, event) {
+      if (event) event.stopPropagation();
+      const trade = tradesData.find(t => t.id === tradeId);
+      if (!trade) return;
+
+      const setups = [
+        '1m Pullback to 9EMA',
+        'Opening Range Breakout (ORB)',
+        '1m VWAP Bounce',
+        '1m Breakout & Re-test',
+        'Support / Resistance Bounce',
+        'Counter-trend Reversal'
+      ];
+      const current = trade.setup_name || '1m Pullback to 9EMA';
+      const idx = setups.indexOf(current);
+      const nextSetup = setups[(idx + 1) % setups.length];
+
+      trade.setup_name = nextSetup;
+      saveTradesLocally();
+      renderTradesTable();
+      syncTradesWithBackend();
+
+      showSystemToast(`🎯 <strong>${trade.symbol} Setup Switched:</strong> Tagged as <em>${nextSetup}</em>.`, 'info');
+      playFeedbackSound('click');
+    }
+
+    function quickEditTradeLesson(tradeId, event) {
+      if (event) event.stopPropagation();
+      const trade = tradesData.find(t => t.id === tradeId);
+      if (!trade) return;
+
+      const existing = trade.lesson || '';
+      const updated = prompt(`Edit Lesson / Mental Note for ${trade.symbol} (${trade.id}):`, existing);
+      if (updated !== null) {
+        trade.lesson = updated.trim();
+        saveTradesLocally();
+        renderTradesTable();
+        syncTradesWithBackend();
+        showSystemToast(`📝 <strong>Lesson Saved:</strong> Note updated for ${trade.symbol}.`, 'success');
+        playFeedbackSound('click');
+      }
+    }
+
+    // --- 4. FOCUS SOUNDSCAPES DESK (WEB AUDIO ENGINE) ---
+    let soundscapeCtx = null;
+    let soundscapeMasterGain = null;
+    let soundscapeSourceNode = null;
+    let soundscapeActiveType = 'brown';
+    let isSoundscapePlaying = false;
+    let soundscapeBellTimer = null;
+
+    function toggleSoundscapesModal(show = true) {
+      const modal = document.getElementById('soundscapesModal');
+      if (!modal) return;
+      if (show) modal.classList.remove('hidden');
+      else modal.classList.add('hidden');
+    }
+
+    function selectSoundscape(type) {
+      soundscapeActiveType = type;
+      ['brown', 'binaural', 'bell'].forEach(t => {
+        const card = document.getElementById('soundCard_' + t);
+        const badge = card ? card.querySelector('.sound-status-badge') : null;
+        if (card && badge) {
+          if (t === type) {
+            card.className = "sound-card p-3 rounded-xl border border-purple-500/60 bg-purple-950/30 cursor-pointer transition flex items-center justify-between ring-1 ring-purple-500/40";
+            badge.textContent = isSoundscapePlaying ? "Active" : "Selected";
+            badge.className = "sound-status-badge text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold";
+          } else {
+            card.className = "sound-card p-3 rounded-xl border border-slate-800 hover:border-purple-500/40 bg-slate-950/70 hover:bg-purple-950/20 cursor-pointer transition flex items-center justify-between";
+            badge.textContent = "Ready";
+            badge.className = "sound-status-badge text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400";
+          }
+        }
+      });
+
+      if (isSoundscapePlaying) {
+        stopSoundscape();
+        startSoundscape();
+      }
+    }
+
+    function toggleActiveSoundscape() {
+      if (isSoundscapePlaying) {
+        stopSoundscape();
+      } else {
+        startSoundscape();
+      }
+    }
+
+    function startSoundscape() {
+      try {
+        if (!soundscapeCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          soundscapeCtx = new AudioContextClass();
+        }
+        if (soundscapeCtx.state === 'suspended') {
+          soundscapeCtx.resume();
+        }
+
+        if (!soundscapeMasterGain) {
+          soundscapeMasterGain = soundscapeCtx.createGain();
+          const slider = document.getElementById('soundscapeVolumeSlider');
+          const vol = slider ? parseInt(slider.value, 10) / 100 : 0.4;
+          soundscapeMasterGain.gain.setValueAtTime(vol * 0.35, soundscapeCtx.currentTime);
+          soundscapeMasterGain.connect(soundscapeCtx.destination);
+        }
+
+        if (soundscapeActiveType === 'brown') {
+          const bufferSize = soundscapeCtx.sampleRate * 5;
+          const buffer = soundscapeCtx.createBuffer(1, bufferSize, soundscapeCtx.sampleRate);
+          const data = buffer.getChannelData(0);
+          let lastOut = 0.0;
+          for (let i = 0; i < bufferSize; i++) {
+            const white = Math.random() * 2 - 1;
+            data[i] = (lastOut + (0.02 * white)) / 1.02;
+            lastOut = data[i];
+            data[i] *= 3.5;
+          }
+          const noise = soundscapeCtx.createBufferSource();
+          noise.buffer = buffer;
+          noise.loop = true;
+          noise.connect(soundscapeMasterGain);
+          noise.start();
+          soundscapeSourceNode = noise;
+        } else if (soundscapeActiveType === 'binaural') {
+          const oscL = soundscapeCtx.createOscillator();
+          const oscR = soundscapeCtx.createOscillator();
+          const panL = soundscapeCtx.createStereoPanner ? soundscapeCtx.createStereoPanner() : null;
+          const panR = soundscapeCtx.createStereoPanner ? soundscapeCtx.createStereoPanner() : null;
+
+          oscL.type = 'sine';
+          oscL.frequency.setValueAtTime(200, soundscapeCtx.currentTime);
+          oscR.type = 'sine';
+          oscR.frequency.setValueAtTime(210, soundscapeCtx.currentTime);
+
+          if (panL && panR) {
+            panL.pan.setValueAtTime(-1, soundscapeCtx.currentTime);
+            panR.pan.setValueAtTime(1, soundscapeCtx.currentTime);
+            oscL.connect(panL); panL.connect(soundscapeMasterGain);
+            oscR.connect(panR); panR.connect(soundscapeMasterGain);
+          } else {
+            oscL.connect(soundscapeMasterGain);
+            oscR.connect(soundscapeMasterGain);
+          }
+          oscL.start();
+          oscR.start();
+          soundscapeSourceNode = {
+            stop: () => {
+              try { oscL.stop(); oscR.stop(); } catch(e){}
+            }
+          };
+        } else if (soundscapeActiveType === 'bell') {
+          function playBellChime() {
+            if (!isSoundscapePlaying || !soundscapeCtx) return;
+            const now = soundscapeCtx.currentTime;
+            const osc = soundscapeCtx.createOscillator();
+            const gain = soundscapeCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(432, now);
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.exponentialRampToValueAtTime(0.25, now + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 7.5);
+            osc.connect(gain);
+            gain.connect(soundscapeMasterGain);
+            osc.start(now);
+            osc.stop(now + 7.5);
+          }
+          playBellChime();
+          soundscapeBellTimer = setInterval(playBellChime, 45000);
+          soundscapeSourceNode = {
+            stop: () => {
+              if (soundscapeBellTimer) clearInterval(soundscapeBellTimer);
+            }
+          };
+        }
+
+        isSoundscapePlaying = true;
+        updateSoundscapeUI();
+        showSystemToast('🎧 <strong>Focus Audio Active:</strong> ' + (soundscapeActiveType === 'brown' ? 'Oceanic Brown Noise' : (soundscapeActiveType === 'binaural' ? '10Hz Alpha Waves' : '432Hz Tibetan Chimes')) + ' playing.', 'info');
+      } catch (err) {
+        console.warn("Soundscape start error:", err);
+      }
+    }
+
+    function stopSoundscape() {
+      if (soundscapeSourceNode) {
+        try { soundscapeSourceNode.stop(); } catch (e) {}
+        soundscapeSourceNode = null;
+      }
+      if (soundscapeBellTimer) {
+        clearInterval(soundscapeBellTimer);
+        soundscapeBellTimer = null;
+      }
+      isSoundscapePlaying = false;
+      updateSoundscapeUI();
+    }
+
+    function setSoundscapeVolume(val) {
+      const label = document.getElementById('soundscapeVolLabel');
+      if (label) label.textContent = `${val}%`;
+      if (soundscapeMasterGain && soundscapeCtx) {
+        const gainVal = (val / 100) * 0.35;
+        soundscapeMasterGain.gain.setValueAtTime(gainVal, soundscapeCtx.currentTime);
+      }
+    }
+
+    function updateSoundscapeUI() {
+      const btnIcon = document.getElementById('soundscapeBtnIcon');
+      const btnText = document.getElementById('soundscapeBtnActionText');
+      const waveIcon = document.getElementById('soundscapesWaveIcon');
+      const btnPill = document.getElementById('soundscapesToggleBtn');
+
+      if (isSoundscapePlaying) {
+        if (btnIcon) btnIcon.textContent = "⏸️";
+        if (btnText) btnText.textContent = "Pause Ambient Audio";
+        if (waveIcon) waveIcon.classList.remove('hidden');
+        if (btnPill) btnPill.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/50 text-xs font-mono font-bold transition cursor-pointer ring-1 ring-purple-500/30";
+      } else {
+        if (btnIcon) btnIcon.textContent = "▶️";
+        if (btnText) btnText.textContent = "Start Ambient Audio";
+        if (waveIcon) waveIcon.classList.add('hidden');
+        if (btnPill) btnPill.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-purple-300 hover:text-white border border-purple-500/30 text-xs font-mono font-bold transition cursor-pointer";
+      }
+
+      ['brown', 'binaural', 'bell'].forEach(t => {
+        const card = document.getElementById('soundCard_' + t);
+        const badge = card ? card.querySelector('.sound-status-badge') : null;
+        if (badge && t === soundscapeActiveType) {
+          badge.textContent = isSoundscapePlaying ? "Active" : "Selected";
+        }
+      });
     }
 
     function showSystemToast(message, type = 'info') {
