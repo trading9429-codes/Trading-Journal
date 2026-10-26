@@ -850,7 +850,7 @@
 
   <!-- Live Trading Window Closed Alert Banner (When past 10:30 AM IST) -->
   <div id="windowClosedBanner" class="hidden bg-gradient-to-r from-indigo-950/90 via-slate-900 to-indigo-950/90 border-b border-indigo-500/40 px-4 py-2.5 text-center text-xs font-semibold text-indigo-200">
-    <div class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+    <div class="w-full max-w-[1360px] mx-auto px-4 sm:px-6 flex items-center justify-between gap-4">
       <div class="flex items-center gap-2">
         <span class="text-base">🛑</span>
         <span><strong>09:15–10:30 AM IST TRADING WINDOW CLOSED:</strong> Intraday momentum edge closes at 10:30 AM. Preserving capital. Real-time entries locked.</span>
@@ -864,7 +864,7 @@
 
   <!-- Cooldown Active Alert Banner -->
   <div id="cooldownBanner" class="hidden bg-gradient-to-r from-amber-950/80 via-amber-900/60 to-amber-950/80 border-b border-amber-500/40 px-4 py-2.5 text-center text-xs font-semibold text-amber-200">
-    <div class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+    <div class="w-full max-w-[1360px] mx-auto px-4 sm:px-6 flex items-center justify-between gap-4">
       <div class="flex items-center gap-2">
         <span class="text-base">⚠️</span>
         <span><strong>MANDATORY 30-MIN LOSS COOLDOWN ACTIVE:</strong> Loss registered. Step away from your screens immediately. Next trade entry is locked for <span id="cooldownCountdownSpan" class="font-mono font-bold text-amber-300 text-sm">30:00</span>.</span>
@@ -875,7 +875,7 @@
 
   <!-- Daily Circuit Breaker Banner -->
   <div id="circuitBreakerBanner" class="hidden bg-gradient-to-r from-red-950/90 via-rose-900/80 to-red-950/90 border-b border-red-500/50 px-4 py-2.5 text-center text-xs font-semibold text-rose-200">
-    <div class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+    <div class="w-full max-w-[1360px] mx-auto px-4 sm:px-6 flex items-center justify-between gap-4">
       <div class="flex items-center gap-2">
         <span class="text-base">🚨</span>
         <span><strong>BROKER KILL SWITCH ENGAGED:</strong> Daily limit reached (<span id="circuitReasonText">2 Trades Max / 2 Losses Max</span>). Rule 3 strictly requires terminal shutdown. Walk away!</span>
@@ -885,7 +885,7 @@
   </div>
 
   <!-- Main Container (Fluid, 1600px Max-Width for Clean Professional Layout) -->
-  <main class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-5 flex-1">
+  <main class="w-full max-w-[1360px] mx-auto px-4 sm:px-6 py-6 flex-1 space-y-6">
     <!-- Hidden tab dropdown fallback to guarantee legacy JS compatibility -->
     <select id="tabSelectorDropdown" class="hidden">
       <option value="1">1</option>
@@ -953,14 +953,14 @@
       <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         
         <!-- Main: Cumulative Net Equity Curve (2 cols on xl) -->
-        <div id="dashboardPrimaryGraphSection" class="xl:col-span-2 glass-card rounded-2xl p-6 border border-slate-800 shadow-2xl flex flex-col justify-between">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div id="dashboardPrimaryGraphSection" class="xl:col-span-2 glass-card rounded-2xl p-5 sm:p-6 border border-slate-800/90 shadow-2xl flex flex-col justify-between">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800/80">
             <div>
-              <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+              <h3 class="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
                 <span>📈</span>
                 <span>Cumulative Net Equity Curve (₹)</span>
               </h3>
-              <p class="text-xs text-slate-400">Primary account capital progression strictly factoring turnover &amp; statutory charges</p>
+              <p class="text-[11px] text-slate-400">Primary capital progression strictly net of broker fees &amp; statutory taxes</p>
             </div>
             <div class="flex items-center gap-2">
               <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20" id="dashEquityRoiBadge">
@@ -968,77 +968,88 @@
               </span>
             </div>
           </div>
-          <div class="mt-4 relative" style="height: 300px;">
+          <div class="mt-4 relative" style="height: 330px;">
             <canvas id="dashboardEquityChart"></canvas>
           </div>
         </div>
 
         <!-- Side: Win/Loss & Discipline Execution Health Panel (1 col on xl) -->
-        <div id="dashboardHealthDonutsSection" class="glass-card rounded-2xl p-6 border border-slate-800 shadow-2xl flex flex-col justify-between">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-            <div>
-              <h3 class="text-sm font-extrabold text-white flex items-center gap-2">
-                <span>🎯</span>
-                <span>Execution Health</span>
-              </h3>
-              <p class="text-[11px] text-slate-400">Outcome ratio &amp; rule adherence integrity</p>
+        <div id="dashboardHealthDonutsSection" class="glass-card rounded-2xl p-5 border border-slate-800/90 shadow-2xl flex flex-col justify-between">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800/80">
+            <div class="flex items-center gap-2">
+              <span class="text-base">🎯</span>
+              <div>
+                <h3 class="text-xs font-bold text-white uppercase tracking-wider">Execution Edge &amp; Health</h3>
+                <p class="text-[10px] text-slate-400">Outcome ratio &amp; rule adherence metrics</p>
+              </div>
             </div>
-            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+            <span class="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
               Live Edge
             </span>
           </div>
 
-          <!-- Two Donut Charts Side-by-Side in Card -->
-          <div class="grid grid-cols-2 gap-4 mt-4">
-            
-            <!-- 1. Win / Loss Outcome Donut -->
-            <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 flex flex-col items-center justify-between">
-              <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1 flex items-center gap-1">
-                <span>⚡</span>
-                <span>Win / Loss</span>
-              </div>
-              <div class="relative w-28 h-28 my-1 flex items-center justify-center">
+          <div class="space-y-3.5 my-auto py-2">
+            <!-- 1. Win / Loss Outcome Row -->
+            <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 flex items-center justify-between gap-3 shadow-inner">
+              <div class="relative w-24 h-24 flex-shrink-0 flex items-center justify-center">
                 <canvas id="dashWinLossChart"></canvas>
                 <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <span id="dashWinRateLabel" class="text-xs font-black font-mono text-emerald-400">0%</span>
-                  <span class="text-[8px] text-slate-500 uppercase tracking-tighter">Win Rate</span>
+                  <span class="text-[8px] text-slate-400 uppercase tracking-wider font-semibold">Win Rate</span>
                 </div>
               </div>
-              <div class="flex items-center justify-center gap-1.5 text-[10px] font-mono mt-1 flex-wrap">
-                <span class="text-emerald-400 font-bold" id="dashWinCountText">0W</span>
-                <span class="text-slate-600">&bull;</span>
-                <span class="text-rose-400 font-bold" id="dashLossCountText">0L</span>
-                <span class="text-slate-600">&bull;</span>
-                <span class="text-slate-400" id="dashBeCountText">0 BE</span>
+              <div class="flex-1 space-y-1.5 min-w-0">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-white text-[11px]">Win / Loss Ratio</span>
+                  <span id="dashWinLossBadge" class="text-[9px] font-mono font-bold text-emerald-400">Session</span>
+                </div>
+                <!-- Mini Progress Bar -->
+                <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden flex">
+                  <div id="dashWinBar" class="bg-emerald-500 h-1.5 transition-all duration-500" style="width: 50%"></div>
+                  <div id="dashLossBar" class="bg-rose-500 h-1.5 transition-all duration-500" style="width: 50%"></div>
+                </div>
+                <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-0.5">
+                  <span class="text-emerald-400 font-bold" id="dashWinCountText">0 Wins</span>
+                  <span class="text-slate-600">&bull;</span>
+                  <span class="text-rose-400 font-bold" id="dashLossCountText">0 Losses</span>
+                  <span class="text-slate-600">&bull;</span>
+                  <span class="text-slate-400" id="dashBeCountText">0 BE</span>
+                </div>
               </div>
             </div>
 
-            <!-- 2. Rule Discipline Donut -->
-            <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 flex flex-col items-center justify-between">
-              <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1 flex items-center gap-1">
-                <span>🛡️</span>
-                <span>Discipline</span>
-              </div>
-              <div class="relative w-28 h-28 my-1 flex items-center justify-center">
+            <!-- 2. Rule Discipline Adherence Row -->
+            <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 flex items-center justify-between gap-3 shadow-inner">
+              <div class="relative w-24 h-24 flex-shrink-0 flex items-center justify-center">
                 <canvas id="dashDisciplineChart"></canvas>
                 <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <span id="dashDisciplineLabel" class="text-xs font-black font-mono text-blue-400">100%</span>
-                  <span class="text-[8px] text-slate-500 uppercase tracking-tighter">Adherent</span>
+                  <span class="text-[8px] text-slate-400 uppercase tracking-wider font-semibold">Rules</span>
                 </div>
               </div>
-              <div class="flex items-center justify-center gap-1.5 text-[10px] font-mono mt-1 flex-wrap">
-                <span class="text-blue-400 font-bold" id="dashCleanTradesText">0 Clean</span>
-                <span class="text-slate-600">&bull;</span>
-                <span class="text-rose-400 font-bold" id="dashViolationsText">0 Breach</span>
+              <div class="flex-1 space-y-1.5 min-w-0">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-white text-[11px]">Rule Adherence</span>
+                  <span class="text-[9px] font-mono font-bold text-blue-400">Phase 2</span>
+                </div>
+                <!-- Mini Progress Bar -->
+                <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden flex">
+                  <div id="dashDiscBar" class="bg-blue-500 h-1.5 transition-all duration-500" style="width: 100%"></div>
+                  <div id="dashBreachBar" class="bg-rose-500 h-1.5 transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-0.5">
+                  <span class="text-blue-400 font-bold" id="dashCleanTradesText">0 Clean</span>
+                  <span class="text-slate-600">&bull;</span>
+                  <span class="text-rose-400 font-bold" id="dashViolationsText">0 Breach</span>
+                </div>
               </div>
             </div>
-
           </div>
 
           <!-- Bottom Micro-Insight Footer -->
-          <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono">
-            <span class="text-slate-400">Rule 3 Limit:</span>
-            <span class="text-emerald-400 font-bold">Max 2 Trades / Day</span>
+          <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-mono text-slate-400">
+            <span>Daily Limit: <strong class="text-white">Max 2 Trades</strong></span>
+            <span class="text-emerald-400 font-bold">0 Demerit Strikes</span>
           </div>
         </div>
 
@@ -1067,106 +1078,104 @@
         </div>
       </div>
 
-      <!-- 30-DAY PHASE GRADUATION & DISCIPLINE TRACKER WIDGET -->
-      <section id="phaseTrackerSection" class="glass-card rounded-2xl p-5 shadow-2xl border border-blue-500/20 bg-gradient-to-r from-slate-900/95 via-slate-900/80 to-blue-950/40">
-        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400 font-black text-lg shadow-lg">
-              🎯
-            </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <h2 class="text-sm font-bold text-white uppercase tracking-wider">30-Day Execution Reset Graduation</h2>
-                <span id="activePhasePill" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                  Phase 2: Days 4–10 (Consolidation)
-                </span>
-                <span id="phaseGraduationStatusBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                  ✅ Qualified for Promotion
-                </span>
+      <!-- DUAL OPERATIONAL SYSTEMS ROW: GRADUATION TRACKER + 1-MIN RADAR (2-COL BALANCED GRID) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- 30-DAY PHASE GRADUATION & DISCIPLINE TRACKER WIDGET -->
+        <section id="phaseTrackerSection" class="glass-card rounded-2xl p-5 border border-blue-500/20 bg-gradient-to-br from-slate-900/95 via-slate-900/80 to-blue-950/30 shadow-xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800/80 gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400 font-black text-sm">
+                  🎯
+                </div>
+                <div>
+                  <h3 class="text-xs font-bold text-white uppercase tracking-wider">30-Day Execution Reset</h3>
+                  <p class="text-[10px] text-slate-400">Accountability &amp; sizing promotion</p>
+                </div>
               </div>
-              <p class="text-xs text-slate-400 mt-0.5">
-                Current Rules: <strong class="text-slate-200" id="phaseTradeCapText">Max 2 Trades/Day</strong> &bull; Risk: <strong class="text-slate-200" id="phaseRiskText">0.25% &ndash; 0.50%</strong> &bull; Window: <strong class="text-slate-200">09:15–10:30 AM</strong> &bull; Stop after 2 losses
-              </p>
+              <!-- Phase Navigation Selector Buttons -->
+              <div class="flex items-center gap-1 bg-slate-950/80 p-0.5 rounded-lg border border-slate-800 text-[11px] font-mono">
+                <button onclick="setPhase(1)" id="phaseBtn_1" class="phase-selector-btn px-2 py-0.5 rounded font-bold text-slate-400 hover:text-white transition">P1</button>
+                <button onclick="setPhase(2)" id="phaseBtn_2" class="phase-selector-btn px-2 py-0.5 rounded font-bold bg-blue-600 text-white transition shadow">P2</button>
+                <button onclick="setPhase(3)" id="phaseBtn_3" class="phase-selector-btn px-2 py-0.5 rounded font-bold text-slate-400 hover:text-white transition">P3</button>
+                <button onclick="setPhase(4)" id="phaseBtn_4" class="phase-selector-btn px-2 py-0.5 rounded font-bold text-slate-400 hover:text-white transition">P4</button>
+              </div>
+            </div>
+
+            <div class="mt-3.5 space-y-2.5">
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2">
+                  <span id="activePhasePill" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 font-mono">
+                    Phase 2: Days 4–10
+                  </span>
+                  <span id="phaseGraduationStatusBadge" class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                    Qualified
+                  </span>
+                </div>
+                <span class="font-bold text-blue-400 font-mono text-[11px]" id="phaseDayProgressText">Day 4 of 30 (13.3%)</span>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700/80">
+                <div id="phaseProgressBar" class="bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 h-2 rounded-full transition-all duration-500" style="width: 13.3%;"></div>
+              </div>
+
+              <div class="flex items-center justify-between text-[11px] pt-1 font-mono text-slate-400">
+                <span>Rules: <strong class="text-white" id="phaseTradeCapText">Max 2 Trades</strong> &bull; <strong class="text-white" id="phaseRiskText">0.25%–0.50%</strong></span>
+                <span id="phaseDisciplineScoreText" class="font-bold text-emerald-400">100% Adherence</span>
+              </div>
             </div>
           </div>
 
-          <!-- Phase Navigation Selector Buttons -->
-          <div class="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-xs">
-            <button onclick="setPhase(1)" id="phaseBtn_1" class="phase-selector-btn px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white transition">
-              Phase 1 (1–3)
-            </button>
-            <button onclick="setPhase(2)" id="phaseBtn_2" class="phase-selector-btn px-2.5 py-1 rounded-lg font-bold bg-blue-600 text-white transition shadow">
-              Phase 2 (4–10)
-            </button>
-            <button onclick="setPhase(3)" id="phaseBtn_3" class="phase-selector-btn px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white transition">
-              Phase 3 (11–20)
-            </button>
-            <button onclick="setPhase(4)" id="phaseBtn_4" class="phase-selector-btn px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white transition">
-              Phase 4 (21–30)
-            </button>
-          </div>
-        </div>
-
-        <!-- Progress Bar & Key Gate Conditions -->
-        <div class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-          <div class="md:col-span-2">
-            <div class="flex justify-between items-center text-xs mb-1.5">
-              <span class="text-slate-400 font-medium">30-Day Reset Progress</span>
-              <span class="font-bold text-blue-400 font-mono" id="phaseDayProgressText">Day 4 of 30 (13.3%)</span>
-            </div>
-            <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden border border-slate-700">
-              <div id="phaseProgressBar" class="bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 h-2.5 rounded-full transition-all duration-500" style="width: 13.3%;"></div>
-            </div>
-          </div>
-
-          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
-            <span class="text-slate-400">Phase Rule Adherence:</span>
-            <span id="phaseDisciplineScoreText" class="font-mono font-bold text-emerald-400">100% (Target &ge;90%)</span>
-          </div>
-
-          <div class="flex items-center gap-2 justify-end">
-            <button onclick="graduatePhase()" class="w-full py-2 px-3 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5">
+          <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+            <button onclick="graduatePhase()" class="flex-1 py-1.5 px-3 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5">
               <span>🚀</span>
               <span>Advance Phase</span>
             </button>
-            <button onclick="resetToPhase1()" class="py-2 px-2.5 rounded-xl bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-500/20 text-xs font-semibold transition" title="Reset to Phase 1 (Day 1) on rule breach">
-              <span>↺</span>
+            <button onclick="resetToPhase1()" class="py-1.5 px-2.5 rounded-lg bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 border border-rose-500/20 text-xs font-semibold transition" title="Reset to Phase 1 (Day 1) on rule breach">
+              <span>↺ Reset</span>
             </button>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- ========================================== -->
-      <!-- COMPACT 1-MINUTE RADAR LIVE TICKER (Direct shortcut to Tab 5) -->
-      <!-- ========================================== -->
-      <div id="radarCompactTickerBanner" onclick="switchTab(5)" class="cursor-pointer glass-card rounded-2xl p-4 border border-emerald-500/40 bg-gradient-to-r from-emerald-950/40 via-slate-900/90 to-teal-950/30 hover:border-emerald-400 transition shadow-xl group">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-black text-base group-hover:scale-110 transition">
-              📡
-            </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5">
-                  <span>1-Min Chartink Radar</span>
-                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                </span>
-                <span id="tickerAlertsCountBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  0 Alerts
-                </span>
+        <!-- COMPACT 1-MINUTE RADAR LIVE TICKER (Direct shortcut to Tab 5) -->
+        <div id="radarCompactTickerBanner" onclick="switchTab(5)" class="cursor-pointer glass-card rounded-2xl p-5 border border-emerald-500/30 bg-gradient-to-br from-emerald-950/30 via-slate-900/95 to-teal-950/20 hover:border-emerald-400 transition shadow-xl group flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800/80">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-black text-sm group-hover:scale-110 transition">
+                  📡
+                </div>
+                <div>
+                  <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                    <span>1-Min Chartink Radar</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                  </h3>
+                  <p class="text-[10px] text-slate-400">Live momentum scanner webhooks</p>
+                </div>
               </div>
-              <p id="tickerTopStocksText" class="text-[11px] text-slate-400 mt-0.5 truncate max-w-xl">
-                Awaiting inbound 1-minute webhooks on <code class="text-emerald-400 font-mono">/new-stocks</code>...
+              <span id="tickerAlertsCountBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                0 Alerts
+              </span>
+            </div>
+
+            <div class="mt-3.5 space-y-2">
+              <div class="text-[11px] text-slate-300 font-sans" id="tickerTopStocksText">
+                Awaiting inbound 1-minute webhooks on <code class="text-emerald-400 font-mono text-[10px] bg-slate-950 px-1 py-0.5 rounded">/new-stocks</code>...
+              </div>
+              <p class="text-[10px] text-slate-500">
+                Monitors 1-minute price surges, 9EMA pullbacks &amp; ORB confluences before 10:30 AM IST.
               </p>
             </div>
           </div>
-          <div class="flex items-center gap-2 self-end sm:self-auto">
-            <span class="text-[11px] font-bold text-emerald-300 group-hover:text-white flex items-center gap-1 transition">
-              <span>Open Dedicated Radar (Tab 5)</span>
-              <span>&rarr;</span>
-            </span>
+
+          <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-semibold text-emerald-400 group-hover:text-emerald-300">
+            <span>View Interactive Chartink Feed</span>
+            <span>Tab 5 &rarr;</span>
           </div>
         </div>
+
       </div>
 
       <!-- Quick Trade Entry Card -->
@@ -9528,22 +9537,36 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const cleanTrades = Math.max(0, totalTrades - violations);
       const discPct = totalTrades > 0 ? Math.round((cleanTrades / totalTrades) * 100) : 100;
 
-      // Update text indicators
+      // Update text indicators and progress bars
       const winPctEl = document.getElementById('dashWinRateLabel');
       if (winPctEl) winPctEl.textContent = `${winPct}%`;
       const winCountEl = document.getElementById('dashWinCountText');
-      if (winCountEl) winCountEl.textContent = `${wins}W`;
+      if (winCountEl) winCountEl.textContent = `${wins} Wins`;
       const lossCountEl = document.getElementById('dashLossCountText');
-      if (lossCountEl) lossCountEl.textContent = `${losses}L`;
+      if (lossCountEl) lossCountEl.textContent = `${losses} Losses`;
       const beCountEl = document.getElementById('dashBeCountText');
       if (beCountEl) beCountEl.textContent = `${be} BE`;
+
+      const winBar = document.getElementById('dashWinBar');
+      const lossBar = document.getElementById('dashLossBar');
+      if (winBar && lossBar) {
+        winBar.style.width = `${closed > 0 ? winPct : 50}%`;
+        lossBar.style.width = `${closed > 0 ? (100 - winPct) : 50}%`;
+      }
 
       const discPctEl = document.getElementById('dashDisciplineLabel');
       if (discPctEl) discPctEl.textContent = `${discPct}%`;
       const cleanCountEl = document.getElementById('dashCleanTradesText');
       if (cleanCountEl) cleanCountEl.textContent = `${cleanTrades} Clean`;
       const violCountEl = document.getElementById('dashViolationsText');
-      if (violCountEl) violCountEl.textContent = `${violations} Violations`;
+      if (violCountEl) violCountEl.textContent = `${violations} Breach`;
+
+      const discBar = document.getElementById('dashDiscBar');
+      const breachBar = document.getElementById('dashBreachBar');
+      if (discBar && breachBar) {
+        discBar.style.width = `${discPct}%`;
+        breachBar.style.width = `${100 - discPct}%`;
+      }
 
       // 1. Win/Loss Donut Chart
       if (chartDashWinLoss) chartDashWinLoss.destroy();
