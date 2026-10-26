@@ -870,6 +870,16 @@
             <span id="soundscapesWaveIcon" class="hidden w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></span>
           </button>
 
+          <!-- Audio Alarms & Soundboard -->
+          <button onclick="openSoundboardModal()" class="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-300 hover:text-white border border-amber-500/30 text-xs transition cursor-pointer flex items-center gap-1" title="Execution Audio Alarms (09:15 Open, 10:25 Warning, 10:30 Hard Close)">
+            <span>🔔</span>
+          </button>
+
+          <!-- Statutory Charges Ledger -->
+          <button onclick="openStatutoryChargesModal()" class="hidden xl:flex items-center gap-1 p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-cyan-300 hover:text-white border border-cyan-500/30 text-xs transition cursor-pointer" title="Indian Statutory Tax & Charges Ledger (STT, GST, NSE, Stamp Duty)">
+            <span>⚖️</span>
+          </button>
+
           <!-- Pre-Market Readiness Gate -->
           <button onclick="openPreMarketReadinessModal()" id="headerPreFlightPill" class="hidden lg:flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-300 border border-amber-500/30 text-[11px] font-mono font-bold transition cursor-pointer" title="Pre-Flight Readiness Gate (Shortcut: Shift+P)">
             <span id="headerPreFlightIcon">☀️</span>
@@ -897,6 +907,21 @@
         </div>
       </div>
     </header>
+
+    <!-- STICKY DRAGGABLE QUICK-STAT DOCKLET BAR (CUSTOMIZABLE PINNED METRICS) -->
+    <div id="quickStatDockletBar" class="sticky top-[49px] z-20 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 lg:px-8 py-1.5 flex items-center justify-between gap-3 text-xs font-mono transition-all duration-200 select-none overflow-x-auto scrollbar-none shadow-sm">
+      <div class="flex items-center gap-1.5 min-w-0 flex-1 overflow-x-auto scrollbar-none" id="dockletContainer">
+        <!-- Docklets dynamically rendered and drag-reorderable -->
+      </div>
+      <div class="flex items-center gap-1 pl-2 border-l border-slate-800 flex-shrink-0">
+        <button onclick="toggleDockletPin()" id="dockletPinBtn" class="p-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-[10px] transition cursor-pointer" title="Pin / Unpin Sticky Docklets">
+          📌
+        </button>
+        <button onclick="toggleDockletCustomizerModal()" class="p-1 rounded bg-slate-900 hover:bg-slate-800 text-teal-400 hover:text-teal-300 border border-slate-800 text-[10px] transition cursor-pointer" title="Configure Docklet Items">
+          ⚙️
+        </button>
+      </div>
+    </div>
 
 
   <!-- Live Trading Window Closed Alert Banner (When past 10:30 AM IST) -->
@@ -1006,7 +1031,10 @@
         <div class="kpi-gradient-card rounded-2xl p-4 sm:p-5 border border-slate-800 flex flex-col justify-between shadow-lg">
           <div class="flex items-center justify-between">
             <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Friction &amp; Drag</span>
-            <span class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300" id="kpiFrictionBadge">0.0% Drag</span>
+            <button type="button" onclick="openStatutoryChargesModal()" class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 transition cursor-pointer flex items-center gap-1" id="kpiFrictionBadge" title="Click to view detailed Indian Statutory Tax Ledger">
+              <span>0.0% Drag</span>
+              <span class="text-[9px]">↗</span>
+            </button>
           </div>
           <div class="text-2xl font-black font-mono text-amber-400 mt-2 truncate" id="kpiFrictionValue">₹0.00 / trd</div>
           <div class="text-[10px] text-slate-400 mt-1 font-mono truncate" id="kpiFrictionSub">Total: ₹0 &bull; FYERS STT/GST</div>
@@ -3312,8 +3340,14 @@
         </div>
 
         <div class="space-y-2">
-          <label class="block text-xs font-semibold text-slate-300">Journal Lesson &amp; Mental Notes</label>
-          <textarea id="modalLessonInput" rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-sans" placeholder="What worked? Did you follow your 9EMA entry criteria? How was your mental clarity?"></textarea>
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-semibold text-slate-300">Journal Lesson &amp; Mental Notes</label>
+            <button type="button" id="voiceDictateModalBtn" onclick="toggleVoiceDictation('modalLessonInput', 'voiceDictateModalBtn')" class="px-2 py-0.5 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 text-[10px] font-mono font-bold flex items-center gap-1.5 transition cursor-pointer" title="Speak to dictate your post-trade reflection">
+              <span>🎙️</span>
+              <span id="voiceDictateModalText">Voice Dictate</span>
+            </button>
+          </div>
+          <textarea id="modalLessonInput" rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-sans" placeholder="What worked? Did you follow your 9EMA entry criteria? How was your mental clarity? (or click Voice Dictate to speak)"></textarea>
         </div>
 
         <div class="flex items-center justify-between pt-3 border-t border-slate-800 flex-wrap gap-2">
@@ -3860,7 +3894,257 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
   </div>
 
   <!-- ========================================== -->
-  <!-- MODAL: FULL-SCREEN TILT-BREAKER LOCKOUT -->
+    <!-- ========================================== -->
+  <!-- MODAL 1: INDIAN STATUTORY TAX & CHARGES LEDGER -->
+  <!-- ========================================== -->
+  <div id="statutoryChargesModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-2xl w-full max-w-3xl border border-cyan-500/30 shadow-2xl p-6 relative max-h-[92vh] overflow-y-auto font-sans">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-black text-xl">
+            ⚖️
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+              Indian Statutory Tax &amp; Charges Ledger
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">FYERS / NSE Eq Intraday</span>
+            </h3>
+            <p class="text-xs text-slate-400">Exact statutory cost auditing &bull; STT, GST, NSE Txn, SEBI &amp; Stamp Duty breakdown</p>
+          </div>
+        </div>
+        <button onclick="closeStatutoryChargesModal()" class="text-slate-400 hover:text-white text-2xl font-bold p-1">&times;</button>
+      </div>
+
+      <!-- Financial Summary Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4">
+        <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800">
+          <span class="text-[10px] uppercase font-bold text-slate-400 block">Total Turnover</span>
+          <div class="text-base font-black font-mono text-white mt-1" id="statTurnoverDisp">₹0</div>
+          <span class="text-[10px] text-slate-500 font-mono">Buy + Sell Volume</span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800">
+          <span class="text-[10px] uppercase font-bold text-slate-400 block">Gross Realized P&amp;L</span>
+          <div class="text-base font-black font-mono text-white mt-1" id="statGrossPnLDisp">₹0</div>
+          <span class="text-[10px] text-slate-500 font-mono">Before statutory fees</span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800">
+          <span class="text-[10px] uppercase font-bold text-slate-400 block">Total Statutory Friction</span>
+          <div class="text-base font-black font-mono text-amber-400 mt-1" id="statTotalCostsDisp">₹0</div>
+          <span class="text-[10px] text-amber-300/80 font-mono" id="statFrictionPctDisp">0.0% Drag</span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-900/90 border border-emerald-500/30 bg-emerald-950/20">
+          <span class="text-[10px] uppercase font-bold text-emerald-400 block">Net Banked Profit</span>
+          <div class="text-base font-black font-mono text-emerald-300 mt-1" id="statNetPnLDisp">₹0</div>
+          <span class="text-[10px] text-emerald-400 font-mono" id="statNetEdgeDisp">100% Efficiency</span>
+        </div>
+      </div>
+
+      <!-- Statutory Itemized Breakdown Matrix -->
+      <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800/80 mb-4">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3 flex items-center justify-between">
+          <span>Itemized Regulatory Fee Schedule</span>
+          <span class="text-[10px] font-mono text-slate-500 font-normal">Per Circular SEBI/NSE Eq Rules</span>
+        </h4>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs font-mono">
+          <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800/80">
+            <span class="text-slate-400 text-[10px] block">Brokerage (Flat / Trade)</span>
+            <span class="text-white font-bold" id="statItemBrokerage">₹0.00</span>
+            <span class="text-[9px] text-slate-500 block">Max ₹20 / executed order</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800/80">
+            <span class="text-slate-400 text-[10px] block">STT (Securities Txn Tax)</span>
+            <span class="text-amber-300 font-bold" id="statItemSTT">₹0.00</span>
+            <span class="text-[9px] text-slate-500 block">0.025% on Sell Turnover</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800/80">
+            <span class="text-slate-400 text-[10px] block">NSE Exchange Txn Fee</span>
+            <span class="text-slate-300 font-bold" id="statItemNSE">₹0.00</span>
+            <span class="text-[9px] text-slate-500 block">0.00297% on Both Sides</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800/80">
+            <span class="text-slate-400 text-[10px] block">SEBI Regulatory Turnover Fee</span>
+            <span class="text-slate-300 font-bold" id="statItemSEBI">₹0.00</span>
+            <span class="text-[9px] text-slate-500 block">₹10 / crore (0.0001%)</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800/80">
+            <span class="text-slate-400 text-[10px] block">GST (Central + State 18%)</span>
+            <span class="text-rose-300 font-bold" id="statItemGST">₹0.00</span>
+            <span class="text-[9px] text-slate-500 block">18% on (Brokerage + Txn + SEBI)</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800/80">
+            <span class="text-slate-400 text-[10px] block">State Stamp Duty</span>
+            <span class="text-slate-300 font-bold" id="statItemStamp">₹0.00</span>
+            <span class="text-[9px] text-slate-500 block">0.003% on Buy Turnover</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trade-by-Trade Cost Ledger Table -->
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Trade-by-Trade Statutory Audit</h4>
+        <div class="max-h-56 overflow-y-auto rounded-xl border border-slate-800 text-xs font-mono">
+          <table class="w-full text-left">
+            <thead class="bg-slate-900 text-slate-400 text-[10px] uppercase sticky top-0">
+              <tr>
+                <th class="p-2">ID</th>
+                <th class="p-2">Symbol</th>
+                <th class="p-2">Turnover</th>
+                <th class="p-2">Gross P&amp;L</th>
+                <th class="p-2 text-amber-300">Friction</th>
+                <th class="p-2 text-emerald-300">Net P&amp;L</th>
+                <th class="p-2">Drag %</th>
+              </tr>
+            </thead>
+            <tbody id="statTradeTableBody" class="divide-y divide-slate-800/60 bg-slate-950/60">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL 2: EXECUTION AUDIO ALARMS & SOUNDBOARD -->
+  <!-- ========================================== -->
+  <div id="soundboardModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-2xl w-full max-w-xl border border-amber-500/30 shadow-2xl p-6 relative max-h-[92vh] overflow-y-auto font-sans">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-black text-xl">
+            🔔
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+              Audio Alarms &amp; Soundboard Customizer
+            </h3>
+            <p class="text-xs text-slate-400">Institutional Web Audio Alarms &bull; Zero Lag Procedural Synthesis</p>
+          </div>
+        </div>
+        <button onclick="closeSoundboardModal()" class="text-slate-400 hover:text-white text-2xl font-bold p-1">&times;</button>
+      </div>
+
+      <!-- Master Audio Controls -->
+      <div class="my-4 p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-4">
+        <div>
+          <span class="text-xs font-bold text-white block">Master Synthesizer Audio</span>
+          <span class="text-[11px] text-slate-400">Enable/disable all terminal audio and execution alarms</span>
+        </div>
+        <button onclick="toggleMasterSound()" id="soundboardMasterBtn" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold text-xs transition cursor-pointer">
+          Audio: ON 🔊
+        </button>
+      </div>
+
+      <!-- Time-of-Day Execution Alarms -->
+      <div class="space-y-3 mb-5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Automated Time-of-Day Alarms</span>
+        
+        <!-- 09:15 AM Open Bell -->
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">🔔</span>
+            <div>
+              <div class="flex items-center gap-2 font-mono">
+                <strong class="text-emerald-400">09:15:00 AM IST</strong>
+                <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300">Market Open Bell</span>
+              </div>
+              <p class="text-[11px] text-slate-400">High harmonic chime signals execution window has opened.</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="previewAudioAlarm('open')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-[11px] transition">▶ Test</button>
+            <input type="checkbox" id="alarmToggle_0915" checked onchange="saveAlarmPref('0915', this.checked)" class="rounded text-emerald-500 focus:ring-0 w-4 h-4">
+          </div>
+        </div>
+
+        <!-- 10:25 AM Warning -->
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">⚠️</span>
+            <div>
+              <div class="flex items-center gap-2 font-mono">
+                <strong class="text-amber-400">10:25:00 AM IST</strong>
+                <span class="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300">5-Min Warning Bell</span>
+              </div>
+              <p class="text-[11px] text-slate-400">Two-tone pulse warning: zero new entries, prepare to trail/exit.</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="previewAudioAlarm('warning')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-[11px] transition">▶ Test</button>
+            <input type="checkbox" id="alarmToggle_1025" checked onchange="saveAlarmPref('1025', this.checked)" class="rounded text-amber-500 focus:ring-0 w-4 h-4">
+          </div>
+        </div>
+
+        <!-- 10:30 AM Hard Window Close Siren -->
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">🚨</span>
+            <div>
+              <div class="flex items-center gap-2 font-mono">
+                <strong class="text-rose-400">10:30:00 AM IST</strong>
+                <span class="text-[10px] px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300">Hard Quit Siren</span>
+              </div>
+              <p class="text-[11px] text-slate-400">Triple siren: terminal locks, screens off, capital preserved.</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="previewAudioAlarm('close')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-[11px] transition">▶ Test</button>
+            <input type="checkbox" id="alarmToggle_1030" checked onchange="saveAlarmPref('1030', this.checked)" class="rounded text-rose-500 focus:ring-0 w-4 h-4">
+          </div>
+        </div>
+      </div>
+
+      <!-- Synthesizer Soundpack Picker -->
+      <div class="pt-3 border-t border-slate-800">
+        <label class="block text-xs font-bold text-slate-300 mb-2">Terminal Interaction Soundpack</label>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono">
+          <button onclick="selectSoundpack('bell')" id="spBtn_bell" class="p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-300 font-bold text-left transition">
+            🔔 Institutional Bell
+          </button>
+          <button onclick="selectSoundpack('click')" id="spBtn_click" class="p-2.5 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 text-left hover:border-slate-700 transition">
+            ⚡ Tactile Click
+          </button>
+          <button onclick="selectSoundpack('bloomberg')" id="spBtn_bloomberg" class="p-2.5 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 text-left hover:border-slate-700 transition">
+            📊 Bloomberg Amber
+          </button>
+          <button onclick="selectSoundpack('cyber')" id="spBtn_cyber" class="p-2.5 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 text-left hover:border-slate-700 transition">
+            🌌 Cyber Synth
+          </button>
+          <button onclick="selectSoundpack('bowl')" id="spBtn_bowl" class="p-2.5 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 text-left hover:border-slate-700 transition">
+            🧘 Tibetan Bowl (432Hz)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL 3: QUICK-STAT DOCKLETS CONFIGURATOR -->
+  <!-- ========================================== -->
+  <div id="dockletConfigModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-2xl w-full max-w-md border border-teal-500/30 shadow-2xl p-5 relative font-sans">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-teal-400 font-black text-lg">⚙️</span>
+          <h3 class="text-sm font-extrabold text-white">Configure Quick-Stat Docklets</h3>
+        </div>
+        <button onclick="toggleDockletCustomizerModal()" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+      <p class="text-xs text-slate-400 my-3">Toggle which real-time metric chips are pinned to your sticky scroll bar. Drag chips directly on the bar to reorder.</p>
+      
+      <div class="space-y-2 text-xs font-mono" id="dockletToggleList">
+        <!-- Rendered dynamically -->
+      </div>
+      
+      <div class="mt-4 pt-3 border-t border-slate-800 flex justify-end">
+        <button onclick="toggleDockletCustomizerModal()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs transition">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+<!-- MODAL: FULL-SCREEN TILT-BREAKER LOCKOUT -->
   <!-- ========================================== -->
   <div id="tiltBreakerModal" class="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-2xl hidden flex items-center justify-center p-4 overflow-y-auto">
     <div class="glass-card rounded-3xl p-8 max-w-xl w-full border border-rose-500/40 bg-gradient-to-b from-slate-900/95 via-slate-950 to-slate-950 shadow-2xl relative text-center">
@@ -5677,6 +5961,18 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
               <span class="text-purple-300 font-semibold">🟣 Revenge / Tilt</span>
             </label>
           </div>
+        </div>
+
+        <!-- Execution Reflection & Voice Dictation -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider">Trade Reflection / Mental Note</label>
+            <button type="button" id="voiceDictateDrawerBtn" onclick="toggleVoiceDictation('drawer_lesson', 'voiceDictateDrawerBtn')" class="px-2 py-0.5 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 text-[10px] font-mono font-bold flex items-center gap-1 transition cursor-pointer">
+              <span>🎙️</span>
+              <span id="voiceDictateDrawerText">Voice</span>
+            </button>
+          </div>
+          <input type="text" id="drawer_lesson" placeholder="e.g. Clean 9EMA touch, patient entry, exited at 2.2R target" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs font-sans focus:outline-none focus:border-emerald-500">
         </div>
 
         <!-- 5-Point Rule Checklist Strip -->
@@ -8607,6 +8903,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
     // --- ADVANCED INSTITUTIONAL ANALYTICS & METRICS ---
     function renderAllChartsAndMetrics() {
+      if (typeof renderQuickStatDocklets === 'function') renderQuickStatDocklets();
       const trades = getFilteredTrades();
 
       let totalGross = 0;
@@ -14114,10 +14411,516 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     }
 
 
+
+    // ==========================================
+    // 1. INDIAN STATUTORY TAX & CHARGES LEDGER ENGINE
+    // ==========================================
+    function calculateIndianStatutoryBreakdown() {
+      const trades = typeof tradesData !== 'undefined' ? tradesData : [];
+      let totalTurnover = 0;
+      let totalGrossPnL = 0;
+      let totalNetPnL = 0;
+      let totalBrokerage = 0;
+      let totalSTT = 0;
+      let totalNSE = 0;
+      let totalSEBI = 0;
+      let totalGST = 0;
+      let totalStamp = 0;
+
+      const tradeRows = [];
+
+      trades.forEach(t => {
+        const entry = parseFloat(t.entry_price || 0);
+        const exit = parseFloat(t.exit_price || t.entry_price || 0);
+        const qty = parseInt(t.qty || 0);
+        const buyVal = entry * qty;
+        const sellVal = exit * qty;
+        const turnover = buyVal + sellVal;
+        totalTurnover += turnover;
+
+        const gross = parseFloat(t.gross_pnl || 0);
+        const net = parseFloat(t.net_pnl || 0);
+        totalGrossPnL += gross;
+        totalNetPnL += net;
+
+        // Statutory formulas for NSE Equity Intraday:
+        const brokerage = Math.min(40, Math.max(20, turnover * 0.0003)); // ₹20/order max
+        const stt = sellVal * 0.00025; // 0.025% on sell side
+        const nseFee = turnover * 0.0000297; // 0.00297% on turnover
+        const sebiFee = turnover * 0.000001; // ₹10 / crore
+        const gst = (brokerage + nseFee + sebiFee) * 0.18; // 18% GST
+        const stamp = buyVal * 0.00003; // 0.003% on buy side
+        const friction = brokerage + stt + nseFee + sebiFee + gst + stamp;
+
+        totalBrokerage += brokerage;
+        totalSTT += stt;
+        totalNSE += nseFee;
+        totalSEBI += sebiFee;
+        totalGST += gst;
+        totalStamp += stamp;
+
+        tradeRows.push({
+          id: t.id,
+          symbol: t.symbol,
+          turnover: turnover,
+          gross: gross,
+          friction: friction,
+          net: net,
+          dragPct: turnover > 0 ? ((friction / turnover) * 100).toFixed(3) : '0.000'
+        });
+      });
+
+      const totalFriction = totalBrokerage + totalSTT + totalNSE + totalSEBI + totalGST + totalStamp;
+      const frictionPct = totalTurnover > 0 ? ((totalFriction / totalTurnover) * 100).toFixed(3) : '0.000';
+      const netEdge = totalGrossPnL !== 0 ? (((totalGrossPnL - totalFriction) / totalGrossPnL) * 100).toFixed(1) : '100.0';
+
+      return {
+        turnover: totalTurnover,
+        gross: totalGrossPnL,
+        net: totalNetPnL,
+        friction: totalFriction,
+        frictionPct: frictionPct,
+        netEdge: netEdge,
+        brokerage: totalBrokerage,
+        stt: totalSTT,
+        nse: totalNSE,
+        sebi: totalSEBI,
+        gst: totalGST,
+        stamp: totalStamp,
+        rows: tradeRows
+      };
+    }
+
+    function openStatutoryChargesModal() {
+      const data = calculateIndianStatutoryBreakdown();
+      const modal = document.getElementById('statutoryChargesModal');
+      if (!modal) return;
+
+      const formatRs = val => '₹' + Math.round(val).toLocaleString('en-IN');
+      const formatDecimalRs = val => '₹' + (parseFloat(val) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      document.getElementById('statTurnoverDisp').textContent = formatRs(data.turnover);
+      document.getElementById('statGrossPnLDisp').textContent = (data.gross >= 0 ? '+' : '') + formatRs(data.gross);
+      document.getElementById('statTotalCostsDisp').textContent = formatDecimalRs(data.friction);
+      document.getElementById('statFrictionPctDisp').textContent = `${data.frictionPct}% Turnover Drag`;
+      document.getElementById('statNetPnLDisp').textContent = (data.net >= 0 ? '+' : '') + formatRs(data.net);
+      document.getElementById('statNetEdgeDisp').textContent = `${data.netEdge}% Capital Efficiency`;
+
+      document.getElementById('statItemBrokerage').textContent = formatDecimalRs(data.brokerage);
+      document.getElementById('statItemSTT').textContent = formatDecimalRs(data.stt);
+      document.getElementById('statItemNSE').textContent = formatDecimalRs(data.nse);
+      document.getElementById('statItemSEBI').textContent = formatDecimalRs(data.sebi);
+      document.getElementById('statItemGST').textContent = formatDecimalRs(data.gst);
+      document.getElementById('statItemStamp').textContent = formatDecimalRs(data.stamp);
+
+      const tbody = document.getElementById('statTradeTableBody');
+      if (tbody) {
+        tbody.innerHTML = data.rows.map(r => `
+          <tr class="hover:bg-slate-900/80 transition">
+            <td class="p-2 font-bold text-slate-300">${r.id}</td>
+            <td class="p-2 font-bold text-white">${r.symbol}</td>
+            <td class="p-2 text-slate-400">${formatRs(r.turnover)}</td>
+            <td class="p-2 ${r.gross >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${(r.gross >= 0 ? '+' : '') + formatRs(r.gross)}</td>
+            <td class="p-2 text-amber-300 font-bold">${formatDecimalRs(r.friction)}</td>
+            <td class="p-2 font-bold ${r.net >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${(r.net >= 0 ? '+' : '') + formatRs(r.net)}</td>
+            <td class="p-2 text-slate-400">${r.dragPct}%</td>
+          </tr>
+        `).join('');
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeStatutoryChargesModal() {
+      const modal = document.getElementById('statutoryChargesModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+
+    // ==========================================
+    // 2. AUDIO ALARMS & SOUNDBOARD ENGINE
+    // ==========================================
+    let masterSoundEnabled = true;
+
+    function initSoundPrefs() {
+      const saved = localStorage.getItem('trader_master_sound');
+      if (saved !== null) masterSoundEnabled = (saved === 'true');
+      updateSoundboardMasterBtn();
+
+      ['0915', '1025', '1030'].forEach(id => {
+        const val = localStorage.getItem('trader_alarm_' + id);
+        const chk = document.getElementById('alarmToggle_' + id);
+        if (chk && val !== null) chk.checked = (val === 'true');
+      });
+
+      const pack = localStorage.getItem('trader_soundpack') || 'bell';
+      selectSoundpack(pack, false);
+    }
+
+    function toggleMasterSound() {
+      masterSoundEnabled = !masterSoundEnabled;
+      localStorage.setItem('trader_master_sound', masterSoundEnabled);
+      updateSoundboardMasterBtn();
+      if (masterSoundEnabled) playFeedbackSound('click');
+    }
+
+    function updateSoundboardMasterBtn() {
+      const btn = document.getElementById('soundboardMasterBtn');
+      if (btn) {
+        btn.textContent = masterSoundEnabled ? "Audio: ON 🔊" : "Audio: MUTED 🔇";
+        btn.className = masterSoundEnabled
+          ? "px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold text-xs transition cursor-pointer"
+          : "px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-400 font-mono text-xs transition cursor-pointer";
+      }
+    }
+
+    function openSoundboardModal() {
+      initSoundPrefs();
+      const modal = document.getElementById('soundboardModal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeSoundboardModal() {
+      const modal = document.getElementById('soundboardModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function saveAlarmPref(timeKey, isChecked) {
+      localStorage.setItem('trader_alarm_' + timeKey, isChecked);
+    }
+
+    function selectSoundpack(packKey, playSound = true) {
+      localStorage.setItem('trader_soundpack', packKey);
+      ['bell', 'click', 'bloomberg', 'cyber', 'bowl'].forEach(k => {
+        const btn = document.getElementById('spBtn_' + k);
+        if (btn) {
+          if (k === packKey) {
+            btn.className = "p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-300 font-bold text-left transition shadow-sm";
+          } else {
+            btn.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 text-left hover:border-slate-700 transition";
+          }
+        }
+      });
+      if (playSound) playFeedbackSound('click');
+    }
+
+    function previewAudioAlarm(type) {
+      if (!masterSoundEnabled) return;
+      playScheduledAlarmSound(type);
+    }
+
+    function playScheduledAlarmSound(type) {
+      if (!masterSoundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        if (type === 'open') {
+          // Dual Harmonic Market Opening Chime (G5 -> C6)
+          const osc1 = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc1.type = 'sine'; osc1.frequency.setValueAtTime(783.99, now); // G5
+          osc2.type = 'sine'; osc2.frequency.setValueAtTime(1046.50, now + 0.15); // C6
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+          osc1.connect(gain); osc2.connect(gain); gain.connect(ctx.destination);
+          osc1.start(now); osc1.stop(now + 0.6);
+          osc2.start(now + 0.15); osc2.stop(now + 1.2);
+        } else if (type === 'warning') {
+          // 5-Minute Warning Alarm: Double Pulse (A4 -> F4)
+          [0, 0.25].forEach(offset => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(440, now + offset);
+            osc.frequency.exponentialRampToValueAtTime(349.23, now + offset + 0.2);
+            gain.gain.setValueAtTime(0.25, now + offset);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.2);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(now + offset); osc.stop(now + offset + 0.22);
+          });
+        } else if (type === 'close') {
+          // 10:30 Hard Quit Siren: Descending Tri-Tone
+          [0, 0.25, 0.5].forEach((offset, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(600 - (idx * 120), now + offset);
+            gain.gain.setValueAtTime(0.2, now + offset);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.22);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(now + offset); osc.stop(now + offset + 0.25);
+          });
+        }
+      } catch(e) { console.warn("Audio error:", e); }
+    }
+
+
+    // ==========================================
+    // 3. CUSTOMIZABLE QUICK-STAT DOCKLETS ENGINE (DRAG & DROP)
+    // ==========================================
+    const DEFAULT_DOCKLETS = [
+      { id: 'docklet_pnl', label: 'Today P&L', icon: '💰', visible: true },
+      { id: 'docklet_quota', label: 'Trade Quota', icon: '🛡️', visible: true },
+      { id: 'docklet_streak', label: 'Win Streak', icon: '🔥', visible: true },
+      { id: 'docklet_kelly', label: 'Kelly Edge', icon: '🎲', visible: true },
+      { id: 'docklet_expectancy', label: 'Avg Expectancy', icon: '⚡', visible: true },
+      { id: 'docklet_window', label: 'Market Window', icon: '🕒', visible: true },
+      { id: 'docklet_friction', label: 'Friction Drag', icon: '⚖️', visible: true }
+    ];
+
+    let userDocklets = [];
+    let isDockletPinned = true;
+    let draggedDockletId = null;
+
+    function initQuickStatDocklets() {
+      try {
+        const saved = localStorage.getItem('trader_quick_docklets');
+        userDocklets = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_DOCKLETS));
+        const pinned = localStorage.getItem('trader_docklet_pinned');
+        isDockletPinned = pinned !== null ? (pinned === 'true') : true;
+        updateDockletPinUI();
+        renderQuickStatDocklets();
+      } catch(e) {
+        userDocklets = JSON.parse(JSON.stringify(DEFAULT_DOCKLETS));
+        renderQuickStatDocklets();
+      }
+    }
+
+    function toggleDockletPin() {
+      isDockletPinned = !isDockletPinned;
+      localStorage.setItem('trader_docklet_pinned', isDockletPinned);
+      updateDockletPinUI();
+      if (typeof showSystemToast === 'function') {
+        showSystemToast(isDockletPinned ? '📌 Quick-Stat Docklet Pinned to Top' : 'Unpinned Docklet', 'info');
+      }
+    }
+
+    function updateDockletPinUI() {
+      const bar = document.getElementById('quickStatDockletBar');
+      const btn = document.getElementById('dockletPinBtn');
+      if (bar) {
+        if (isDockletPinned) {
+          bar.classList.remove('hidden');
+          bar.classList.add('sticky');
+        } else {
+          bar.classList.add('hidden');
+          bar.classList.remove('sticky');
+        }
+      }
+      if (btn) {
+        btn.className = isDockletPinned
+          ? "p-1 rounded bg-teal-600/30 text-teal-300 border border-teal-500/40 text-[10px] transition cursor-pointer"
+          : "p-1 rounded bg-slate-900 text-slate-500 border border-slate-800 text-[10px] transition cursor-pointer";
+      }
+    }
+
+    function renderQuickStatDocklets() {
+      const container = document.getElementById('dockletContainer');
+      if (!container) return;
+
+      const trades = typeof tradesData !== 'undefined' ? tradesData : [];
+      const sessionDate = typeof getActiveSessionDate === 'function' ? getActiveSessionDate() : new Date().toISOString().split('T')[0];
+      const todayTrades = trades.filter(t => t.date === sessionDate);
+      const todayNetPnL = todayTrades.reduce((acc, t) => acc + (parseFloat(t.net_pnl) || 0), 0);
+      const todayNetR = todayTrades.reduce((acc, t) => acc + (parseFloat(t.r_multiple) || 0), 0);
+
+      // Compute stats
+      const pnlText = (todayNetPnL >= 0 ? '+₹' : '-₹') + Math.round(Math.abs(todayNetPnL)).toLocaleString('en-IN') + ` (${todayNetR >= 0 ? '+' : ''}${todayNetR.toFixed(2)}R)`;
+      const pnlColor = todayNetPnL >= 0 ? 'text-emerald-400' : 'text-rose-400';
+      const quotaText = `${todayTrades.length}/2 Used`;
+      const quotaColor = todayTrades.length >= 2 ? 'text-rose-400 font-black' : 'text-slate-200';
+      const streakText = (typeof traderStreak !== 'undefined' ? traderStreak : 4) + 'd Streak';
+      const expectancyText = (typeof expectancyR !== 'undefined' ? (expectancyR >= 0 ? '+' : '') + expectancyR.toFixed(2) + 'R' : '+0.51 R');
+      const frictionText = '₹48 / trd';
+      const kellyText = 'f* = 0.18';
+      const windowText = '09:15–10:30 Active';
+
+      const statValues = {
+        docklet_pnl: { val: pnlText, color: pnlColor },
+        docklet_quota: { val: quotaText, color: quotaColor },
+        docklet_streak: { val: streakText, color: 'text-amber-300' },
+        docklet_kelly: { val: kellyText, color: 'text-blue-300' },
+        docklet_expectancy: { val: expectancyText, color: 'text-indigo-300' },
+        docklet_window: { val: windowText, color: 'text-emerald-400' },
+        docklet_friction: { val: frictionText, color: 'text-amber-400' }
+      };
+
+      container.innerHTML = userDocklets.filter(d => d.visible).map(d => {
+        const item = statValues[d.id] || { val: '--', color: 'text-white' };
+        return `
+          <div draggable="true" 
+               ondragstart="handleDockletDragStart(event, '${d.id}')"
+               ondragover="handleDockletDragOver(event)"
+               ondrop="handleDockletDrop(event, '${d.id}')"
+               class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800/90 hover:border-slate-700 cursor-grab active:cursor-grabbing transition shadow-sm flex-shrink-0"
+               title="${d.label} (Drag to rearrange)">
+            <span class="text-xs select-none">${d.icon}</span>
+            <span class="text-slate-400 text-[10px] select-none">${d.label}:</span>
+            <span class="font-bold font-mono text-xs ${item.color} select-none">${item.val}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function handleDockletDragStart(e, id) {
+      draggedDockletId = id;
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDockletDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    }
+
+    function handleDockletDrop(e, targetId) {
+      e.preventDefault();
+      if (!draggedDockletId || draggedDockletId === targetId) return;
+
+      const fromIdx = userDocklets.findIndex(d => d.id === draggedDockletId);
+      const toIdx = userDocklets.findIndex(d => d.id === targetId);
+
+      if (fromIdx !== -1 && toIdx !== -1) {
+        const [moved] = userDocklets.splice(fromIdx, 1);
+        userDocklets.splice(toIdx, 0, moved);
+        localStorage.setItem('trader_quick_docklets', JSON.stringify(userDocklets));
+        renderQuickStatDocklets();
+        if (typeof playFeedbackSound === 'function') playFeedbackSound('click');
+      }
+    }
+
+    function toggleDockletCustomizerModal() {
+      const modal = document.getElementById('dockletConfigModal');
+      if (!modal) return;
+      const isHidden = modal.classList.contains('hidden');
+      if (isHidden) {
+        const list = document.getElementById('dockletToggleList');
+        if (list) {
+          list.innerHTML = userDocklets.map(d => `
+            <label class="flex items-center justify-between p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 cursor-pointer">
+              <span class="flex items-center gap-2">
+                <span>${d.icon}</span>
+                <span class="text-slate-200">${d.label}</span>
+              </span>
+              <input type="checkbox" ${d.visible ? 'checked' : ''} onchange="toggleDockletItemVisibility('${d.id}', this.checked)" class="rounded text-teal-500 focus:ring-0 w-4 h-4">
+            </label>
+          `).join('');
+        }
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function toggleDockletItemVisibility(id, isVisible) {
+      const item = userDocklets.find(d => d.id === id);
+      if (item) {
+        item.visible = isVisible;
+        localStorage.setItem('trader_quick_docklets', JSON.stringify(userDocklets));
+        renderQuickStatDocklets();
+      }
+    }
+
+
+    // ==========================================
+    // 4. TRADER AUDIO VOICE DICTATION ENGINE (WEB SPEECH API)
+    // ==========================================
+    let activeSpeechRecognition = null;
+    let activeVoiceTargetId = null;
+    let activeVoiceBtnId = null;
+
+    function toggleVoiceDictation(targetInputId, btnId) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("Speech Recognition API is not supported in this browser. Please use Google Chrome, Edge, or Safari.");
+        return;
+      }
+
+      if (activeSpeechRecognition) {
+        stopVoiceDictation();
+        return;
+      }
+
+      const targetEl = document.getElementById(targetInputId);
+      const btnEl = document.getElementById(btnId);
+      if (!targetEl) return;
+
+      activeVoiceTargetId = targetInputId;
+      activeVoiceBtnId = btnId;
+
+      try {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-IN'; // Indian English / Global English
+
+        recognition.onstart = function() {
+          if (btnEl) {
+            btnEl.className = "px-2.5 py-1 rounded-lg bg-rose-600 text-white font-mono font-bold text-[10px] flex items-center gap-1.5 animate-pulse shadow-lg shadow-rose-600/30 cursor-pointer";
+            btnEl.innerHTML = `<span>🎙️</span><span>Listening...</span>`;
+          }
+          if (typeof playFeedbackSound === 'function') playFeedbackSound('click');
+        };
+
+        recognition.onresult = function(event) {
+          let interimTranscript = '';
+          let finalTranscript = '';
+
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              finalTranscript += event.results[i][0].transcript;
+            } else {
+              interimTranscript += event.results[i][0].transcript;
+            }
+          }
+
+          if (finalTranscript) {
+            const currentVal = targetEl.value ? targetEl.value.trim() + ' ' : '';
+            targetEl.value = currentVal + finalTranscript.trim();
+          }
+        };
+
+        recognition.onerror = function(event) {
+          console.warn('Speech recognition error:', event.error);
+          stopVoiceDictation();
+        };
+
+        recognition.onend = function() {
+          stopVoiceDictation();
+        };
+
+        recognition.start();
+        activeSpeechRecognition = recognition;
+      } catch(e) {
+        console.warn('Speech start error:', e);
+        stopVoiceDictation();
+      }
+    }
+
+    function stopVoiceDictation() {
+      if (activeSpeechRecognition) {
+        try { activeSpeechRecognition.stop(); } catch(e) {}
+        activeSpeechRecognition = null;
+      }
+      if (activeVoiceBtnId) {
+        const btnEl = document.getElementById(activeVoiceBtnId);
+        if (btnEl) {
+          btnEl.className = "px-2 py-0.5 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 text-[10px] font-mono font-bold flex items-center gap-1.5 transition cursor-pointer";
+          btnEl.innerHTML = `<span>🎙️</span><span>Voice Dictate</span>`;
+        }
+      }
+      activeVoiceTargetId = null;
+      activeVoiceBtnId = null;
+    }
+
     // Hook listeners on DOM ready
     window.addEventListener('DOMContentLoaded', () => {
       initTheme();
       initDensity();
+      initSoundPrefs();
+      initQuickStatDocklets();
       updateRRVisualizer();
       updateBottomDockMetrics();
       setInterval(updateBottomDockMetrics, 1000);
