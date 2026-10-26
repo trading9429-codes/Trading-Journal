@@ -523,6 +523,56 @@
       box-shadow: 0 0 10px rgba(37, 99, 235, 0.35);
     }
 
+  
+    /* ========================================== */
+    /* TRADESYNC PRO UI DESIGN SYSTEM STYLES      */
+    /* ========================================== */
+    .sidebar-collapsed {
+      width: 5rem !important; /* 80px */
+    }
+    .sidebar-collapsed .sidebar-label {
+      display: none !important;
+    }
+    .sidebar-collapsed .sidebar-nav-item {
+      justify-content: center !important;
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+    }
+    .sidebar-collapsed #sidebarBrandTitle {
+      display: none !important;
+    }
+
+    .tradesync-drawer-open {
+      transform: translateX(0%) !important;
+    }
+    .tradesync-drawer-closed {
+      transform: translateX(100%) !important;
+    }
+
+    .sidebar-nav-item.active {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%) !important;
+      color: #34D399 !important;
+      border-left: 3px solid #10B981 !important;
+      font-weight: 700 !important;
+    }
+
+    .kpi-gradient-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.8) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-gradient-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.8), rgba(6, 182, 212, 0.8));
+    }
+
   </style>
 </head>
 <body class="min-h-screen pb-16">
@@ -534,137 +584,201 @@
   <input type="file" id="fyersFileInput" accept=".csv,text/csv" class="hidden" onchange="handleFyersFileImport(event)">
   <input type="file" id="vaultFileInput" accept=".json,application/json" class="hidden" onchange="handleVaultRestore(event)">
 
-  <!-- Sticky Top Execution Command Bar -->
-  <header class="sticky top-0 z-50 glass-card border-b border-slate-800 px-4 lg:px-8 py-3">
-    <div class="max-w-7xl mx-auto flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
-      <!-- BRAND & SYSTEM STATUS CLUSTER (Clean, Institutional, Never Wraps) -->
-      <div class="flex items-center gap-3.5 flex-shrink-0">
-        <!-- Modern Glowing Logo Icon with Live Pulse Indicator -->
-        <div class="relative flex-shrink-0 cursor-pointer" onclick="switchTab(1)" title="Trader Reset Command Center">
-          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-blue-600 flex items-center justify-center font-black text-white text-lg shadow-xl shadow-emerald-500/25 border border-white/20 ring-1 ring-emerald-400/40 hover:scale-105 transition-transform duration-200">
+
+  <!-- ========================================== -->
+  <!-- TRADESYNC PRO: COLLAPSIBLE LEFT SIDEBAR    -->
+  <!-- ========================================== -->
+  <aside id="appSidebar" class="fixed top-0 bottom-0 left-0 z-40 w-64 bg-slate-950/98 backdrop-blur-2xl border-r border-slate-800/90 flex flex-col justify-between transition-all duration-300 shadow-2xl overflow-y-auto">
+    <div>
+      <!-- Brand & Collapse Toggle -->
+      <div class="h-16 flex items-center justify-between px-4 border-b border-slate-800/80">
+        <div class="flex items-center gap-3 overflow-hidden cursor-pointer" onclick="switchTab(1)" title="TradeSync Dashboard">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-blue-600 flex items-center justify-center font-black text-white text-base shadow-lg shadow-emerald-500/25 border border-white/20 flex-shrink-0">
             ⚡
           </div>
-          <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-slate-950 flex items-center justify-center shadow" title="System Active &amp; Online">
-            <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
-          </span>
+          <div id="sidebarBrandTitle" class="sidebar-label transition-opacity duration-200">
+            <div class="flex items-center gap-1.5">
+              <span class="font-black text-white text-sm tracking-tight">TradeSync</span>
+              <span class="text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1 rounded">PRO</span>
+            </div>
+            <span class="text-[10px] text-slate-400 font-mono block -mt-0.5">Execution Reset</span>
+          </div>
+        </div>
+        <button onclick="toggleSidebarCollapse()" class="w-7 h-7 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 flex items-center justify-center text-xs transition cursor-pointer" title="Toggle sidebar (Ctrl+B)">
+          <span id="sidebarToggleIcon">«</span>
+        </button>
+      </div>
+
+      <!-- Quick Action: + Log Trade CTA inside Sidebar -->
+      <div class="p-3">
+        <button onclick="openTradeSyncSlideOver()" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-600/25 cursor-pointer">
+          <span class="text-base leading-none font-black">+</span>
+          <span class="sidebar-label">Log Trade</span>
+        </button>
+      </div>
+
+      <!-- Primary Navigation Links -->
+      <nav class="px-2 py-1 space-y-1 text-xs">
+        <button onclick="switchTab(1)" id="sidebarNav_1" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-slate-300 hover:text-white hover:bg-slate-900/80 transition cursor-pointer group active">
+          <span class="text-base flex-shrink-0">📊</span>
+          <span class="sidebar-label font-sans">Dashboard</span>
+          <span class="sidebar-label ml-auto text-[10px] font-mono text-slate-500 group-hover:text-slate-400">1</span>
+        </button>
+
+        <button onclick="switchTab(2)" id="sidebarNav_2" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-slate-400 hover:text-white hover:bg-slate-900/80 transition cursor-pointer group">
+          <span class="text-base flex-shrink-0">📈</span>
+          <span class="sidebar-label font-sans">Edge &amp; Analytics</span>
+          <span class="sidebar-label ml-auto text-[10px] font-mono text-slate-500 group-hover:text-slate-400">2</span>
+        </button>
+
+        <button onclick="switchTab(3)" id="sidebarNav_3" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-slate-400 hover:text-white hover:bg-slate-900/80 transition cursor-pointer group">
+          <span class="text-base flex-shrink-0">🎯</span>
+          <span class="sidebar-label font-sans">Attribution &amp; Leaks</span>
+          <span class="sidebar-label ml-auto text-[10px] font-mono text-slate-500 group-hover:text-slate-400">3</span>
+        </button>
+
+        <button onclick="switchTab(4)" id="sidebarNav_4" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-slate-400 hover:text-white hover:bg-slate-900/80 transition cursor-pointer group">
+          <span class="text-base flex-shrink-0">🎲</span>
+          <span class="sidebar-label font-sans">Quant Risk &amp; Sim</span>
+          <span class="sidebar-label ml-auto text-[10px] font-mono text-slate-500 group-hover:text-slate-400">4</span>
+        </button>
+
+        <button onclick="switchTab(5)" id="sidebarNav_5" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-slate-400 hover:text-white hover:bg-slate-900/80 transition cursor-pointer group">
+          <span class="text-base flex-shrink-0">📡</span>
+          <span class="sidebar-label font-sans">Chartink Radar</span>
+          <span class="sidebar-label ml-auto text-[9px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-1 py-0.2 rounded border border-emerald-500/20">LIVE</span>
+        </button>
+
+        <div class="pt-3 pb-1 px-3">
+          <div class="sidebar-label text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono">Execution Systems</div>
         </div>
 
-        <div class="space-y-1.5">
-          <!-- Title Row & High-Contrast Phase Badge (Never wraps awkwardly) -->
-          <div class="flex items-center gap-3 flex-wrap">
-            <h1 class="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-2 whitespace-nowrap">
-              <span>Trader Execution Reset</span>
-              <span class="text-slate-600 font-normal">|</span>
-              <span class="text-xs font-mono font-semibold text-slate-400">v16.0</span>
-            </h1>
+        <button onclick="openImpulseModal()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-fuchsia-300 hover:bg-fuchsia-950/30 transition cursor-pointer">
+          <span class="text-base flex-shrink-0">⚡</span>
+          <span class="sidebar-label font-sans">Impulse Sandbox</span>
+          <span id="sidebarImpulseXP" class="sidebar-label ml-auto text-[9px] bg-fuchsia-500/20 text-fuchsia-300 px-1.5 py-0.2 rounded font-mono">+50 XP</span>
+        </button>
 
-            <!-- Institutional Phase Status Pill (Clean single line, dynamic) -->
-            <div id="headerPhasePill" onclick="switchTab(1)" class="cursor-pointer inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-emerald-500/15 to-teal-500/15 border border-emerald-400/40 text-emerald-300 text-xs font-mono font-bold whitespace-nowrap shadow-sm shadow-emerald-950/50 hover:bg-emerald-500/25 transition" title="Current 30-Day Reset Phase (Click to view Phase Tracker)">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span id="headerPhaseTitle" class="tracking-wide">PHASE 2: DAYS 4–10</span>
-              <span class="text-emerald-500/80 font-sans">&bull;</span>
-              <span id="headerPhaseTradeCap" class="text-emerald-200 font-semibold">MAX 2 TRADES</span>
-            </div>
-          </div>
+        <button onclick="openAICoachModal()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-cyan-300 hover:bg-cyan-950/30 transition cursor-pointer">
+          <span class="text-base flex-shrink-0">🤖</span>
+          <span class="sidebar-label font-sans">AI Risk Partner</span>
+          <kbd class="sidebar-label ml-auto text-[9px] bg-slate-900 px-1 py-0.2 text-cyan-300 rounded font-mono border border-cyan-500/30">Ctrl+J</kbd>
+        </button>
 
-          <!-- Structured Micro-Tag Rules Strip (Clean, separated chips) -->
-          <div class="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono flex-wrap">
-            <span class="px-2 py-0.5 rounded-md bg-slate-900/90 border border-slate-800 text-slate-300 font-semibold whitespace-nowrap shadow-sm">
-              NSE Equities &bull; 1-Min
-            </span>
-            <span class="px-2 py-0.5 rounded-md bg-slate-900/90 border border-slate-800 text-slate-300 font-semibold whitespace-nowrap shadow-sm">
-              🕒 09:15–10:30 AM IST
-            </span>
-            <span class="px-2 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/25 text-blue-300 font-bold whitespace-nowrap shadow-sm">
-              🎯 Planned RR &ge; 2.2
-            </span>
-            <span class="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/25 text-amber-300 font-bold whitespace-nowrap shadow-sm">
-              🛡️ Risk 0.25%–0.50%
-            </span>
-          </div>
+        <button onclick="togglePlaybookDrawer()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-purple-300 hover:bg-purple-950/30 transition cursor-pointer">
+          <span class="text-base flex-shrink-0">📖</span>
+          <span class="sidebar-label font-sans">Strategy Playbook</span>
+          <kbd class="sidebar-label ml-auto text-[9px] bg-slate-900 px-1 py-0.2 text-purple-300 rounded font-mono">P</kbd>
+        </button>
+
+        <button onclick="openPreMarketReadinessModal()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-emerald-300 hover:bg-emerald-950/30 transition cursor-pointer">
+          <span class="text-base flex-shrink-0">🛡️</span>
+          <span class="sidebar-label font-sans">Pre-Flight Routine</span>
+          <span class="sidebar-label ml-auto text-[9px] text-slate-500">D2</span>
+        </button>
+
+        <button onclick="openMonthlyDossierModal()" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-slate-300 hover:bg-slate-900 transition cursor-pointer">
+          <span class="text-base flex-shrink-0">📑</span>
+          <span class="sidebar-label font-sans">Monthly Dossier</span>
+          <span class="sidebar-label ml-auto text-[9px] text-slate-500">PDF</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Sidebar Bottom: Account Status & Phase -->
+    <div class="p-3 border-t border-slate-800/80 space-y-2">
+      <div class="sidebar-label p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] font-mono">
+        <div class="flex items-center justify-between text-slate-400">
+          <span>Starting Capital:</span>
+          <span class="font-bold text-white" id="sidebarStartingCapital">₹2,00,000</span>
+        </div>
+        <div class="flex items-center justify-between text-slate-400 mt-1">
+          <span>Daily Ceiling:</span>
+          <span class="font-bold text-emerald-400" id="sidebarTradeCap">Max 2 Trades</span>
         </div>
       </div>
 
-      <!-- Live Terminal Status, IST Clock, Window Guard & Indicators -->
-      <div class="flex items-center gap-2.5 text-xs flex-wrap justify-end">
-        <div class="bg-slate-900/90 border border-slate-800 px-3 py-1.5 rounded-lg flex items-center gap-2 font-mono">
-          <span class="text-slate-400">🕒 IST:</span>
-          <span id="headerLiveISTClock" class="font-bold text-white text-xs">--:--:-- IST</span>
-        </div>
-
-        <div id="headerWindowPill" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold flex items-center gap-1.5">
-          <span id="headerWindowDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="headerWindowText">Window Active</span>
-        </div>
-
-        <button onclick="togglePlaybookDrawer()" class="px-2.5 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-300 hover:text-white flex items-center gap-1.5 transition text-xs font-semibold shadow-sm" title="Open 1-Minute Playbook Strategy Cheatsheet (Shortcut: P)">
-          <span>📖</span>
-          <span>Playbook (P)</span>
+      <div class="flex items-center justify-between gap-1 text-xs">
+        <button onclick="openDashboardCustomizerModal()" class="flex-1 py-1.5 px-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-teal-300 border border-teal-500/30 text-[11px] font-semibold flex items-center justify-center gap-1 transition cursor-pointer" title="Customize Layout &amp; Charts (V)">
+          <span>🎛️</span>
+          <span class="sidebar-label">Layout</span>
         </button>
-
-        <button onclick="openPreMarketFocusModal()" class="px-2.5 py-1.5 rounded-lg bg-teal-500/10 border border-teal-500/30 text-teal-300 hover:text-white flex items-center gap-1.5 transition text-xs font-semibold shadow-sm" title="5-Minute Pre-Market Mindset &amp; Box Breathing (09:05–09:10 AM IST)">
-          <span>🧘</span>
-          <span>Mindset Timer</span>
+        <button onclick="openWeeklyReviewModal()" class="py-1.5 px-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold transition cursor-pointer" title="Weekly Governance Review (D5)">
+          <span>📝</span>
         </button>
-
-        <button onclick="openTraderContractModal()" id="headerDemeritBadge" class="px-2.5 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 hover:text-white flex items-center gap-1.5 transition text-xs font-semibold shadow-sm" title="Execution Contract &amp; Penalty Strike System">
-          <span>⚖️</span>
-          <span id="headerStrikesText">Strikes: 0/3</span>
-        </button>
-
-        <button id="ambientAudioBtn" onclick="toggle432HzAmbient()" class="px-2.5 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 hover:text-white flex items-center gap-1.5 transition text-xs font-semibold shadow-sm" title="Toggle 432Hz Alpha Waves Focus Audio">
-          <span id="ambientIcon">🎧</span>
-          <span id="ambientText">432Hz Focus</span>
-        </button>
-
-        <button onclick="testAudioCoachVoice()" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:text-white flex items-center gap-1.5 transition text-xs font-semibold shadow-sm" title="Audio Coach Verbal Feedback (Click to test)">
-          <span>🗣️</span>
-          <span>Voice Coach</span>
-        </button>
-
-        <button id="soundToggleBtn" onclick="toggleSound()" class="px-2.5 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300 hover:text-white flex items-center gap-1.5 transition">
-          <span id="soundIcon">🔊</span>
-          <span id="soundText" class="font-medium">Audio ON</span>
-        </button>
-
-        <div class="bg-slate-900/90 border border-slate-800 px-3 py-1.5 rounded-lg flex items-center gap-2">
-          <span class="text-slate-400">Capital:</span>
-          <span class="font-bold text-white font-mono" id="headerStartingCapDisplay">₹200,000</span>
-          <span class="text-slate-600">|</span>
-          <span class="text-slate-400">Current:</span>
-          <span class="font-bold font-mono" id="headerCurrentCapDisplay">₹200,000</span>
-        </div>
-
-        <div id="cooldownHeaderBadge" class="hidden px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 font-mono font-bold flex items-center gap-1.5">
-          <span>⏳</span>
-          <span id="cooldownTimerText">30:00</span>
-        </div>
-
-        <div id="headerKillSwitchBadge" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-medium flex items-center gap-1.5">
-          <span id="headerDailyStatusText">Today: 0/2 Trades</span>
-        </div>
-
-        <a href="/api/download" download="D3_Tracking_Spreadsheet.xlsx" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold transition flex items-center gap-1.5 shadow-sm">
-          <span>📥</span>
-          <span>Download .XLSX</span>
-        </a>
-
-        <!-- 1m Chartink Scanner Quick-Link Pill -->
-        <button onclick="scrollToScannerFeed()" id="headerScannerPill" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 hover:text-white flex items-center gap-1.5 transition text-xs font-semibold shadow-sm" title="Live 1-Minute Chartink Scanner Stream">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-          <span>📡 Radar: <span id="headerScannerCount" class="font-bold text-white font-mono">0</span></span>
-          <span id="headerScannerTopLeader" class="hidden font-mono text-[10px] bg-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-200"></span>
-        </button>
-
-        <!-- Cloud Backup Button / Status Badge -->
-        <button id="cloudBackupHeaderBtn" onclick="openCloudBackupModal()" class="px-2.5 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-slate-300 hover:text-white flex items-center gap-1.5 transition text-xs font-semibold shadow-sm" title="Cloud Backup: Auto-Sync trades to GitHub repository">
-          <span id="cloudBackupIcon">☁️</span>
-          <span id="cloudBackupLabel">Cloud Backup</span>
-          <span id="cloudBackupDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+        <button onclick="openAISettingsModal()" class="py-1.5 px-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-[11px] font-semibold transition cursor-pointer" title="AI Settings (BYOK)">
+          <span>⚙️</span>
         </button>
       </div>
     </div>
-  </header>
+  </aside>
+
+  <!-- ========================================== -->
+  <!-- MAIN APPLICATION SHELL                     -->
+  <!-- ========================================== -->
+  <div id="mainAppShell" class="flex-1 md:ml-64 flex flex-col min-h-screen transition-all duration-300 pb-16">
+
+    <!-- Top TradeSync Application Bar -->
+    <header class="sticky top-0 z-30 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/90 px-4 lg:px-6 py-2.5 flex items-center justify-between gap-4 shadow-sm">
+      <!-- Left: Mobile Menu Toggle + View Title / Breadcrumbs -->
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebarCollapse()" class="md:hidden p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 cursor-pointer">
+          ☰
+        </button>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 id="topBarViewTitle" class="text-sm font-extrabold text-white tracking-tight flex items-center gap-1.5 font-sans">
+              <span>📊</span>
+              <span>Dashboard Overview</span>
+            </h2>
+            <div id="topBarPhaseBadge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold cursor-pointer" onclick="switchTab(1)">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="topBarPhaseText">PHASE 2 &bull; MAX 2 TRADES</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: IST Market Clock & Execution Window -->
+      <div class="hidden lg:flex items-center gap-2.5 text-xs font-mono">
+        <div class="bg-slate-900/90 border border-slate-800 px-3 py-1 rounded-lg flex items-center gap-2">
+          <span class="text-slate-400">🕒 IST:</span>
+          <span id="headerLiveISTClock" class="font-bold text-white text-xs">--:--:-- IST</span>
+        </div>
+        <div id="headerWindowPill" class="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold flex items-center gap-1.5 text-xs">
+          <span id="headerWindowDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="headerWindowText">Window Active</span>
+        </div>
+      </div>
+
+      <!-- Right: Real-time Today P&L Ticker + Action CTAs -->
+      <div class="flex items-center gap-2">
+        <!-- Live Today Net P&L Pill -->
+        <div id="topBarTodayPnLPill" class="px-3 py-1 rounded-xl bg-slate-900/95 border border-slate-800 text-xs font-mono flex items-center gap-1.5 shadow-sm">
+          <span class="text-[10px] text-slate-400 uppercase font-semibold">Today:</span>
+          <span id="topBarTodayPnLValue" class="font-black text-emerald-400">₹0.00</span>
+          <span id="topBarTodayRValue" class="text-[10px] text-blue-300 font-bold">(0.00R)</span>
+        </div>
+
+        <!-- Primary CTA: + Log Trade Slide-Over -->
+        <button onclick="openTradeSyncSlideOver()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider flex items-center gap-1.5 transition shadow-lg shadow-emerald-600/25 cursor-pointer" title="Quick Log Trade (Shortcut: T)">
+          <span class="text-sm font-black leading-none">+</span>
+          <span>Log Trade</span>
+        </button>
+
+        <!-- AI Coach Button -->
+        <button onclick="openAICoachModal()" class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 text-xs font-bold flex items-center gap-1 transition shadow-sm cursor-pointer" title="AI Desk Risk Partner (Ctrl+J)">
+          <span>🤖</span>
+          <span class="hidden sm:inline">AI Desk</span>
+        </button>
+
+        <!-- Customize View Button -->
+        <button onclick="openDashboardCustomizerModal()" class="px-2 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-teal-300 border border-teal-500/30 text-xs font-bold flex items-center gap-1 transition cursor-pointer" title="Customize Layout &amp; Charts (Hotkey: V)">
+          <span>🎛️</span>
+        </button>
+      </div>
+    </header>
+
 
   <!-- Live Trading Window Closed Alert Banner (When past 10:30 AM IST) -->
   <div id="windowClosedBanner" class="hidden bg-gradient-to-r from-indigo-950/90 via-slate-900 to-indigo-950/90 border-b border-indigo-500/40 px-4 py-2.5 text-center text-xs font-semibold text-indigo-200">
@@ -839,7 +953,55 @@
     <!-- ========================================== -->
     <!-- TAB 1: LIVE EXECUTION & TRADE LOG -->
     <!-- ========================================== -->
-    <div id="tabContent1" class="mt-6 space-y-6">
+    <div id="tabContent1" class="mt-4 space-y-6">
+
+      <!-- TRADESYNC HIGH-IMPACT EXECUTIVE KPI STRIP -->
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- 1. Net Realized P&L -->
+        <div class="kpi-gradient-card rounded-2xl p-5 border border-slate-800 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Net Realized P&amp;L</span>
+            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300" id="kpiNetPnLBadge">+0.0% ROI</span>
+          </div>
+          <div class="text-2xl lg:text-3xl font-black font-mono text-emerald-400 mt-2" id="kpiNetPnL">₹0.00</div>
+          <div class="text-[10px] text-slate-400 mt-1 font-mono" id="kpiGrossCostSub">Gross: ₹0 &bull; Taxes/Charges: ₹0</div>
+        </div>
+
+        <!-- 2. Win Rate & Asymmetry -->
+        <div class="kpi-gradient-card rounded-2xl p-5 border border-slate-800 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Session Win Rate</span>
+            <span class="text-[10px] font-mono text-slate-400" id="kpiWinLossCount">0W - 0L</span>
+          </div>
+          <div class="text-2xl lg:text-3xl font-black font-mono text-white mt-2" id="kpiWinRate">0.0%</div>
+          <!-- Mini Progress Bar -->
+          <div class="w-full bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden flex">
+            <div id="kpiWinRateBar" class="bg-emerald-500 h-1.5 transition-all duration-500" style="width: 0%"></div>
+            <div id="kpiLossRateBar" class="bg-rose-500 h-1.5 transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- 3. Profit Factor & Edge -->
+        <div class="kpi-gradient-card rounded-2xl p-5 border border-slate-800 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Profit Factor</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300" id="kpiPFBadge">0.00x</span>
+          </div>
+          <div class="text-2xl lg:text-3xl font-black font-mono text-blue-400 mt-2" id="kpiProfitFactor">0.00</div>
+          <div class="text-[10px] text-slate-400 mt-1 font-mono" id="kpiExpectancySub">Expectancy: +0.00R / Trade</div>
+        </div>
+
+        <!-- 4. Execution Discipline Score -->
+        <div class="kpi-gradient-card rounded-2xl p-5 border border-slate-800 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Discipline Adherence</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Max 2 Trades/Day</span>
+          </div>
+          <div class="text-2xl lg:text-3xl font-black font-mono text-emerald-400 mt-2" id="kpiDisciplineScore">100%</div>
+          <div class="text-[10px] text-slate-400 mt-1 font-mono" id="kpiDemeritsSub">0 Demerit Strikes &bull; Clean Process</div>
+        </div>
+      </section>
+
 
       <!-- COMBAT MODE HIGH-FOCUS HUD BANNER (Toggled by H) -->
       <div id="combatBanner" class="hidden bg-gradient-to-r from-amber-950/80 via-slate-900 to-amber-950/80 border border-amber-500/40 p-3.5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-2xl">
@@ -2962,6 +3124,7 @@
 
     </div>
   </main>
+  </div><!-- /#mainAppShell -->
 
   <!-- ========================================== -->
   <!-- MODAL 1: TRADE INSPECTION & JOURNAL MODAL -->
@@ -5122,6 +5285,153 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     </div>
   </div>
 
+  
+  <!-- ========================================== -->
+  <!-- TRADESYNC: QUICK LOG TRADE SLIDE-OVER      -->
+  <!-- ========================================== -->
+  <div id="tradeSyncDrawerBackdrop" onclick="closeTradeSyncSlideOver()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden transition-opacity duration-300"></div>
+
+  <div id="tradeSyncSlideOverDrawer" class="fixed top-0 bottom-0 right-0 z-50 w-full max-w-lg bg-slate-950/98 backdrop-blur-2xl border-l border-slate-800 shadow-2xl p-6 flex flex-col justify-between overflow-y-auto transform translate-x-full transition-transform duration-300 ease-in-out">
+    <div>
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-emerald-600/30">
+            ⚡
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-white">Log Trade Execution</h3>
+            <p class="text-[11px] text-slate-400 font-mono">TradeSync Fast Desk Entry &bull; Synced to Spreadsheet</p>
+          </div>
+        </div>
+        <button onclick="closeTradeSyncSlideOver()" class="text-slate-400 hover:text-white text-2xl font-bold p-1 leading-none cursor-pointer">&times;</button>
+      </div>
+
+      <!-- Quick Ticker Suggestions -->
+      <div class="mt-4 flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] font-mono">
+        <span class="text-slate-500 text-[10px] uppercase font-bold mr-1">Fast Fill:</span>
+        <button type="button" onclick="prefillDrawerTicker('RELIANCE', 2510.0)" class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 hover:border-emerald-500 text-slate-300 hover:text-white transition">RELIANCE</button>
+        <button type="button" onclick="prefillDrawerTicker('TCS', 3520.0)" class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 hover:border-emerald-500 text-slate-300 hover:text-white transition">TCS</button>
+        <button type="button" onclick="prefillDrawerTicker('INFY', 1485.0)" class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 hover:border-emerald-500 text-slate-300 hover:text-white transition">INFY</button>
+        <button type="button" onclick="prefillDrawerTicker('HDFCBANK', 1650.0)" class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 hover:border-emerald-500 text-slate-300 hover:text-white transition">HDFCBANK</button>
+        <button type="button" onclick="prefillDrawerTicker('SBIN', 810.0)" class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 hover:border-emerald-500 text-slate-300 hover:text-white transition">SBIN</button>
+      </div>
+
+      <!-- Drawer Execution Form -->
+      <form id="drawerTradeForm" onsubmit="submitTradeSyncDrawer(event)" class="mt-4 space-y-3.5 text-xs">
+        
+        <!-- Direction Segmented Buttons -->
+        <div>
+          <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1.5">Trade Direction</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" id="drawerDirLong" onclick="setDrawerDirection('Long')" class="py-2 rounded-xl bg-emerald-600 text-white font-black text-xs uppercase transition border border-emerald-500 shadow-md flex items-center justify-center gap-1.5">
+              <span>📈</span>
+              <span>LONG (Buy)</span>
+            </button>
+            <button type="button" id="drawerDirShort" onclick="setDrawerDirection('Short')" class="py-2 rounded-xl bg-slate-900 text-slate-400 font-bold text-xs uppercase transition border border-slate-800 hover:text-white flex items-center justify-center gap-1.5">
+              <span>📉</span>
+              <span>SHORT (Sell)</span>
+            </button>
+          </div>
+          <input type="hidden" id="drawer_direction" value="Long">
+        </div>
+
+        <!-- Symbol & Setup Grid -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Stock Symbol</label>
+            <input type="text" id="drawer_symbol" required placeholder="e.g. RELIANCE" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono font-bold uppercase focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Playbook Setup</label>
+            <select id="drawer_setup_name" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-white font-sans focus:outline-none focus:border-emerald-500">
+              <option value="1m Pullback to 9EMA">1m Pullback to 9EMA</option>
+              <option value="1m Breakout + VWAP Cross">1m Breakout + VWAP Cross</option>
+              <option value="Opening Range Breakout (ORB)">Opening Range Breakout (ORB)</option>
+              <option value="Liquidity Sweep Reversal">Liquidity Sweep Reversal</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Entry, Stop Loss & Quantity -->
+        <div class="grid grid-cols-3 gap-2.5 font-mono">
+          <div>
+            <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1 font-sans">Entry Price (₹)</label>
+            <input type="number" id="drawer_entry_price" step="0.05" required oninput="calcDrawerQuantParams()" placeholder="2500.00" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-white font-bold focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1 font-sans">Stop Loss (₹)</label>
+            <input type="number" id="drawer_stop_price" step="0.05" required oninput="calcDrawerQuantParams()" placeholder="2492.00" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-rose-300 font-bold focus:outline-none focus:border-rose-500">
+          </div>
+          <div>
+            <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1 font-sans">Exit Price (₹)</label>
+            <input type="number" id="drawer_exit_price" step="0.05" placeholder="Optional" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-emerald-300 font-bold focus:outline-none focus:border-emerald-500">
+          </div>
+        </div>
+
+        <!-- Calculated Parameters Banner (Position Sizing & RR) -->
+        <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-[11px] font-mono grid grid-cols-3 gap-2 text-center">
+          <div>
+            <span class="text-slate-500 block text-[9px] uppercase">Calculated Qty</span>
+            <span id="drawerQtyDisp" class="font-bold text-white text-xs">--</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block text-[9px] uppercase">Planned Target</span>
+            <span id="drawerTargetDisp" class="font-bold text-cyan-300 text-xs">--</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block text-[9px] uppercase">Planned RR</span>
+            <span id="drawerRRDisp" class="font-bold text-emerald-400 text-xs">&ge; 2.2R</span>
+          </div>
+        </div>
+
+        <!-- Mindset & Emotion Selection -->
+        <div>
+          <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1.5">Pre-Trade Mental State</label>
+          <div class="grid grid-cols-2 gap-2 text-xs font-sans">
+            <label class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-500 flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="drawerMentalState" value="Calm & Patient" checked class="text-emerald-500 focus:ring-0">
+              <span class="text-emerald-300 font-semibold">🟢 Calm &amp; Patient</span>
+            </label>
+            <label class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500 flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="drawerMentalState" value="Bored & Restless" class="text-amber-500 focus:ring-0">
+              <span class="text-amber-300 font-semibold">🟡 Bored / Restless</span>
+            </label>
+            <label class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-rose-500 flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="drawerMentalState" value="FOMO & Chasing" class="text-rose-500 focus:ring-0">
+              <span class="text-rose-300 font-semibold">🔴 FOMO / Chasing</span>
+            </label>
+            <label class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-purple-500 flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="drawerMentalState" value="Revenge & Frustrated" class="text-purple-500 focus:ring-0">
+              <span class="text-purple-300 font-semibold">🟣 Revenge / Tilt</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 5-Point Rule Checklist Strip -->
+        <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 text-[11px] space-y-1.5">
+          <span class="font-bold uppercase tracking-wider text-slate-400 text-[10px] block">Execution Guardrails (5/5 Checklist)</span>
+          <label class="flex items-center gap-2 text-slate-300 cursor-pointer">
+            <input type="checkbox" id="chk_drw_1" checked class="rounded bg-slate-950 border-slate-700 text-emerald-500">
+            <span>Trading Window active (09:15–10:30 AM IST)</span>
+          </label>
+          <label class="flex items-center gap-2 text-slate-300 cursor-pointer">
+            <input type="checkbox" id="chk_drw_2" checked class="rounded bg-slate-950 border-slate-700 text-emerald-500">
+            <span>Daily trade cap honored (&le; 2 trades today)</span>
+          </label>
+          <label class="flex items-center gap-2 text-slate-300 cursor-pointer">
+            <input type="checkbox" id="chk_drw_3" checked class="rounded bg-slate-950 border-slate-700 text-emerald-500">
+            <span>Stop loss defined before order submission</span>
+          </label>
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-extrabold text-xs uppercase tracking-wider transition shadow-xl shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer">
+          <span>🚀</span>
+          <span>Log Execution &amp; Sync Ledger</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- APPLICATION LOGIC SCRIPT -->
   <script>
     let startingCapital = 200000;
@@ -5546,8 +5856,226 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     }
 
     // --- Tab Switching (5 DEDICATED TABS) ---
+    
+    // ==========================================
+    // TRADESYNC PRO UI CONTROLLERS
+    // ==========================================
+    function toggleSidebarCollapse() {
+      const sidebar = document.getElementById('appSidebar');
+      const mainShell = document.getElementById('mainAppShell');
+      const icon = document.getElementById('sidebarToggleIcon');
+      if (!sidebar || !mainShell) return;
+
+      const isCollapsed = sidebar.classList.contains('sidebar-collapsed');
+      if (isCollapsed) {
+        sidebar.classList.remove('sidebar-collapsed');
+        sidebar.classList.remove('w-20');
+        sidebar.classList.add('w-64');
+        mainShell.classList.remove('md:ml-20');
+        mainShell.classList.add('md:ml-64');
+        if (icon) icon.textContent = '«';
+        localStorage.setItem('trader_sidebar_collapsed', 'false');
+      } else {
+        sidebar.classList.add('sidebar-collapsed');
+        sidebar.classList.remove('w-64');
+        sidebar.classList.add('w-20');
+        mainShell.classList.remove('md:ml-64');
+        mainShell.classList.add('md:ml-20');
+        if (icon) icon.textContent = '»';
+        localStorage.setItem('trader_sidebar_collapsed', 'true');
+      }
+    }
+
+    function initSidebarState() {
+      const saved = localStorage.getItem('trader_sidebar_collapsed');
+      if (saved === 'true') {
+        const sidebar = document.getElementById('appSidebar');
+        const mainShell = document.getElementById('mainAppShell');
+        const icon = document.getElementById('sidebarToggleIcon');
+        if (sidebar && mainShell) {
+          sidebar.classList.add('sidebar-collapsed');
+          sidebar.classList.remove('w-64');
+          sidebar.classList.add('w-20');
+          mainShell.classList.remove('md:ml-64');
+          mainShell.classList.add('md:ml-20');
+          if (icon) icon.textContent = '»';
+        }
+      }
+    }
+
+    function openTradeSyncSlideOver() {
+      const drawer = document.getElementById('tradeSyncSlideOverDrawer');
+      const backdrop = document.getElementById('tradeSyncDrawerBackdrop');
+      if (!drawer || !backdrop) return;
+      drawer.classList.remove('translate-x-full');
+      backdrop.classList.remove('hidden');
+      setTimeout(() => {
+        const sym = document.getElementById('drawer_symbol');
+        if (sym) sym.focus();
+      }, 100);
+    }
+
+    function closeTradeSyncSlideOver() {
+      const drawer = document.getElementById('tradeSyncSlideOverDrawer');
+      const backdrop = document.getElementById('tradeSyncDrawerBackdrop');
+      if (!drawer || !backdrop) return;
+      drawer.classList.add('translate-x-full');
+      backdrop.classList.add('hidden');
+    }
+
+    function setDrawerDirection(dir) {
+      const btnLong = document.getElementById('drawerDirLong');
+      const btnShort = document.getElementById('drawerDirShort');
+      const inputDir = document.getElementById('drawer_direction');
+      if (inputDir) inputDir.value = dir;
+
+      if (dir === 'Long') {
+        if (btnLong) btnLong.className = 'py-2 rounded-xl bg-emerald-600 text-white font-black text-xs uppercase transition border border-emerald-500 shadow-md flex items-center justify-center gap-1.5';
+        if (btnShort) btnShort.className = 'py-2 rounded-xl bg-slate-900 text-slate-400 font-bold text-xs uppercase transition border border-slate-800 hover:text-white flex items-center justify-center gap-1.5';
+      } else {
+        if (btnLong) btnLong.className = 'py-2 rounded-xl bg-slate-900 text-slate-400 font-bold text-xs uppercase transition border border-slate-800 hover:text-white flex items-center justify-center gap-1.5';
+        if (btnShort) btnShort.className = 'py-2 rounded-xl bg-rose-600 text-white font-black text-xs uppercase transition border border-rose-500 shadow-md flex items-center justify-center gap-1.5';
+      }
+      calcDrawerQuantParams();
+    }
+
+    function prefillDrawerTicker(symbol, price) {
+      const symInput = document.getElementById('drawer_symbol');
+      const entryInput = document.getElementById('drawer_entry_price');
+      const stopInput = document.getElementById('drawer_stop_price');
+      if (symInput) symInput.value = symbol;
+      if (entryInput) entryInput.value = price;
+      if (stopInput) stopInput.value = (price * 0.995).toFixed(2);
+      calcDrawerQuantParams();
+    }
+
+    function calcDrawerQuantParams() {
+      const entry = parseFloat(document.getElementById('drawer_entry_price').value) || 0;
+      const stop = parseFloat(document.getElementById('drawer_stop_price').value) || 0;
+      const dir = document.getElementById('drawer_direction').value || 'Long';
+
+      const riskPerShare = Math.abs(entry - stop);
+      const totalRiskBudget = startingCapital * riskModePercent;
+
+      if (riskPerShare > 0) {
+        const qty = Math.max(1, Math.floor(totalRiskBudget / riskPerShare));
+        const target = dir === 'Long' ? (entry + 2.2 * riskPerShare) : (entry - 2.2 * riskPerShare);
+
+        const elQty = document.getElementById('drawerQtyDisp');
+        const elTarget = document.getElementById('drawerTargetDisp');
+        const elRR = document.getElementById('drawerRRDisp');
+
+        if (elQty) elQty.textContent = `${qty} shares`;
+        if (elTarget) elTarget.textContent = `₹${target.toFixed(2)}`;
+        if (elRR) elRR.textContent = `2.20R (+₹${Math.round(qty * 2.2 * riskPerShare)})`;
+      }
+    }
+
+    async function submitTradeSyncDrawer(e) {
+      if (e && e.preventDefault) e.preventDefault();
+
+      const symbol = (document.getElementById('drawer_symbol').value || '').toUpperCase().trim();
+      const direction = document.getElementById('drawer_direction').value || 'Long';
+      const entry = parseFloat(document.getElementById('drawer_entry_price').value);
+      const stop = parseFloat(document.getElementById('drawer_stop_price').value);
+      const exit = parseFloat(document.getElementById('drawer_exit_price').value) || 0;
+      const setupName = document.getElementById('drawer_setup_name').value;
+
+      if (!symbol || isNaN(entry) || isNaN(stop)) {
+        alert("Please enter a valid Symbol, Entry Price, and Stop Loss.");
+        return;
+      }
+
+      const riskPerShare = Math.abs(entry - stop);
+      if (riskPerShare <= 0) {
+        alert("Stop Loss cannot equal Entry Price.");
+        return;
+      }
+
+      const riskAmt = startingCapital * riskModePercent;
+      const qty = Math.max(1, Math.floor(riskAmt / riskPerShare));
+      const target = direction === 'Long' ? (entry + 2.2 * riskPerShare) : (entry - 2.2 * riskPerShare);
+      const realizedExit = exit > 0 ? exit : target;
+
+      const mentalEl = document.querySelector('input[name="drawerMentalState"]:checked');
+      const mentalState = mentalEl ? mentalEl.value : 'Calm & Patient';
+
+      const now = new Date();
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      const payload = {
+        symbol: symbol,
+        direction: direction,
+        entry_price: entry,
+        stop_price: stop,
+        exit_price: realizedExit,
+        qty: qty,
+        setup_name: setupName,
+        date: today,
+        time: timeStr,
+        mental_state: mentalState,
+        emotion_before: mentalState.includes('Calm') ? 2 : (mentalState.includes('Bored') ? 5 : 8),
+        checklist_score: 5,
+        rule_violation: 'N',
+        rr_planned: 2.2,
+        lesson: `Logged via TradeSync Fast Drawer. Setup: ${setupName}`
+      };
+
+      try {
+        const res = await fetch('/api/trades', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          closeTradeSyncSlideOver();
+          if (typeof playWinChime === 'function') playWinChime();
+          if (typeof loadTrades === 'function') await loadTrades();
+          if (typeof renderAllChartsAndMetrics === 'function') renderAllChartsAndMetrics();
+          alert(`Trade ${data.trade ? data.trade.id : ''} (${symbol}) logged successfully!`);
+        } else {
+          alert('Error logging trade to server.');
+        }
+      } catch (err) {
+        console.error('Drawer trade submit error:', err);
+        alert('Connection error logging trade.');
+      }
+    }
+
     function switchTab(tabNum) {
       currentTab = tabNum;
+
+      // Synchronize TradeSync Sidebar Items
+      for (let s = 1; s <= 5; s++) {
+        const sideNav = document.getElementById(`sidebarNav_${s}`);
+        if (sideNav) {
+          if (s === tabNum) {
+            sideNav.classList.add('active');
+            sideNav.classList.remove('text-slate-400');
+            sideNav.classList.add('text-white');
+          } else {
+            sideNav.classList.remove('active');
+            sideNav.classList.add('text-slate-400');
+            sideNav.classList.remove('text-white');
+          }
+        }
+      }
+
+      // Synchronize Top Bar View Title
+      const titleMap = {
+        1: { icon: '📊', title: 'Dashboard Overview & Scorecard' },
+        2: { icon: '📈', title: 'Performance Curves & Edge Metrics' },
+        3: { icon: '🎯', title: 'Attribution, Leaks & Strategy Matrix' },
+        4: { icon: '🎲', title: 'Quant Risk & Monte Carlo Simulation' },
+        5: { icon: '📡', title: '1-Minute Chartink Webhook Radar' }
+      };
+      const titleEl = document.getElementById('topBarViewTitle');
+      if (titleEl && titleMap[tabNum]) {
+        titleEl.innerHTML = `<span>${titleMap[tabNum].icon}</span><span>${titleMap[tabNum].title}</span>`;
+      }
 
       // Synchronize dropdown selector
       const dropdown = document.getElementById('tabSelectorDropdown');
@@ -8082,6 +8610,69 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         document.getElementById('statEfficiencyDesc').textContent = efficiencyScore >= 75 ? 'Optimal Hold Target' : 'Check for Early Exits';
 
         document.getElementById('statDisciplineScore').textContent = `${disciplineScore}%`;
+
+        // Update TradeSync Executive KPI Strip
+        const kpiNet = document.getElementById('kpiNetPnL');
+        const kpiBadge = document.getElementById('kpiNetPnLBadge');
+        if (kpiNet) {
+          kpiNet.textContent = '₹' + totalNet.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          kpiNet.className = totalNet >= 0 ? 'text-2xl lg:text-3xl font-black font-mono text-emerald-400 mt-2' : 'text-2xl lg:text-3xl font-black font-mono text-rose-400 mt-2';
+          if (kpiBadge) {
+            const roiPct = startingCapital > 0 ? ((totalNet / startingCapital) * 100).toFixed(2) : '0.00';
+            kpiBadge.textContent = (totalNet >= 0 ? '+' : '') + roiPct + '% ROI';
+            kpiBadge.className = totalNet >= 0 ? 'text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300' : 'text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300';
+          }
+          const kpiSub = document.getElementById('kpiGrossCostSub');
+          if (kpiSub) kpiSub.textContent = 'Gross: ₹' + Math.round(totalGross).toLocaleString('en-IN') + ' • Taxes/Charges: ₹' + Math.round(totalCosts).toLocaleString('en-IN');
+        }
+
+        const kpiWR = document.getElementById('kpiWinRate');
+        if (kpiWR) {
+          kpiWR.textContent = winRate.toFixed(1) + '%';
+          const wlCount = document.getElementById('kpiWinLossCount');
+          if (wlCount) wlCount.textContent = totalWins + 'W - ' + totalLosses + 'L (' + (trades.length - totalClosed) + ' BE)';
+          const wrBar = document.getElementById('kpiWinRateBar');
+          const lrBar = document.getElementById('kpiLossRateBar');
+          if (wrBar && lrBar) {
+            wrBar.style.width = winRate + '%';
+            lrBar.style.width = (100 - winRate) + '%';
+          }
+        }
+
+        const kpiPF = document.getElementById('kpiProfitFactor');
+        if (kpiPF) {
+          kpiPF.textContent = profitFactor.toFixed(2);
+          const pfBadge = document.getElementById('kpiPFBadge');
+          if (pfBadge) {
+            pfBadge.textContent = profitFactor >= 2.0 ? 'Tier 1 Edge' : (profitFactor >= 1.2 ? 'Moderate' : 'Low PF');
+            pfBadge.className = profitFactor >= 2.0 ? 'text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300' : 'text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300';
+          }
+          const kpiExp = document.getElementById('kpiExpectancySub');
+          if (kpiExp) kpiExp.textContent = 'Expectancy: ' + (expectancyR >= 0 ? '+' : '') + expectancyR.toFixed(2) + 'R • Net: ' + (totalRealizedR >= 0 ? '+' : '') + totalRealizedR.toFixed(2) + 'R';
+        }
+
+        const kpiDisc = document.getElementById('kpiDisciplineScore');
+        if (kpiDisc) {
+          kpiDisc.textContent = disciplineScore + '%';
+          const demSub = document.getElementById('kpiDemeritsSub');
+          if (demSub) demSub.textContent = violations + ' Violations • Max 2 Trades Ceiling';
+        }
+
+        // Update Top Bar Today Net P&L Pill
+        const todayStr = typeof getTodayLocalDateStr === 'function' ? getTodayLocalDateStr() : new Date().toISOString().split('T')[0];
+        const todayTrades = tradesData.filter(t => t.date === todayStr);
+        const todayNet = todayTrades.reduce((acc, t) => acc + (parseFloat(t.net_pnl) || 0), 0);
+        const todayR = todayTrades.reduce((acc, t) => acc + (parseFloat(t.r_multiple) || 0), 0);
+
+        const topVal = document.getElementById('topBarTodayPnLValue');
+        const topR = document.getElementById('topBarTodayRValue');
+        if (topVal && topR) {
+          topVal.textContent = (todayNet >= 0 ? '+₹' : '-₹') + Math.abs(todayNet).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          topVal.className = todayNet >= 0 ? 'font-black text-emerald-400' : 'font-black text-rose-400';
+          topR.textContent = '(' + (todayR >= 0 ? '+' : '') + todayR.toFixed(2) + 'R)';
+          topR.className = todayNet >= 0 ? 'text-[10px] text-blue-300 font-bold' : 'text-[10px] text-rose-300 font-bold';
+        }
+
         document.getElementById('statViolationsCount').textContent = `${violations} Violations`;
 
         const longTotal = longWins + longLosses;
@@ -9238,6 +9829,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
       // Initialize Dashboard Visibility Customizer
       applyDashboardVisibility();
+      initSidebarState();
     });
 
     // ==========================================
@@ -10514,6 +11106,16 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         return;
       }
 
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'b' || e.key === 'B')) {
+        e.preventDefault();
+        toggleSidebarCollapse();
+        return;
+      }
+      if ((e.key === 't' || e.key === 'T') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        openTradeSyncSlideOver();
+        return;
+      }
       if ((e.key === 'v' || e.key === 'V') && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
         openDashboardCustomizerModal();
