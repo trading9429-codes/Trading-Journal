@@ -4355,6 +4355,65 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       return todayTrades.length >= 2 || todayLosses.length >= 2;
     }
 
+    // --- Robust Date & Weekday Parser (Prevents UTC day shift & format discrepancies) ---
+    function getTradeWeekday(dateStr, fallbackDay) {
+      if (dateStr && typeof dateStr === 'string') {
+        const s = dateStr.trim();
+        const validDayMap = {
+          'monday': 'Mon', 'mon': 'Mon',
+          'tuesday': 'Tue', 'tue': 'Tue',
+          'wednesday': 'Wed', 'wed': 'Wed',
+          'thursday': 'Thu', 'thu': 'Thu',
+          'friday': 'Fri', 'fri': 'Fri',
+          'saturday': 'Sat', 'sat': 'Sat',
+          'sunday': 'Sun', 'sun': 'Sun'
+        };
+        if (validDayMap[s.toLowerCase()]) {
+          return validDayMap[s.toLowerCase()];
+        }
+
+        // 1. YYYY-MM-DD or YYYY/MM/DD (Local Date constructor avoids UTC midnight day-shift)
+        const isoMatch = s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+        if (isoMatch) {
+          const y = parseInt(isoMatch[1], 10);
+          const m = parseInt(isoMatch[2], 10) - 1;
+          const d = parseInt(isoMatch[3], 10);
+          const dt = new Date(y, m, d);
+          if (!isNaN(dt.getTime())) {
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            return days[dt.getDay()];
+          }
+        }
+
+        // 2. DD-MM-YYYY or DD/MM/YYYY (Indian date format)
+        const dmyMatch = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+        if (dmyMatch) {
+          const d = parseInt(dmyMatch[1], 10);
+          const m = parseInt(dmyMatch[2], 10) - 1;
+          const y = parseInt(dmyMatch[3], 10);
+          const dt = new Date(y, m, d);
+          if (!isNaN(dt.getTime())) {
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            return days[dt.getDay()];
+          }
+        }
+
+        // 3. Fallback generic Date parse
+        const genDt = new Date(s);
+        if (!isNaN(genDt.getTime())) {
+          const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+          return days[genDt.getDay()];
+        }
+      }
+
+      if (fallbackDay && typeof fallbackDay === 'string') {
+        const fb = fallbackDay.trim().slice(0, 3);
+        const cap = fb.charAt(0).toUpperCase() + fb.slice(1).toLowerCase();
+        if (['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].includes(cap)) return cap;
+      }
+      return 'Mon';
+    }
+
     // --- FYERS Intraday Equity Statutory Charges Exact Formula ---
     function computeFyersCharges(buyTurnover, sellTurnover) {
       const totalTurnover = buyTurnover + sellTurnover;
@@ -4577,31 +4636,30 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     }
 
     function checkDailyCircuitBreaker() {
-      const todayStr = new Date().toISOString().split('T')[0];
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       const todayTrades = tradesData.filter(t => t.date === todayStr);
       const todayLosses = todayTrades.filter(t => t.outcome === 'Loss');
       
       const headerStatus = document.getElementById('headerDailyStatusText');
       const headerBadge = document.getElementById('headerKillSwitchBadge');
       const cbBanner = document.getElementById('circuitBreakerBanner');
-      const cbReason = document.getElementById('circuitReasonText');
+      const cbReasonEl = document.getElementById('circuitReasonText');
 
-      headerStatus.textContent = `Today: ${todayTrades.length}/2 Trades (${todayLosses.length} Loss)`;
+      if (headerStatus) headerStatus.textContent = `Today: ${todayTrades.length}/2 Trades (${todayLosses.length} Loss)`;
 
       if (todayTrades.length >= 2 || todayLosses.length >= 2) {
-        cbBanner.classList.remove('hidden');
-        const cbReason = todayLosses.length >= 2 ? "2 Losses Daily Limit" : "2 Trades Daily Limit";
-        dispatchAccountabilityAlert("KILL_SWITCH", { reason: cbReason });
-        triggerTiltBreakerLockout(cbReason);
-        if (todayLosses.length >= 2) {
-          cbReason.textContent = "2 Losses Max Hit for the Day";
-        } else {
-          cbReason.textContent = "2 Trades Max Hit for the Day";
+        if (cbBanner) cbBanner.classList.remove('hidden');
+        const reasonStr = todayLosses.length >= 2 ? "2 Losses Daily Limit Hit" : "2 Trades Daily Limit Hit";
+        dispatchAccountabilityAlert("KILL_SWITCH", { reason: reasonStr });
+        triggerTiltBreakerLockout(reasonStr);
+        if (cbReasonEl) {
+          cbReasonEl.textContent = todayLosses.length >= 2 ? "2 Losses Max Hit for the Day (Mandatory Hard Quit)" : "2 Trades Max Hit for the Day (Execution Window Closed)";
         }
-        headerBadge.className = 'px-2.5 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 font-bold flex items-center gap-1.5 animate-pulse';
+        if (headerBadge) headerBadge.className = 'px-2.5 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 font-bold flex items-center gap-1.5 animate-pulse';
       } else {
-        cbBanner.classList.add('hidden');
-        headerBadge.className = 'px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-medium flex items-center gap-1.5';
+        if (cbBanner) cbBanner.classList.add('hidden');
+        if (headerBadge) headerBadge.className = 'px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-medium flex items-center gap-1.5';
       }
     }
 
@@ -4681,16 +4739,18 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
     function getFilteredTrades() {
       let filtered = [...tradesData];
-      const today = new Date();
-      const todayStr = today.toISOString().split('T')[0];
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
       if (activeDateFilter === 'TODAY') {
         filtered = filtered.filter(t => t.date === todayStr);
       } else if (activeDateFilter === '7D') {
-        const cutoff = new Date(today.getTime() - 7 * 86400000).toISOString().split('T')[0];
+        const d7 = new Date(now.getTime() - 7 * 86400000);
+        const cutoff = `${d7.getFullYear()}-${String(d7.getMonth() + 1).padStart(2, '0')}-${String(d7.getDate()).padStart(2, '0')}`;
         filtered = filtered.filter(t => t.date >= cutoff);
       } else if (activeDateFilter === '30D') {
-        const cutoff = new Date(today.getTime() - 30 * 86400000).toISOString().split('T')[0];
+        const d30 = new Date(now.getTime() - 30 * 86400000);
+        const cutoff = `${d30.getFullYear()}-${String(d30.getMonth() + 1).padStart(2, '0')}-${String(d30.getDate()).padStart(2, '0')}`;
         filtered = filtered.filter(t => t.date >= cutoff);
       }
 
@@ -4853,7 +4913,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const tradeObj = {
         id: `T-${String(tradesData.length + 1).padStart(3, '0')}`,
         date: date,
-        day: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
+        day: getTradeWeekday(date),
         time: time,
         exit_time: exitTime || time,
         hold_duration: holdDuration,
@@ -5989,7 +6049,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         return `
           <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 cursor-pointer" onclick="openTradeModal('${t.id}')">
             <td class="py-2.5 px-3 font-bold text-blue-400">${t.id}</td>
-            <td class="py-2.5 px-3 text-slate-400 font-sans text-[11px]">${t.date} <span class="text-slate-500">&bull;</span> ${t.time}</td>
+            <td class="py-2.5 px-3 text-slate-400 font-sans text-[11px]">${t.date} <span class="text-emerald-400/80 font-mono text-[10px] font-bold">(${getTradeWeekday(t.date, t.day)})</span> <span class="text-slate-500">&bull;</span> ${t.time}</td>
             <td class="py-2.5 px-3 font-bold text-white flex items-center gap-1.5">${t.symbol} ${t.screenshot ? '<span class="text-[11px]" title="Chart attached">📷</span>' : ''}</td>
             <td class="py-2.5 px-3">
               <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${t.direction === 'Long' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-rose-950 text-rose-400 border border-rose-800'}">
@@ -6056,7 +6116,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           Execution: ${tradeGrade.grade} (${tradeGrade.label})
         </span>
       `;
-      document.getElementById('modalTradeSubtitle').textContent = `${trade.date} (${trade.day || ''}) &bull; ${trade.time} IST &bull; Setup: ${trade.setup_name || 'Standard'}`;
+      document.getElementById('modalTradeSubtitle').textContent = `${trade.date} (${getTradeWeekday(trade.date, trade.day)}) &bull; ${trade.time} IST &bull; Setup: ${trade.setup_name || 'Standard'}`;
 
       document.getElementById('modalGrossPnL').textContent = `₹${Number(trade.gross_pnl || 0).toFixed(2)}`;
       document.getElementById('modalCosts').textContent = `₹${Number(trade.costs || 0).toFixed(2)}`;
@@ -6482,7 +6542,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           pendingFyersTrades.push({
             id: `FYERS-${String(tradesData.length + pendingFyersTrades.length + 1).padStart(3, '0')}`,
             date: today,
-            day: 'Intraday',
+            day: getTradeWeekday(today),
             time: buyEx.time.length <= 8 ? buyEx.time : '09:30',
             exit_time: sellEx.time.length <= 8 ? sellEx.time : '09:38',
             hold_duration: 8,
@@ -6662,14 +6722,16 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         tiltBuckets[bIdx].totalR += r;
         if (net > 0) tiltBuckets[bIdx].wins++;
 
-        const cleanDay = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].includes(dayStr) ? dayStr : 'Tue';
-        weekdayMatrix[cleanDay].count++;
-        weekdayMatrix[cleanDay].netPnL += net;
-        if (net > 0) {
-          weekdayMatrix[cleanDay].wins++;
-          weekdayMatrix[cleanDay].grossWin += net;
-        } else if (net < 0) {
-          weekdayMatrix[cleanDay].grossLoss += Math.abs(net);
+        const cleanDay = getTradeWeekday(t.date, t.day);
+        if (weekdayMatrix[cleanDay]) {
+          weekdayMatrix[cleanDay].count++;
+          weekdayMatrix[cleanDay].netPnL += net;
+          if (net > 0) {
+            weekdayMatrix[cleanDay].wins++;
+            weekdayMatrix[cleanDay].grossWin += net;
+          } else if (net < 0) {
+            weekdayMatrix[cleanDay].grossLoss += Math.abs(net);
+          }
         }
 
         if (t.rule_violation === 'Y' || (t.checklist_score && t.checklist_score < 5)) {
@@ -6684,9 +6746,11 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const disciplineScore = trades.length > 0 ? Math.round(((trades.length - violations) / trades.length) * 100) : 100;
       const efficiencyScore = totalPlannedRR > 0 ? Math.max(0, Math.min(100, Math.round((Math.max(0, totalRealizedR) / totalPlannedRR) * 100))) : 0;
 
-      // Kelly Criterion
-      const avgWinR = winHoldCount > 0 ? (grossProfit / (totalWins * (startingCapital * riskModePercent))) : 2.0;
-      const avgLossR = lossHoldCount > 0 ? (grossLoss / (totalLosses * (startingCapital * riskModePercent))) : 1.0;
+      // Kelly Criterion (computed using actual realized trade R-multiples)
+      const winTrades = trades.filter(t => (parseFloat(t.net_pnl) || 0) > 0);
+      const lossTrades = trades.filter(t => (parseFloat(t.net_pnl) || 0) < 0);
+      const avgWinR = winTrades.length > 0 ? (winTrades.reduce((sum, t) => sum + Math.max(0, parseFloat(t.r_multiple) || 0), 0) / winTrades.length) : 2.0;
+      const avgLossR = lossTrades.length > 0 ? (lossTrades.reduce((sum, t) => sum + Math.abs(parseFloat(t.r_multiple) || 0), 0) / lossTrades.length) : 1.0;
       const payoffB = avgLossR > 0 ? (avgWinR / avgLossR) : 2.0;
       const pWin = totalClosed > 0 ? (totalWins / totalClosed) : 0.55;
       const pLoss = 1.0 - pWin;
@@ -6873,35 +6937,41 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       // Weekday Matrix
       const weekdayTbody = document.getElementById('weekdayMatrixBody');
       if (weekdayTbody) {
-        let bestDay = 'Tue';
+        let bestDay = 'None';
         let worstDay = 'None';
-        let maxDayPnL = -999999;
-        let minDayPnL = 999999;
+        let maxDayPnL = -Infinity;
+        let minDayPnL = 0;
 
         weekdayTbody.innerHTML = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map(day => {
           const item = weekdayMatrix[day];
           const wr = item.count > 0 ? Math.round((item.wins / item.count) * 100) : 0;
-          const pf = item.grossLoss > 0 ? (item.grossWin / item.grossLoss).toFixed(2) : (item.grossWin > 0 ? '99.0' : '0.00');
+          const pf = item.grossLoss > 0 ? (item.grossWin / item.grossLoss).toFixed(2) : (item.grossWin > 0 ? '99.0' : (item.count > 0 ? '0.00' : '--'));
           const pnl = Math.round(item.netPnL);
 
-          if (pnl > maxDayPnL && item.count > 0) { maxDayPnL = pnl; bestDay = day; }
-          if (pnl < minDayPnL && item.count > 0 && pnl < 0) { minDayPnL = pnl; worstDay = day; }
+          if (item.count > 0 && pnl > maxDayPnL) {
+            maxDayPnL = pnl;
+            bestDay = day;
+          }
+          if (item.count > 0 && pnl < minDayPnL) {
+            minDayPnL = pnl;
+            worstDay = day;
+          }
 
           return `
             <tr class="border-b border-slate-800/40">
               <td class="py-2.5 px-3 font-semibold text-white font-sans">${day}</td>
-              <td class="py-2.5 px-1 text-center text-slate-300">${item.count}</td>
-              <td class="py-2.5 px-1 text-center font-bold ${wr >= 50 ? 'text-emerald-400' : 'text-amber-400'}">${wr}%</td>
-              <td class="py-2.5 px-1 text-center text-blue-400 font-bold">${pf}</td>
-              <td class="py-2.5 px-2.5 text-right font-bold ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}">₹${pnl.toLocaleString('en-IN')}</td>
+              <td class="py-2.5 px-1 text-center font-mono ${item.count > 0 ? 'text-white' : 'text-slate-500'}">${item.count}</td>
+              <td class="py-2.5 px-1 text-center font-bold font-mono ${item.count === 0 ? 'text-slate-500' : (wr >= 50 ? 'text-emerald-400' : 'text-amber-400')}">${item.count > 0 ? wr + '%' : '--'}</td>
+              <td class="py-2.5 px-1 text-center font-bold font-mono ${item.count === 0 ? 'text-slate-500' : 'text-blue-400'}">${pf}</td>
+              <td class="py-2.5 px-2.5 text-right font-bold font-mono ${item.count === 0 ? 'text-slate-500' : (pnl >= 0 ? 'text-emerald-400' : 'text-rose-400')}">${item.count > 0 ? (pnl >= 0 ? '+' : '') + '₹' + pnl.toLocaleString('en-IN') : '₹0'}</td>
             </tr>
           `;
         }).join('');
 
         const bestDayElem = document.getElementById('bestWeekdayText');
-        if (bestDayElem) bestDayElem.textContent = bestDay;
+        if (bestDayElem) bestDayElem.textContent = bestDay !== 'None' ? `${bestDay} (+₹${Math.round(maxDayPnL).toLocaleString('en-IN')})` : 'None';
         const worstDayElem = document.getElementById('worstWeekdayText');
-        if (worstDayElem) worstDayElem.textContent = worstDay;
+        if (worstDayElem) worstDayElem.textContent = worstDay !== 'None' ? `${worstDay} (₹${Math.round(minDayPnL).toLocaleString('en-IN')})` : 'None';
       }
 
       // Update Standard Metrics in DOM
@@ -8209,10 +8279,11 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         const risk = entry * 0.003 * matchedQty;
         const rMult = risk > 0 ? (netPnL / risk) : 0;
 
+        const fillDate = (firstFill.orderDateTime || new Date().toISOString()).split(" ")[0];
         const tradeObj = {
           id: `T-${String(tradesData.length + 1).padStart(3, '0')}`,
-          date: (firstFill.orderDateTime || new Date().toISOString()).split(" ")[0],
-          day: new Date().toLocaleDateString('en-US', { weekday: 'short' }),
+          date: fillDate,
+          day: getTradeWeekday(fillDate),
           time: (firstFill.orderDateTime || "").split(" ")[1] ? firstFill.orderDateTime.split(" ")[1].slice(0, 5) : "09:25",
           exit_time: "10:15",
           hold_duration: 8,
@@ -9586,6 +9657,18 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       if (demEl) {
         demEl.textContent = breaches;
         demEl.className = 'font-mono font-bold text-base ' + (breaches === 0 ? 'text-emerald-400' : 'text-rose-400');
+      }
+
+      const maxDDEl = document.getElementById('dossierMaxDD');
+      if (maxDDEl) {
+        let peakR = 0, currentR = 0, maxDDR = 0;
+        trades.forEach(t => {
+          currentR += (parseFloat(t.r_multiple) || 0);
+          if (currentR > peakR) peakR = currentR;
+          const dd = peakR - currentR;
+          if (dd > maxDDR) maxDDR = dd;
+        });
+        maxDDEl.textContent = `${maxDDR.toFixed(2)}R`;
       }
 
       // Populate Strategy Table

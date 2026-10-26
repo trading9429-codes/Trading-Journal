@@ -2,7 +2,7 @@
   {
     "id": "T-001",
     "date": "2026-10-23",
-    "day": "Mon",
+    "day": "Fri",
     "time": "09:18",
     "exit_time": "09:38",
     "hold_duration": 8,
@@ -39,7 +39,7 @@
   {
     "id": "T-002",
     "date": "2026-10-23",
-    "day": "Mon",
+    "day": "Fri",
     "time": "09:16",
     "exit_time": "09:38",
     "hold_duration": 8,

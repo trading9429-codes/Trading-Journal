@@ -230,6 +230,38 @@ DEFAULT_TRADES = [
     }
 ]
 
+def get_weekday_from_date(date_str: str, fallback: str = "Mon") -> str:
+    """Safely and accurately extracts 3-letter weekday (Mon, Tue, Wed, Thu, Fri, Sat, Sun)."""
+    if not date_str:
+        return fallback or "Mon"
+    date_str = str(date_str).strip()
+    
+    day_map = {
+        "monday": "Mon", "mon": "Mon",
+        "tuesday": "Tue", "tue": "Tue",
+        "wednesday": "Wed", "wed": "Wed",
+        "thursday": "Thu", "thu": "Thu",
+        "friday": "Fri", "fri": "Fri",
+        "saturday": "Sat", "sat": "Sat",
+        "sunday": "Sun", "sun": "Sun"
+    }
+    if date_str.lower() in day_map:
+        return day_map[date_str.lower()]
+
+    for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%Y/%m/%d", "%d.%m.%Y", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"):
+        try:
+            return datetime.strptime(date_str, fmt).strftime("%a")
+        except ValueError:
+            pass
+
+    try:
+        from dateutil import parser
+        return parser.parse(date_str).strftime("%a")
+    except Exception:
+        pass
+
+    return fallback or "Mon"
+
 class ExcelTradeManager:
     def __init__(self):
         self.trades = self._load_data()
@@ -242,6 +274,9 @@ class ExcelTradeManager:
             _, remote_trades, err = get_remote_file_info()
             if remote_trades and isinstance(remote_trades, list) and len(remote_trades) > 0:
                 print(f"[Cloud Backup] Loaded {len(remote_trades)} trades from GitHub backup.")
+                for t in remote_trades:
+                    if isinstance(t, dict):
+                        t["day"] = get_weekday_from_date(t.get("date"), t.get("day"))
                 self._save_local(remote_trades)
                 return remote_trades
         except Exception as e:
@@ -253,6 +288,9 @@ class ExcelTradeManager:
                 with open(DATA_JSON_PATH, "r") as f:
                     data = json.load(f)
                     if isinstance(data, list):
+                        for t in data:
+                            if isinstance(t, dict):
+                                t["day"] = get_weekday_from_date(t.get("date"), t.get("day"))
                         return data
             except Exception:
                 pass
@@ -287,7 +325,7 @@ class ExcelTradeManager:
         date_str = str(payload.get("date") or now.strftime("%Y-%m-%d"))
         time_str = str(payload.get("time") or now.strftime("%H:%M"))
         exit_time_str = str(payload.get("exit_time") or time_str)
-        day_str = datetime.strptime(date_str, "%Y-%m-%d").strftime("%a") if date_str else "Mon"
+        day_str = get_weekday_from_date(date_str, payload.get("day"))
         
         setup_name = str(payload.get("setup_name") or "1m Indicator Setup")
         scanner_time = str(payload.get("scanner_alert_time") or time_str)
@@ -387,6 +425,9 @@ class ExcelTradeManager:
         return {"status": "ok", "message": "Defaults reloaded."}
 
     def set_trades(self, trades_list):
+        for t in trades_list:
+            if isinstance(t, dict):
+                t["day"] = get_weekday_from_date(t.get("date"), t.get("day"))
         self.trades = list(trades_list)
         self._save_data(self.trades)
         self.sync_excel_file()
