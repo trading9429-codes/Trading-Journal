@@ -3368,7 +3368,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     <div class="glass-card rounded-2xl w-full max-w-2xl border border-emerald-500/30 shadow-2xl p-6 relative max-h-[92vh] overflow-y-auto bg-slate-950">
       
       <!-- Top Action Bar -->
-      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-3">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-emerald-500/20">
             🏆
@@ -3380,7 +3380,15 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             <p class="text-xs text-slate-400">Institutional execution summary &amp; high-res export</p>
           </div>
         </div>
-        <button onclick="closeEODCardModal()" class="text-slate-400 hover:text-white text-2xl font-bold p-1">&times;</button>
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5 bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-1">
+            <span class="text-[11px] text-slate-400 font-medium">Session:</span>
+            <select id="eodDateSelector" onchange="renderEODScorecard(this.value)" class="bg-transparent text-emerald-400 text-xs font-mono font-bold focus:outline-none cursor-pointer">
+              <!-- Dynamically populated with Today and session dates -->
+            </select>
+          </div>
+          <button onclick="closeEODCardModal()" class="text-slate-400 hover:text-white text-2xl font-bold p-1 leading-none">&times;</button>
+        </div>
       </div>
 
       <!-- Preview Scorecard Card Container -->
@@ -3391,7 +3399,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             <h4 class="text-sm font-black text-white uppercase tracking-wider">NSE Intraday Reset &bull; Daily Audit</h4>
             <p class="text-[11px] text-slate-400 font-mono" id="eodCardDateText">Today &bull; Phase 2 (Days 4–10)</p>
           </div>
-          <span class="self-start sm:self-auto px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+          <span id="eodCardVerifiedBadge" class="self-start sm:self-auto px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
             <span>🛡️</span>
             <span>DISCIPLINE VERIFIED</span>
           </span>
@@ -3412,27 +3420,16 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             <span id="eodCardDiscipline" class="text-base font-black font-mono text-blue-400 mt-1 block">100%</span>
           </div>
           <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-800/80">
-            <span class="text-[10px] text-slate-400 uppercase font-semibold block">Strikes</span>
-            <span id="eodCardStrikes" class="text-base font-black font-mono text-emerald-400 mt-1 block">0 / 3</span>
+            <span class="text-[10px] text-slate-400 uppercase font-semibold block">Daily Breaches</span>
+            <span id="eodCardStrikes" class="text-base font-black font-mono text-emerald-400 mt-1 block">0 Daily</span>
           </div>
         </div>
 
         <!-- Rules Checklist -->
         <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-1.5 text-xs">
           <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Execution Guardrails:</span>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-            <div class="flex items-center gap-1.5 text-slate-300">
-              <span class="text-emerald-400 font-bold">✓</span> Max 2 Trades/Day Rule Honored
-            </div>
-            <div class="flex items-center gap-1.5 text-slate-300">
-              <span class="text-emerald-400 font-bold">✓</span> Stop Loss Set &amp; Never Widened
-            </div>
-            <div class="flex items-center gap-1.5 text-slate-300">
-              <span class="text-emerald-400 font-bold">✓</span> Window Respected (09:15–10:30 AM)
-            </div>
-            <div class="flex items-center gap-1.5 text-slate-300">
-              <span class="text-emerald-400 font-bold">✓</span> Planned RR &ge; 2.2 Target Met
-            </div>
+          <div id="eodCardRulesList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+            <!-- Dynamically populated based on selected session -->
           </div>
         </div>
 
@@ -8962,14 +8959,73 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     // ==========================================
     // 3. 1-CLICK EOD PERFORMANCE SHARE CARD & PNG EXPORTER
     // ==========================================
-    function openEODCardModal() {
+    let activeScorecardDate = null;
+
+    function getTodayLocalDateStr() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
+
+    function openEODCardModal(forcedDate) {
       const modal = document.getElementById('eodScorecardModal');
       if (!modal) return;
 
-      const totalNetPnL = tradesData.reduce((acc, t) => acc + (parseFloat(t.net_pnl) || 0), 0);
-      const totalR = tradesData.reduce((acc, t) => acc + (parseFloat(t.r_multiple) || 0), 0);
-      const discTrades = tradesData.filter(t => t.rule_violation !== 'Y' && (!t.checklist_score || t.checklist_score >= 5)).length;
-      const discPct = tradesData.length > 0 ? Math.round((discTrades / tradesData.length) * 100) : 100;
+      const todayStr = getTodayLocalDateStr();
+      const uniqueDates = Array.from(new Set(tradesData.map(t => t.date).filter(Boolean))).sort().reverse();
+
+      if (forcedDate) {
+        activeScorecardDate = forcedDate;
+      } else {
+        // Prioritize today if it has trades, otherwise latest session date or today
+        if (tradesData.some(t => t.date === todayStr)) {
+          activeScorecardDate = todayStr;
+        } else if (uniqueDates.length > 0) {
+          activeScorecardDate = uniqueDates[0];
+        } else {
+          activeScorecardDate = todayStr;
+        }
+      }
+
+      const sel = document.getElementById('eodDateSelector');
+      if (sel) {
+        let optionsHtml = '';
+        const todayTrades = tradesData.filter(t => t.date === todayStr);
+        optionsHtml += `<option value="${todayStr}">Today (${todayStr})${todayTrades.length ? ` • ${todayTrades.length} trade${todayTrades.length > 1 ? 's' : ''}` : ' (0 trades)'}</option>`;
+
+        uniqueDates.forEach(d => {
+          if (d !== todayStr) {
+            const count = tradesData.filter(t => t.date === d).length;
+            optionsHtml += `<option value="${d}">${d} • ${count} trade${count > 1 ? 's' : ''}</option>`;
+          }
+        });
+        optionsHtml += `<option value="ALL">All Historical Sessions (${tradesData.length} trades)</option>`;
+        sel.innerHTML = optionsHtml;
+        sel.value = activeScorecardDate;
+      }
+
+      renderEODScorecard(activeScorecardDate);
+      modal.classList.remove('hidden');
+    }
+
+    function closeEODCardModal() {
+      const modal = document.getElementById('eodScorecardModal');
+      if (!modal) return;
+      modal.classList.add('hidden');
+    }
+
+    function renderEODScorecard(selectedDate) {
+      activeScorecardDate = selectedDate || getTodayLocalDateStr();
+      const todayStr = getTodayLocalDateStr();
+
+      const sessionTrades = (activeScorecardDate === 'ALL')
+        ? [...tradesData]
+        : tradesData.filter(t => t.date === activeScorecardDate);
+
+      const totalNetPnL = sessionTrades.reduce((acc, t) => acc + (parseFloat(t.net_pnl) || 0), 0);
+      const totalR = sessionTrades.reduce((acc, t) => acc + (parseFloat(t.r_multiple) || 0), 0);
+      const discTrades = sessionTrades.filter(t => t.rule_violation !== 'Y' && (!t.checklist_score || t.checklist_score >= 5)).length;
+      const discPct = sessionTrades.length > 0 ? Math.round((discTrades / sessionTrades.length) * 100) : 100;
+      const sessionViolations = sessionTrades.filter(t => t.rule_violation === 'Y').length;
 
       const pnlElem = document.getElementById('eodCardNetPnL');
       if (pnlElem) {
@@ -8984,23 +9040,94 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       }
 
       const discElem = document.getElementById('eodCardDiscipline');
-      if (discElem) discElem.textContent = `${discPct}%`;
+      if (discElem) {
+        discElem.textContent = `${discPct}%`;
+        discElem.className = discPct >= 90 ? 'text-base font-black font-mono text-emerald-400 mt-1 block' : 'text-base font-black font-mono text-amber-400 mt-1 block';
+      }
 
       const strikesElem = document.getElementById('eodCardStrikes');
-      if (strikesElem) strikesElem.textContent = `${penaltyStrikes} / 3`;
+      if (strikesElem) {
+        if (activeScorecardDate === 'ALL') {
+          strikesElem.textContent = `${penaltyStrikes} / 3 Total`;
+          strikesElem.className = penaltyStrikes === 0 ? 'text-base font-black font-mono text-emerald-400 mt-1 block' : 'text-base font-black font-mono text-rose-400 mt-1 block';
+        } else {
+          strikesElem.textContent = `${sessionViolations} Daily`;
+          strikesElem.className = sessionViolations === 0 ? 'text-base font-black font-mono text-emerald-400 mt-1 block' : 'text-base font-black font-mono text-rose-400 mt-1 block';
+        }
+      }
 
       const dateElem = document.getElementById('eodCardDateText');
       if (dateElem) {
-        const todayStr = new Date().toLocaleDateString('en-IN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-        dateElem.textContent = `${todayStr} • Phase ${activePhase} (Day ${currentDayNumber})`;
+        if (activeScorecardDate === 'ALL') {
+          dateElem.textContent = `All-Time Performance Audit (${sessionTrades.length} trades) • Phase ${activePhase} (Day ${currentDayNumber})`;
+        } else {
+          const dParts = activeScorecardDate.split('-');
+          let formattedDate = activeScorecardDate;
+          if (dParts.length === 3) {
+            const dObj = new Date(parseInt(dParts[0], 10), parseInt(dParts[1], 10) - 1, parseInt(dParts[2], 10));
+            formattedDate = dObj.toLocaleDateString('en-IN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+          }
+          const isToday = (activeScorecardDate === todayStr);
+          dateElem.textContent = `${isToday ? 'Today (' + formattedDate + ')' : formattedDate} • Phase ${activePhase} (Day ${currentDayNumber})`;
+        }
+      }
+
+      const badgeElem = document.getElementById('eodCardVerifiedBadge');
+      if (badgeElem) {
+        const isCompliant = (activeScorecardDate === 'ALL' || sessionTrades.length <= 2) && sessionViolations === 0 && discPct >= 80;
+        if (isCompliant) {
+          badgeElem.className = 'self-start sm:self-auto px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1';
+          badgeElem.innerHTML = `<span>🛡️</span><span>DISCIPLINE VERIFIED</span>`;
+        } else {
+          badgeElem.className = 'self-start sm:self-auto px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center gap-1';
+          badgeElem.innerHTML = `<span>⚠️</span><span>GUARDRAIL BREACHED</span>`;
+        }
+      }
+
+      const rulesList = document.getElementById('eodCardRulesList');
+      if (rulesList) {
+        const rule1Pass = (activeScorecardDate === 'ALL') ? true : (sessionTrades.length <= 2);
+        const rule1Text = (activeScorecardDate === 'ALL')
+          ? `${sessionTrades.length} Total Trades Logged`
+          : `${sessionTrades.length} / 2 Trades Taken`;
+
+        const rule2Pass = sessionTrades.length === 0 || sessionTrades.every(t => t.stop_defined === 'Y');
+        const rule3Pass = sessionTrades.length === 0 || sessionTrades.every(t => {
+          if (!t.time) return true;
+          const [h, m] = t.time.split(':').map(Number);
+          return (h === 9 && m >= 15) || (h === 10 && m <= 30);
+        });
+        const avgRR = sessionTrades.length > 0 
+          ? (sessionTrades.reduce((a, t) => a + (parseFloat(t.rr_planned) || 0), 0) / sessionTrades.length).toFixed(2)
+          : '2.20';
+        const rule4Pass = sessionTrades.length === 0 || parseFloat(avgRR) >= 2.0;
+
+        rulesList.innerHTML = `
+          <div class="flex items-center gap-1.5 ${rule1Pass ? 'text-slate-300' : 'text-rose-400 font-semibold'}">
+            <span class="${rule1Pass ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}">${rule1Pass ? '✓' : '✗'}</span>
+            Max 2 Trades/Day Rule (${rule1Text})
+          </div>
+          <div class="flex items-center gap-1.5 ${rule2Pass ? 'text-slate-300' : 'text-rose-400 font-semibold'}">
+            <span class="${rule2Pass ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}">${rule2Pass ? '✓' : '✗'}</span>
+            Stop Loss Set &amp; Never Widened
+          </div>
+          <div class="flex items-center gap-1.5 ${rule3Pass ? 'text-slate-300' : 'text-rose-400 font-semibold'}">
+            <span class="${rule3Pass ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}">${rule3Pass ? '✓' : '✗'}</span>
+            Window Respected (09:15–10:30 AM)
+          </div>
+          <div class="flex items-center gap-1.5 ${rule4Pass ? 'text-slate-300' : 'text-amber-400'}">
+            <span class="${rule4Pass ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}">${rule4Pass ? '✓' : '!'}</span>
+            Planned RR &ge; 2.2 (Avg: ${avgRR}R)
+          </div>
+        `;
       }
 
       const tbody = document.getElementById('eodCardTradesBody');
       if (tbody) {
-        if (tradesData.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-slate-500 font-sans">No trades logged today. Clean capital preservation!</td></tr>`;
+        if (sessionTrades.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-500 font-sans">No trades logged for this session (${activeScorecardDate}). Clean capital preservation!</td></tr>`;
         } else {
-          tbody.innerHTML = [...tradesData].reverse().slice(0, 6).map(t => {
+          tbody.innerHTML = [...sessionTrades].reverse().map(t => {
             const gradeObj = computeExecutionGrade(t);
             const pnl = parseFloat(t.net_pnl || 0);
             return `
@@ -9020,16 +9147,14 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           }).join('');
         }
       }
-
-      modal.classList.remove('hidden');
-    }
-
-    function closeEODCardModal() {
-      const modal = document.getElementById('eodScorecardModal');
-      if (modal) modal.classList.add('hidden');
     }
 
     function downloadEODCardPNG() {
+      const selectedDate = activeScorecardDate || getTodayLocalDateStr();
+      const sessionTrades = (selectedDate === 'ALL')
+        ? [...tradesData]
+        : tradesData.filter(t => t.date === selectedDate);
+
       const canvas = document.createElement('canvas');
       canvas.width = 1200;
       canvas.height = 720;
@@ -9061,34 +9186,48 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       ctx.font = 'bold 26px Inter, sans-serif';
       ctx.fillText('NSE INTRADAY EXECUTION RESET', 50, 70);
 
-      const todayStr = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
+      let dateSubtitle = '';
+      if (selectedDate === 'ALL') {
+        dateSubtitle = `All Sessions Performance Audit • ${sessionTrades.length} Trades • Phase ${activePhase} (Day ${currentDayNumber})`;
+      } else {
+        const dParts = selectedDate.split('-');
+        let formatted = selectedDate;
+        if (dParts.length === 3) {
+          const dObj = new Date(parseInt(dParts[0], 10), parseInt(dParts[1], 10) - 1, parseInt(dParts[2], 10));
+          formatted = dObj.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
+        }
+        dateSubtitle = `Daily Execution Audit • ${formatted} • Phase ${activePhase} (Day ${currentDayNumber})`;
+      }
+
       ctx.fillStyle = '#94A3B8';
       ctx.font = '14px Inter, sans-serif';
-      ctx.fillText(`Daily Execution Audit • ${todayStr} • Phase ${activePhase} (Day ${currentDayNumber})`, 50, 98);
-
-      // Verified Discipline Pill Badge
-      ctx.fillStyle = '#065F46';
-      ctx.beginPath();
-      ctx.roundRect(930, 48, 220, 36, 8);
-      ctx.fill();
-      ctx.fillStyle = '#34D399';
-      ctx.font = 'bold 12px Inter, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('🛡️ DISCIPLINE VERIFIED', 1040, 71);
-      ctx.textAlign = 'left';
+      ctx.fillText(dateSubtitle, 50, 98);
 
       // Aggregate Stats
-      const totalNetPnL = tradesData.reduce((acc, t) => acc + (parseFloat(t.net_pnl) || 0), 0);
-      const totalRealizedR = tradesData.reduce((acc, t) => acc + (parseFloat(t.r_multiple) || 0), 0);
-      const disciplinedTrades = tradesData.filter(t => t.rule_violation !== 'Y' && (!t.checklist_score || t.checklist_score >= 5)).length;
-      const discScore = tradesData.length > 0 ? Math.round((disciplinedTrades / tradesData.length) * 100) : 100;
+      const totalNetPnL = sessionTrades.reduce((acc, t) => acc + (parseFloat(t.net_pnl) || 0), 0);
+      const totalRealizedR = sessionTrades.reduce((acc, t) => acc + (parseFloat(t.r_multiple) || 0), 0);
+      const disciplinedTrades = sessionTrades.filter(t => t.rule_violation !== 'Y' && (!t.checklist_score || t.checklist_score >= 5)).length;
+      const discScore = sessionTrades.length > 0 ? Math.round((disciplinedTrades / sessionTrades.length) * 100) : 100;
+      const sessionViolations = sessionTrades.filter(t => t.rule_violation === 'Y').length;
+
+      // Verified Discipline Pill Badge
+      const isCompliant = (selectedDate === 'ALL' || sessionTrades.length <= 2) && sessionViolations === 0 && discScore >= 80;
+      ctx.fillStyle = isCompliant ? '#065F46' : '#991B1B';
+      ctx.beginPath();
+      ctx.roundRect(910, 48, 240, 36, 8);
+      ctx.fill();
+      ctx.fillStyle = isCompliant ? '#34D399' : '#FCA5A5';
+      ctx.font = 'bold 12px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(isCompliant ? '🛡️ DISCIPLINE VERIFIED' : '⚠️ GUARDRAIL BREACHED', 1030, 71);
+      ctx.textAlign = 'left';
 
       // 4 Metric Cards
       const cards = [
         { label: 'NET SESSION P&L', val: (totalNetPnL >= 0 ? '+₹' : '-₹') + Math.abs(totalNetPnL).toFixed(2), col: totalNetPnL >= 0 ? '#34D399' : '#F87171' },
         { label: 'REALIZED R-MULTIPLE', val: (totalRealizedR >= 0 ? '+' : '') + totalRealizedR.toFixed(2) + ' R', col: totalRealizedR >= 0 ? '#34D399' : '#F87171' },
         { label: 'DISCIPLINE ADHERENCE', val: discScore + '%', col: discScore >= 90 ? '#34D399' : '#FBBF24' },
-        { label: 'PENALTY DEMERIT STRIKES', val: `${penaltyStrikes} / 3`, col: penaltyStrikes === 0 ? '#34D399' : '#F87171' }
+        { label: selectedDate === 'ALL' ? 'PENALTY DEMERIT STRIKES' : 'DAILY RULE VIOLATIONS', val: selectedDate === 'ALL' ? `${penaltyStrikes} / 3` : `${sessionViolations} Daily`, col: (selectedDate === 'ALL' ? penaltyStrikes === 0 : sessionViolations === 0) ? '#34D399' : '#F87171' }
       ];
 
       cards.forEach((c, idx) => {
@@ -9124,11 +9263,23 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       ctx.font = 'bold 14px Inter, sans-serif';
       ctx.fillText('Execution Guardrails & Risk Parameters', 70, 285);
 
+      const rule1Pass = (selectedDate === 'ALL') ? true : (sessionTrades.length <= 2);
+      const rule2Pass = sessionTrades.length === 0 || sessionTrades.every(t => t.stop_defined === 'Y');
+      const rule3Pass = sessionTrades.length === 0 || sessionTrades.every(t => {
+        if (!t.time) return true;
+        const [h, m] = t.time.split(':').map(Number);
+        return (h === 9 && m >= 15) || (h === 10 && m <= 30);
+      });
+      const avgRR = sessionTrades.length > 0 
+        ? (sessionTrades.reduce((a, t) => a + (parseFloat(t.rr_planned) || 0), 0) / sessionTrades.length).toFixed(2)
+        : '2.20';
+      const rule4Pass = sessionTrades.length === 0 || parseFloat(avgRR) >= 2.0;
+
       const rules = [
-        { title: '1. Max 2 Trades/Day Rule', pass: tradesData.length <= 2, note: `${tradesData.length} / 2 Trades Taken` },
-        { title: '2. Stop Loss Always In Place', pass: true, note: '100% Pre-Set with Zero Widening' },
-        { title: '3. Trading Window 09:15–10:30', pass: true, note: 'Zero Out-of-Window Overtrading' },
-        { title: '4. Minimum Planned RR >= 2.2', pass: true, note: 'Average Planned RR: 2.38R' }
+        { title: '1. Max 2 Trades/Day Rule', pass: rule1Pass, note: selectedDate === 'ALL' ? `${sessionTrades.length} Total Trades` : `${sessionTrades.length} / 2 Trades Taken` },
+        { title: '2. Stop Loss Always In Place', pass: rule2Pass, note: rule2Pass ? '100% Pre-Set with Zero Widening' : 'Breached' },
+        { title: '3. Trading Window 09:15–10:30', pass: rule3Pass, note: rule3Pass ? 'Zero Out-of-Window Trades' : 'Breached' },
+        { title: '4. Minimum Planned RR >= 2.2', pass: rule4Pass, note: `Average Planned RR: ${avgRR}R` }
       ];
 
       rules.forEach((r, idx) => {
@@ -9169,44 +9320,50 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       ctx.lineTo(1150, 460);
       ctx.stroke();
 
-      const sampleTrades = tradesData.slice(-4).reverse();
-      sampleTrades.forEach((t, i) => {
-        const ty = 485 + i * 36;
-        const gradeObj = computeExecutionGrade(t);
+      if (sessionTrades.length === 0) {
+        ctx.fillStyle = '#64748B';
+        ctx.font = 'italic 13px Inter, sans-serif';
+        ctx.fillText('No trades executed during this session. Capital preservation maintained.', 50, 495);
+      } else {
+        const sampleTrades = sessionTrades.slice(-4).reverse();
+        sampleTrades.forEach((t, i) => {
+          const ty = 485 + i * 36;
+          const gradeObj = computeExecutionGrade(t);
 
-        ctx.fillStyle = '#38BDF8';
-        ctx.font = 'bold 12px "JetBrains Mono", monospace';
-        ctx.fillText(t.id, 50, ty);
+          ctx.fillStyle = '#38BDF8';
+          ctx.font = 'bold 12px "JetBrains Mono", monospace';
+          ctx.fillText(t.id, 50, ty);
 
-        ctx.fillStyle = '#94A3B8';
-        ctx.font = '12px "JetBrains Mono", monospace';
-        ctx.fillText(t.time || '--:--', 150, ty);
+          ctx.fillStyle = '#94A3B8';
+          ctx.font = '12px "JetBrains Mono", monospace';
+          ctx.fillText(t.time || '--:--', 150, ty);
 
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 12px Inter, sans-serif';
-        ctx.fillText(t.symbol, 250, ty);
+          ctx.fillStyle = '#FFFFFF';
+          ctx.font = 'bold 12px Inter, sans-serif';
+          ctx.fillText(t.symbol, 250, ty);
 
-        ctx.fillStyle = '#94A3B8';
-        ctx.font = '11px Inter, sans-serif';
-        ctx.fillText((t.setup_name || 'Pullback').substring(0, 22), 380, ty);
+          ctx.fillStyle = '#94A3B8';
+          ctx.font = '11px Inter, sans-serif';
+          ctx.fillText((t.setup_name || 'Pullback').substring(0, 22), 380, ty);
 
-        const net = parseFloat(t.net_pnl || 0);
-        ctx.fillStyle = net >= 0 ? '#34D399' : '#F87171';
-        ctx.font = 'bold 12px "JetBrains Mono", monospace';
-        ctx.fillText((net >= 0 ? '+₹' : '-₹') + Math.abs(net).toFixed(2), 620, ty);
+          const net = parseFloat(t.net_pnl || 0);
+          ctx.fillStyle = net >= 0 ? '#34D399' : '#F87171';
+          ctx.font = 'bold 12px "JetBrains Mono", monospace';
+          ctx.fillText((net >= 0 ? '+₹' : '-₹') + Math.abs(net).toFixed(2), 620, ty);
 
-        const r = parseFloat(t.r_multiple || 0);
-        ctx.fillStyle = r >= 0 ? '#34D399' : '#F87171';
-        ctx.fillText((r >= 0 ? '+' : '') + r.toFixed(2) + 'R', 770, ty);
+          const r = parseFloat(t.r_multiple || 0);
+          ctx.fillStyle = r >= 0 ? '#34D399' : '#F87171';
+          ctx.fillText((r >= 0 ? '+' : '') + r.toFixed(2) + 'R', 770, ty);
 
-        ctx.fillStyle = t.outcome === 'Win' ? '#34D399' : '#F87171';
-        ctx.font = 'bold 11px Inter, sans-serif';
-        ctx.fillText(t.outcome, 920, ty);
+          ctx.fillStyle = t.outcome === 'Win' ? '#34D399' : '#F87171';
+          ctx.font = 'bold 11px Inter, sans-serif';
+          ctx.fillText(t.outcome, 920, ty);
 
-        ctx.fillStyle = gradeObj.grade.startsWith('A') ? '#10B981' : (gradeObj.grade === 'B' ? '#3B82F6' : '#EF4444');
-        ctx.font = 'bold 12px "JetBrains Mono", monospace';
-        ctx.fillText(gradeObj.grade, 1050, ty);
-      });
+          ctx.fillStyle = gradeObj.grade.startsWith('A') ? '#10B981' : (gradeObj.grade === 'B' ? '#3B82F6' : '#EF4444');
+          ctx.font = 'bold 12px "JetBrains Mono", monospace';
+          ctx.fillText(gradeObj.grade, 1050, ty);
+        });
+      }
 
       // Footer Philosophy
       ctx.fillStyle = '#475569';
@@ -9220,32 +9377,39 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
       // Trigger download
       const link = document.createElement('a');
-      link.download = `Execution_Scorecard_${new Date().toISOString().slice(0, 10)}.png`;
+      link.download = `Execution_Scorecard_${selectedDate}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     }
 
     function copyEODSummaryText() {
-      const totalNetPnL = tradesData.reduce((acc, t) => acc + (parseFloat(t.net_pnl) || 0), 0);
-      const totalR = tradesData.reduce((acc, t) => acc + (parseFloat(t.r_multiple) || 0), 0);
-      const wins = tradesData.filter(t => t.outcome === 'Win').length;
-      const wr = tradesData.length > 0 ? ((wins / tradesData.length) * 100).toFixed(0) : 0;
-      const discTrades = tradesData.filter(t => t.rule_violation !== 'Y' && (!t.checklist_score || t.checklist_score >= 5)).length;
-      const discPct = tradesData.length > 0 ? Math.round((discTrades / tradesData.length) * 100) : 100;
-      const todayStr = new Date().toISOString().slice(0, 10);
+      const selectedDate = activeScorecardDate || getTodayLocalDateStr();
+      const sessionTrades = (selectedDate === 'ALL')
+        ? [...tradesData]
+        : tradesData.filter(t => t.date === selectedDate);
 
-      const text = `🏆 *NSE INTRADAY RESET — DAILY SCORECARD (${todayStr})*
+      const totalNetPnL = sessionTrades.reduce((acc, t) => acc + (parseFloat(t.net_pnl) || 0), 0);
+      const totalR = sessionTrades.reduce((acc, t) => acc + (parseFloat(t.r_multiple) || 0), 0);
+      const wins = sessionTrades.filter(t => t.outcome === 'Win').length;
+      const wr = sessionTrades.length > 0 ? ((wins / sessionTrades.length) * 100).toFixed(0) : 0;
+      const discTrades = sessionTrades.filter(t => t.rule_violation !== 'Y' && (!t.checklist_score || t.checklist_score >= 5)).length;
+      const discPct = sessionTrades.length > 0 ? Math.round((discTrades / sessionTrades.length) * 100) : 100;
+      const sessionViolations = sessionTrades.filter(t => t.rule_violation === 'Y').length;
+
+      const dateLabel = (selectedDate === 'ALL') ? 'All Sessions Audit' : selectedDate;
+
+      const text = `🏆 *NSE INTRADAY RESET — DAILY SCORECARD (${dateLabel})*
 • *Net P&L:* ₹${totalNetPnL.toFixed(2)}
 • *Realized R:* ${totalR >= 0 ? '+' : ''}${totalR.toFixed(2)}R
 • *Discipline Score:* ${discPct}% (Target >=90%)
-• *Trades Taken:* ${tradesData.length} / 2 (Rule Compliant)
+• *Trades Taken:* ${sessionTrades.length} / 2 (${sessionTrades.length <= 2 ? 'Compliant' : 'BREACHED'})
 • *Win Rate:* ${wr}%
-• *Demerit Penalty Strikes:* ${penaltyStrikes} / 3
+• *Rule Violations:* ${sessionViolations} (Strikes: ${penaltyStrikes}/3)
 
 “Discipline is the bridge between goals and accomplishment.”`;
 
       navigator.clipboard.writeText(text).then(() => {
-        alert("Scorecard summary copied to clipboard! Paste anywhere (WhatsApp, Discord, Journal).");
+        alert('Scorecard summary copied to clipboard! Paste anywhere (WhatsApp, Discord, Journal).');
       });
     }
 
