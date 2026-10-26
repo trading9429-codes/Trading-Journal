@@ -402,6 +402,9 @@ class ExcelTradeManager:
             "emotion_before": int(payload.get("emotion_before", 2)),
             "emotion_during": int(payload.get("emotion_during", 3)),
             "emotion_after": int(payload.get("emotion_after", 2)),
+            "mental_state": payload.get("mental_state") or "Calm & Patient",
+            "tags": payload.get("tags") or [],
+            "screenshot_data": payload.get("screenshot_data") or "",
             "trade_valid": trade_valid,
             "lesson": lesson,
             "screenshot_link": screenshot

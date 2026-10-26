@@ -70,6 +70,12 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
                 self._send_json(scanner_manager.get_scanner_data())
             except Exception as e:
                 self._send_json({"error": str(e), "alerts": [], "top_stocks": []}, status=500)
+        elif path == "/api/impulses":
+            try:
+                from impulse_service import impulse_manager
+                self._send_json({"impulses": impulse_manager.get_impulses(), "stats": impulse_manager.get_stats()})
+            except Exception as e:
+                self._send_json({"error": str(e), "impulses": [], "stats": {}}, status=500)
         else:
             # Serve static files from PUBLIC_DIR
             super().do_GET()
@@ -157,6 +163,21 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
                 self._send_json(res)
             except Exception as e:
                 self._send_json({"status": "error", "message": str(e)}, status=500)
+        elif path == "/api/impulses":
+            try:
+                from impulse_service import impulse_manager
+                new_imp = impulse_manager.add_impulse(payload)
+                stats = impulse_manager.get_stats()
+                self._send_json({"impulse": new_imp, "stats": stats, "message": "Impulse trade resisted and logged to Sandbox! +50 Discipline XP awarded."})
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
+        elif path == "/api/impulses/clear":
+            try:
+                from impulse_service import impulse_manager
+                res = impulse_manager.clear_impulses()
+                self._send_json(res)
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
         else:
             self.send_error(404, "Endpoint not found.")
 

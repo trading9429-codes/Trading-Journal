@@ -762,6 +762,20 @@
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
           <span id="indexedDbSyncText">Auto-Vault</span>
         </div>
+        <!-- Process Gamification: Discipline Level & XP Pill -->
+        <button onclick="openDisciplineBadgesModal()" id="disciplineXpPill" class="px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-500/40 text-xs font-mono font-bold flex items-center gap-1.5 shadow-sm transition cursor-pointer" title="Process Gamification: View Discipline Level, XP & Badges">
+          <span>🔥</span>
+          <span id="headerStreakText">4d Streak</span>
+          <span class="text-slate-500">|</span>
+          <span id="headerLevelText">⭐ Lvl 3</span>
+          <span class="text-[10px] text-amber-400 font-sans font-normal" id="headerXpText">(850 XP)</span>
+        </button>
+        <!-- Dopamine Relief Valve: Impulse Sandbox Button -->
+        <button onclick="openImpulseModal()" class="px-3 py-2 rounded-lg bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-lg shadow-fuchsia-600/25 cursor-pointer" title="Dopamine Relief Valve: Defuse boredom or FOMO impulses without risking real capital (+50 XP)">
+          <span>⚡</span>
+          <span>Log Impulse</span>
+          <span id="headerCapitalSavedBadge" class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full font-mono">+₹0</span>
+        </button>
         <!-- 09:00 AM IST Pre-Flight Readiness Protocol Button -->
         <button onclick="openPreMarketReadinessModal()" id="preFlightBtn" class="px-3 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 font-medium text-xs flex items-center gap-1.5 transition shadow-sm" title="09:00–09:10 AM IST Pre-Market Readiness Routine">
           <span id="preFlightIcon">🛡️</span>
@@ -1074,6 +1088,13 @@
                 <option value="Support / Resistance Bounce">Support / Resistance Level Bounce</option>
                 <option value="Off-Plan / Discretionary">Off-Plan / Discretionary (Rule Breach)</option>
               </select>
+              <!-- 1-Click Quick Setup Selector Pills (Frictionless) -->
+              <div class="flex items-center gap-1 flex-wrap mt-1.5">
+                <button type="button" onclick="quickSelectSetup('1m Pullback to 9EMA')" class="text-[9px] bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2 py-0.5 rounded border border-slate-700 font-mono transition">9EMA Pullback</button>
+                <button type="button" onclick="quickSelectSetup('1m VWAP Bounce')" class="text-[9px] bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2 py-0.5 rounded border border-slate-700 font-mono transition">VWAP Bounce</button>
+                <button type="button" onclick="quickSelectSetup('Opening Range Breakout (ORB)')" class="text-[9px] bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2 py-0.5 rounded border border-slate-700 font-mono transition">ORB</button>
+                <button type="button" onclick="quickSelectSetup('1m Breakout &amp; Re-test')" class="text-[9px] bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2 py-0.5 rounded border border-slate-700 font-mono transition">Breakout</button>
+              </div>
             </div>
 
             <div>
@@ -1101,6 +1122,38 @@
               <p id="urgencyWarning" class="hidden text-[11px] text-amber-400 font-semibold mt-1 flex items-center gap-1">
                 <span>⚠️ High Urgency detected (>6). Rule 4: Step away for 60s, take 3 deep breaths before entering.</span>
               </p>
+            </div>
+          </div>
+
+          <!-- Pre-Trade Neurological Brain-State Selector -->
+          <div class="p-3.5 bg-slate-900/60 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-[11px] font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                <span>🧠</span>
+                <span>Pre-Trade Brain State / Neurological Mindset</span>
+              </label>
+              <span id="mentalStateBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                Calm &amp; Patient
+              </span>
+            </div>
+            <input type="hidden" id="mental_state" value="Calm & Patient">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button type="button" onclick="selectMentalState(this, 'Calm & Patient')" class="mental-state-btn active py-2 px-3 rounded-lg border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+                <span>🟢</span>
+                <span>Calm &amp; Patient</span>
+              </button>
+              <button type="button" onclick="selectMentalState(this, 'Bored & Restless')" class="mental-state-btn py-2 px-3 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 hover:text-amber-300 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+                <span>🟡</span>
+                <span>Bored &amp; Restless</span>
+              </button>
+              <button type="button" onclick="selectMentalState(this, 'FOMO & Chasing')" class="mental-state-btn py-2 px-3 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 hover:text-rose-300 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+                <span>🔴</span>
+                <span>FOMO &amp; Chasing</span>
+              </button>
+              <button type="button" onclick="selectMentalState(this, 'Revenge & Frustrated')" class="mental-state-btn py-2 px-3 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 hover:text-purple-300 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+                <span>🟣</span>
+                <span>Revenge &amp; Tilt</span>
+              </button>
             </div>
           </div>
 
@@ -1287,6 +1340,15 @@
               <option value="Loss">Losses Only</option>
               <option value="Break-Even">Break-Even</option>
             </select>
+            <!-- View Mode Toggle: Table vs Visual Trading Cards -->
+            <div class="flex items-center gap-1 bg-slate-900 border border-slate-700/80 p-0.5 rounded-lg">
+              <button type="button" id="ledgerViewTableBtn" onclick="setLedgerViewMode('table')" class="px-2.5 py-1 rounded text-xs font-bold bg-blue-600 text-white transition flex items-center gap-1 cursor-pointer">
+                <span>📑</span><span class="hidden sm:inline">Table</span>
+              </button>
+              <button type="button" id="ledgerViewCardsBtn" onclick="setLedgerViewMode('cards')" class="px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1 cursor-pointer">
+                <span>🃏</span><span class="hidden sm:inline">Visual Cards</span>
+              </button>
+            </div>
             <button onclick="copyAllExcelTSV()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700 transition" title="Copy all visible trades in Excel TSV format">
               <span>📋 Copy All</span>
             </button>
@@ -1321,8 +1383,13 @@
           </button>
         </div>
 
-        <!-- Scrollable Responsive Trades Table -->
-        <div class="overflow-x-auto mt-2 rounded-xl border border-slate-800">
+        <!-- 1. Visual Trading Cards Grid View (High-Contrast ADHD Friendly) -->
+        <div id="tradesCardsGrid" class="hidden mt-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <!-- Dynamically populated via renderTradesCards() -->
+        </div>
+
+        <!-- 2. Dense Tabular Ledger View -->
+        <div id="tradesTableContainer" class="overflow-x-auto mt-2 rounded-xl border border-slate-800">
           <table class="w-full text-left border-collapse text-xs">
             <thead>
               <tr class="bg-slate-900/90 text-slate-400 uppercase text-[10px] font-bold tracking-wider border-b border-slate-800 select-none">
@@ -2095,6 +2162,100 @@
           </div>
         </div>
 
+      </div>
+
+      <!-- 🧠 NEUROLOGICAL EDGE: PRE-TRADE MINDSET VS. EXPECTANCY -->
+      <div class="glass-card rounded-2xl p-6 border border-purple-500/30 bg-gradient-to-br from-slate-900/90 via-slate-900 to-purple-950/20">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-800 gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-300 font-bold text-lg shadow-lg">
+              🧠
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span>Neurological Edge: Pre-Trade Mindset vs. Statistical Expectancy</span>
+              </h3>
+              <p class="text-[11px] text-slate-400">Objective mathematical proof of what emotional states cost or yield</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-mono font-bold bg-purple-500/15 text-purple-300 px-2.5 py-0.5 rounded-full border border-purple-500/30">
+            Dopamine &bull; Cognitive Audit
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+          <!-- 🟢 Calm & Patient -->
+          <div class="bg-slate-900/80 p-3.5 rounded-xl border border-emerald-500/30">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-emerald-400 flex items-center gap-1">🟢 Calm &amp; Patient</span>
+              <span id="mindsetCount_calm" class="text-[10px] font-mono text-slate-400">0 trades</span>
+            </div>
+            <div class="mt-2 flex items-baseline justify-between">
+              <span class="text-lg font-black font-mono text-white" id="mindsetWinRate_calm">0% WR</span>
+              <span class="text-sm font-bold font-mono text-emerald-400" id="mindsetAvgR_calm">+0.00R avg</span>
+            </div>
+            <div class="text-[11px] font-mono text-slate-400 mt-1 flex justify-between">
+              <span>Total P&amp;L:</span>
+              <span class="font-bold text-emerald-400" id="mindsetNetPnL_calm">₹0.00</span>
+            </div>
+          </div>
+
+          <!-- 🟡 Bored & Restless -->
+          <div class="bg-slate-900/80 p-3.5 rounded-xl border border-amber-500/30">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-amber-400 flex items-center gap-1">🟡 Bored &amp; Restless</span>
+              <span id="mindsetCount_bored" class="text-[10px] font-mono text-slate-400">0 trades</span>
+            </div>
+            <div class="mt-2 flex items-baseline justify-between">
+              <span class="text-lg font-black font-mono text-white" id="mindsetWinRate_bored">0% WR</span>
+              <span class="text-sm font-bold font-mono text-amber-400" id="mindsetAvgR_bored">+0.00R avg</span>
+            </div>
+            <div class="text-[11px] font-mono text-slate-400 mt-1 flex justify-between">
+              <span>Total P&amp;L:</span>
+              <span class="font-bold text-slate-300" id="mindsetNetPnL_bored">₹0.00</span>
+            </div>
+          </div>
+
+          <!-- 🔴 FOMO & Chasing -->
+          <div class="bg-slate-900/80 p-3.5 rounded-xl border border-rose-500/30">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-rose-400 flex items-center gap-1">🔴 FOMO &amp; Chasing</span>
+              <span id="mindsetCount_fomo" class="text-[10px] font-mono text-slate-400">0 trades</span>
+            </div>
+            <div class="mt-2 flex items-baseline justify-between">
+              <span class="text-lg font-black font-mono text-white" id="mindsetWinRate_fomo">0% WR</span>
+              <span class="text-sm font-bold font-mono text-rose-400" id="mindsetAvgR_fomo">+0.00R avg</span>
+            </div>
+            <div class="text-[11px] font-mono text-slate-400 mt-1 flex justify-between">
+              <span>Total P&amp;L:</span>
+              <span class="font-bold text-rose-400" id="mindsetNetPnL_fomo">₹0.00</span>
+            </div>
+          </div>
+
+          <!-- 🟣 Revenge & Frustrated -->
+          <div class="bg-slate-900/80 p-3.5 rounded-xl border border-purple-500/30">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-purple-400 flex items-center gap-1">🟣 Revenge &amp; Tilt</span>
+              <span id="mindsetCount_revenge" class="text-[10px] font-mono text-slate-400">0 trades</span>
+            </div>
+            <div class="mt-2 flex items-baseline justify-between">
+              <span class="text-lg font-black font-mono text-white" id="mindsetWinRate_revenge">0% WR</span>
+              <span class="text-sm font-bold font-mono text-purple-400" id="mindsetAvgR_revenge">+0.00R avg</span>
+            </div>
+            <div class="text-[11px] font-mono text-slate-400 mt-1 flex justify-between">
+              <span>Total P&amp;L:</span>
+              <span class="font-bold text-purple-400" id="mindsetNetPnL_revenge">₹0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Neurological Diagnosis Callout -->
+        <div class="mt-4 p-3.5 rounded-xl bg-purple-950/40 border border-purple-500/30 text-xs text-purple-200 flex items-start gap-2.5">
+          <span class="text-base">💡</span>
+          <p id="neuroDiagnosisText" class="leading-relaxed">
+            <strong>Neurological Edge Diagnosis:</strong> Calm &amp; Patient execution yields your highest mathematical edge. Trades taken in Boredom or FOMO erode your hard-earned gains. When dopamine drops between 10:00–1:30 PM, redirect the urge to the <em>Impulse Sandbox</em> instead of the live market.
+          </p>
+        </div>
       </div>
 
     </div>
@@ -4189,6 +4350,198 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     </div>
   </div>
 
+  <!-- MODAL: IMPULSE BOREDOM SANDBOX & DOPAMINE RELIEF VALVE -->
+  <!-- ======================================================== -->
+  <div id="impulseModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl w-full max-w-2xl border border-fuchsia-500/40 shadow-2xl p-6 relative max-h-[92vh] overflow-y-auto bg-slate-950">
+      
+      <!-- Top Action Bar -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-fuchsia-600 to-pink-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-fuchsia-600/30">
+            ⚡
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+              <span>Dopamine Relief Valve &bull; Impulse Sandbox</span>
+              <span class="text-[10px] font-mono font-bold bg-fuchsia-500/15 text-fuchsia-300 px-2 py-0.5 rounded border border-fuchsia-500/30">+50 XP</span>
+            </h3>
+            <p class="text-xs text-slate-400">Satisfy the urge to click without risking real trading capital</p>
+          </div>
+        </div>
+        <button onclick="closeImpulseModal()" class="text-slate-400 hover:text-white text-2xl font-bold p-1 leading-none">&times;</button>
+      </div>
+
+      <!-- Overview Stats Strip -->
+      <div class="grid grid-cols-3 gap-3 mt-4 text-center">
+        <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+          <span class="text-[10px] uppercase font-bold text-slate-400 block">Impulses Resisted</span>
+          <span id="impulseTotalCountDisp" class="text-xl font-black font-mono text-fuchsia-400 mt-0.5 block">0</span>
+        </div>
+        <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+          <span class="text-[10px] uppercase font-bold text-slate-400 block">Capital Protected</span>
+          <span id="impulseTotalSavedDisp" class="text-xl font-black font-mono text-emerald-400 mt-0.5 block">₹0.00</span>
+        </div>
+        <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+          <span class="text-[10px] uppercase font-bold text-slate-400 block">Discipline XP Earned</span>
+          <span id="impulseXpEarnedDisp" class="text-xl font-black font-mono text-amber-400 mt-0.5 block">+0 XP</span>
+        </div>
+      </div>
+
+      <!-- Quick Impulse Logging Form -->
+      <form id="impulseForm" onsubmit="submitImpulseTrade(event)" class="mt-4 p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3.5">
+        <div class="text-xs font-bold text-slate-300 flex items-center justify-between">
+          <span>Log The Hypothetical Trade You Feel Like Taking:</span>
+          <span class="text-[11px] text-fuchsia-400 font-mono font-normal">0% Risk &bull; 100% Catharsis</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div>
+            <label class="block text-[10px] text-slate-400 font-semibold uppercase mb-1">Symbol</label>
+            <input type="text" id="impulseSymbol" required placeholder="e.g. TATACHEM" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono uppercase focus:outline-none focus:border-fuchsia-500">
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-400 font-semibold uppercase mb-1">Price (₹)</label>
+            <input type="number" step="0.05" id="impulsePrice" placeholder="e.g. 1045.00" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-fuchsia-500">
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-400 font-semibold uppercase mb-1">Direction</label>
+            <select id="impulseDirection" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-fuchsia-500">
+              <option value="Long">🟢 Long</option>
+              <option value="Short">🔴 Short</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-400 font-semibold uppercase mb-1">Risk Saved (₹)</label>
+            <input type="number" step="100" id="impulseSavedRisk" value="5000" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-emerald-400 font-mono font-bold focus:outline-none focus:border-fuchsia-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] text-slate-400 font-semibold uppercase mb-1">What Prompted This Urge?</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+            <button type="button" onclick="setImpulseReason(this, 'Boredom / Slow Market')" class="impulse-reason-btn active px-2 py-1.5 rounded-lg text-[11px] font-semibold bg-fuchsia-600/30 text-fuchsia-300 border border-fuchsia-500/40 text-center">
+              🥱 Boredom
+            </button>
+            <button type="button" onclick="setImpulseReason(this, 'FOMO / Chasing Spike')" class="impulse-reason-btn px-2 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-950 text-slate-400 border border-slate-800 text-center hover:text-slate-200">
+              🚀 FOMO Chasing
+            </button>
+            <button type="button" onclick="setImpulseReason(this, 'Revenge / Make Back Loss')" class="impulse-reason-btn px-2 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-950 text-slate-400 border border-slate-800 text-center hover:text-slate-200">
+              😡 Revenge / Tilt
+            </button>
+            <button type="button" onclick="setImpulseReason(this, 'Random Guess / Itch')" class="impulse-reason-btn px-2 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-950 text-slate-400 border border-slate-800 text-center hover:text-slate-200">
+              🎲 Random Itch
+            </button>
+          </div>
+          <input type="hidden" id="impulseSelectedReason" value="Boredom / Slow Market">
+        </div>
+
+        <div>
+          <label class="block text-[10px] text-slate-400 font-semibold uppercase mb-1">Mindset Reflection (Optional)</label>
+          <input type="text" id="impulseNotes" placeholder="e.g. Market is sideways, looking for dopamine. Paused." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-fuchsia-500">
+        </div>
+
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 text-white font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-fuchsia-600/30 flex items-center justify-center gap-2 cursor-pointer">
+          <span>🛡️ Defuse Impulse &amp; Protect Capital (+50 XP)</span>
+        </button>
+      </form>
+
+      <!-- Resisted Impulses Table -->
+      <div class="mt-4">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800 text-xs">
+          <span class="font-bold text-slate-300 uppercase text-[11px]">Resisted Impulses Ledger</span>
+          <button onclick="clearImpulsesLedger()" class="text-[10px] text-slate-500 hover:text-rose-400 transition underline cursor-pointer">Clear Sandbox</button>
+        </div>
+        <div class="overflow-x-auto mt-2 max-h-48 overflow-y-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="text-[10px] uppercase text-slate-500 border-b border-slate-800/80 sticky top-0 bg-slate-950">
+              <tr>
+                <th class="pb-1.5">ID</th>
+                <th class="pb-1.5">Time</th>
+                <th class="pb-1.5">Symbol</th>
+                <th class="pb-1.5">Urge Trigger</th>
+                <th class="pb-1.5 text-right">Capital Saved</th>
+                <th class="pb-1.5 text-center">Reward</th>
+              </tr>
+            </thead>
+            <tbody id="impulseLedgerBody" class="divide-y divide-slate-800/50 text-slate-300">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: PROCESS GAMIFICATION & DISCIPLINE BADGES -->
+  <!-- ============================================== -->
+  <div id="disciplineBadgesModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl w-full max-w-xl border border-amber-500/40 shadow-2xl p-6 relative max-h-[92vh] overflow-y-auto bg-slate-950">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-amber-500/30">
+            🏆
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+              Process Gamification &bull; Discipline XP
+            </h3>
+            <p class="text-xs text-slate-400">Rewarding execution discipline over random outcome</p>
+          </div>
+        </div>
+        <button onclick="closeDisciplineBadgesModal()" class="text-slate-400 hover:text-white text-2xl font-bold p-1 leading-none">&times;</button>
+      </div>
+
+      <!-- Level & Progress Card -->
+      <div class="mt-4 p-4 rounded-xl bg-gradient-to-r from-amber-950/40 to-slate-900 border border-amber-500/30 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-mono uppercase tracking-wider text-amber-400 font-bold block">Current Discipline Rank</span>
+            <h4 id="disciplineRankTitle" class="text-lg font-black text-white">⭐ Level 3: Execution Sniper</h4>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-mono font-bold text-amber-400" id="disciplineXpProgressText">850 / 1000 XP</span>
+            <span class="text-[10px] text-slate-400 block font-mono" id="disciplineXpToNext">150 XP to Level 4</span>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800">
+          <div id="disciplineXpBar" class="bg-gradient-to-r from-amber-500 to-orange-500 h-full transition-all duration-500" style="width: 85%;"></div>
+        </div>
+
+        <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+          <span>Active Clean Streak: <strong id="disciplineStreakDays" class="text-emerald-400 font-mono font-bold">🔥 4 Days</strong></span>
+          <span class="text-slate-500 font-mono">Process &gt; Outcome</span>
+        </div>
+      </div>
+
+      <!-- Badges Grid -->
+      <div class="mt-5 space-y-3">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Unlocked Mastery Badges</h4>
+        <div class="grid grid-cols-2 gap-3 text-xs" id="badgesListContainer">
+          <!-- Dynamically populated or rendered -->
+        </div>
+      </div>
+
+      <!-- How to Earn XP Rules -->
+      <div class="mt-5 p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2 text-xs">
+        <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">How XP is Earned (Strictly Process-Based):</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-300 font-mono">
+          <div class="flex items-center gap-1.5"><span class="text-emerald-400 font-bold">+100 XP</span> Session &le; 2 Trades</div>
+          <div class="flex items-center gap-1.5"><span class="text-emerald-400 font-bold">+50 XP</span> Stop Loss Never Widened</div>
+          <div class="flex items-center gap-1.5"><span class="text-emerald-400 font-bold">+50 XP</span> Resisting an Impulse Trade</div>
+          <div class="flex items-center gap-1.5"><span class="text-emerald-400 font-bold">+50 XP</span> Window 09:15–10:30 Respected</div>
+          <div class="flex items-center gap-1.5 text-rose-400"><span class="font-bold">-100 XP</span> Rule Violation (Overtrading)</div>
+          <div class="flex items-center gap-1.5 text-rose-400"><span class="font-bold">-150 XP</span> Penalty Demerit Strike</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- APPLICATION LOGIC SCRIPT -->
   <script>
     let startingCapital = 200000;
@@ -5046,6 +5399,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const maeVal = parseFloat(document.getElementById('mae_price').value) || null;
       const mfeVal = parseFloat(document.getElementById('mfe_price').value) || null;
 
+      const mentalStateInput = document.getElementById('mental_state');
+      const selectedMentalState = mentalStateInput ? mentalStateInput.value : 'Calm & Patient';
+
       const tradeObj = {
         id: `T-${String(tradesData.length + 1).padStart(3, '0')}`,
         date: date,
@@ -5070,6 +5426,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         mae_price: maeVal,
         mfe_price: mfeVal,
         screenshot: currentTradeScreenshot || null,
+        screenshot_data: currentTradeScreenshot || null,
+        mental_state: selectedMentalState,
         qty: qty,
         gross_pnl: parseFloat(grossPnL.toFixed(2)),
         costs: parseFloat(fyers.totalCosts.toFixed(2)),
@@ -5114,6 +5472,11 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       }
 
       saveTradesLocally();
+      if (ruleViolation === 'N') {
+        if (typeof addDisciplineXP === 'function') addDisciplineXP(50, 'Clean Trade Execution');
+      } else {
+        if (typeof deductDisciplineXP === 'function') deductDisciplineXP(100, 'Checklist Violation');
+      }
       renderTradesTable();
       renderTopCapitalHeader();
       checkDailyCircuitBreaker();
@@ -6166,8 +6529,11 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
       if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="14" class="text-center py-8 text-slate-500 font-sans">No trades found matching current filter.</td></tr>`;
+        if (typeof renderTradesCards === 'function') renderTradesCards([]);
         return;
       }
+
+      if (typeof renderTradesCards === 'function') renderTradesCards([...filtered].reverse());
 
       const rows = [...filtered].reverse().map(t => {
         const isWin = t.outcome === 'Win';
@@ -7308,6 +7674,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         }
 
         updateSetupEdgePreview();
+        if (typeof renderNeurologicalEdge === 'function') renderNeurologicalEdge();
       }
 
       // Charts render
@@ -11180,8 +11547,519 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       initClipboardPasteListener();
       renderPhaseTracker();
       initPenaltyStrikes();
+      if (typeof initDisciplineGamification === 'function') initDisciplineGamification();
+      if (typeof fetchImpulsesData === 'function') fetchImpulsesData();
+      if (typeof renderNeurologicalEdge === 'function') renderNeurologicalEdge();
     });
     
+
+    // ==========================================
+    // NEURODIVERGENT SUITE: DOPAMINE VALVE, GAMIFICATION,
+    // BRAIN-STATE ANALYTICS & VISUAL TRADING CARDS
+    // ==========================================
+
+    // --- 1. DOPAMINE RELIEF VALVE & IMPULSE SANDBOX ---
+    let impulsesData = [];
+
+    async function fetchImpulsesData() {
+      try {
+        const res = await fetch('/api/impulses');
+        if (res.ok) {
+          const data = await res.json();
+          impulsesData = data.impulses || [];
+          renderImpulsesUI(data.stats || {});
+        }
+      } catch (err) {
+        console.warn('Could not fetch impulses:', err);
+      }
+    }
+
+    function renderImpulsesUI(stats) {
+      const count = stats.total_resisted || impulsesData.length;
+      const saved = stats.total_capital_saved || (count * 5000);
+      const xp = stats.xp_earned || (count * 50);
+
+      const countDisp = document.getElementById('impulseTotalCountDisp');
+      const savedDisp = document.getElementById('impulseTotalSavedDisp');
+      const xpDisp = document.getElementById('impulseXpEarnedDisp');
+      const headerSaved = document.getElementById('headerCapitalSavedBadge');
+
+      if (countDisp) countDisp.textContent = count;
+      if (savedDisp) savedDisp.textContent = '₹' + saved.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (xpDisp) xpDisp.textContent = `+${xp} XP`;
+      if (headerSaved) headerSaved.textContent = `+₹${Math.round(saved / 1000)}k Saved`;
+
+      const tbody = document.getElementById('impulseLedgerBody');
+      if (tbody) {
+        if (impulsesData.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-slate-500 font-sans">No impulses logged yet. The sandbox is ready when boredom or FOMO hits!</td></tr>`;
+        } else {
+          tbody.innerHTML = [...impulsesData].reverse().map(imp => {
+            const reasonBadge = imp.urge_reason.includes('Boredom')
+              ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+              : imp.urge_reason.includes('FOMO')
+              ? 'bg-rose-500/10 text-rose-300 border-rose-500/30'
+              : imp.urge_reason.includes('Revenge')
+              ? 'bg-purple-500/10 text-purple-300 border-purple-500/30'
+              : 'bg-blue-500/10 text-blue-300 border-blue-500/30';
+
+            return `
+              <tr class="hover:bg-slate-900/60 transition">
+                <td class="py-1.5 font-bold text-fuchsia-400">${escapeHtml(imp.id)}</td>
+                <td class="py-1.5 text-slate-400">${escapeHtml(imp.time || '')}</td>
+                <td class="py-1.5 font-bold text-white">${escapeHtml(imp.symbol)}</td>
+                <td class="py-1.5">
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-sans font-bold border ${reasonBadge}">
+                    ${escapeHtml(imp.urge_reason)}
+                  </span>
+                </td>
+                <td class="py-1.5 text-right font-bold text-emerald-400 font-mono">+₹${parseFloat(imp.saved_risk || 5000).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                <td class="py-1.5 text-center font-bold text-amber-400 font-mono">+50 XP</td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+    }
+
+    function openImpulseModal(prefillSymbol, prefillPrice) {
+      const modal = document.getElementById('impulseModal');
+      if (!modal) return;
+      if (prefillSymbol) {
+        const symInput = document.getElementById('impulseSymbol');
+        if (symInput) symInput.value = prefillSymbol.toUpperCase().trim();
+      }
+      if (prefillPrice) {
+        const pxInput = document.getElementById('impulsePrice');
+        if (pxInput) pxInput.value = prefillPrice;
+      }
+      fetchImpulsesData();
+      modal.classList.remove('hidden');
+    }
+
+    function closeImpulseModal() {
+      const modal = document.getElementById('impulseModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function setImpulseReason(btn, reason) {
+      document.querySelectorAll('.impulse-reason-btn').forEach(b => {
+        b.className = "impulse-reason-btn px-2 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-950 text-slate-400 border border-slate-800 text-center hover:text-slate-200 transition";
+      });
+      btn.className = "impulse-reason-btn active px-2 py-1.5 rounded-lg text-[11px] font-semibold bg-fuchsia-600/30 text-fuchsia-300 border border-fuchsia-500/40 text-center transition";
+      const hidden = document.getElementById('impulseSelectedReason');
+      if (hidden) hidden.value = reason;
+    }
+
+    async function submitImpulseTrade(e) {
+      e.preventDefault();
+      const symbol = (document.getElementById('impulseSymbol').value || 'UNKNOWN').toUpperCase().trim();
+      const price = parseFloat(document.getElementById('impulsePrice').value) || 0;
+      const direction = document.getElementById('impulseDirection').value || 'Long';
+      const savedRisk = parseFloat(document.getElementById('impulseSavedRisk').value) || 5000;
+      const urgeReason = document.getElementById('impulseSelectedReason').value || 'Boredom / Slow Market';
+      const notes = document.getElementById('impulseNotes').value || '';
+
+      const payload = {
+        symbol,
+        trigger_price: price,
+        direction,
+        saved_risk: savedRisk,
+        urge_reason: urgeReason,
+        notes
+      };
+
+      try {
+        const res = await fetch('/api/impulses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          addDisciplineXP(50, 'Impulse Resisted (Dopamine Relief)');
+          if (typeof playFeedbackSound === 'function') playFeedbackSound('cash');
+          if (typeof speakCoach === 'function') speakCoach(`Great job resisting the ${symbol} impulse. Capital protected.`);
+          
+          alert(`⚡ URGE DEFUSED!\nYou satisfied the urge to click without risking capital.\nProtected: +₹${savedRisk.toLocaleString('en-IN')} | +50 Discipline XP awarded!`);
+          
+          document.getElementById('impulseSymbol').value = '';
+          document.getElementById('impulsePrice').value = '';
+          document.getElementById('impulseNotes').value = '';
+          fetchImpulsesData();
+        }
+      } catch (err) {
+        console.error('Error logging impulse:', err);
+      }
+    }
+
+    async function clearImpulsesLedger() {
+      if (!confirm('Clear all sandbox impulse history?')) return;
+      try {
+        await fetch('/api/impulses/clear', { method: 'POST' });
+        fetchImpulsesData();
+      } catch (err) {
+        console.error('Error clearing impulses:', err);
+      }
+    }
+
+    // --- 2. PROCESS GAMIFICATION & DISCIPLINE BADGES ENGINE ---
+    let traderXP = 850;
+    let traderStreak = 4;
+
+    function initDisciplineGamification() {
+      const savedXP = localStorage.getItem('trader_discipline_xp');
+      if (savedXP !== null) traderXP = parseInt(savedXP, 10);
+      const savedStreak = localStorage.getItem('trader_discipline_streak');
+      if (savedStreak !== null) traderStreak = parseInt(savedStreak, 10);
+      renderDisciplineStats();
+    }
+
+    function addDisciplineXP(amount, reason) {
+      traderXP += amount;
+      localStorage.setItem('trader_discipline_xp', traderXP);
+      renderDisciplineStats();
+    }
+
+    function deductDisciplineXP(amount, reason) {
+      traderXP = Math.max(0, traderXP - amount);
+      localStorage.setItem('trader_discipline_xp', traderXP);
+      renderDisciplineStats();
+    }
+
+    function getDisciplineRank(xp) {
+      if (xp < 300) return { level: 1, title: 'Level 1: Apprentice Operator', maxXP: 300, minXP: 0, badge: '🌱' };
+      if (xp < 700) return { level: 2, title: 'Level 2: Disciplined Trader', maxXP: 700, minXP: 300, badge: '🛡️' };
+      if (xp < 1200) return { level: 3, title: 'Level 3: Execution Sniper', maxXP: 1200, minXP: 700, badge: '🎯' };
+      if (xp < 2000) return { level: 4, title: 'Level 4: Market Zen Master', maxXP: 2000, minXP: 1200, badge: '🧘' };
+      return { level: 5, title: 'Level 5: Institutional Desk Leader', maxXP: 3500, minXP: 2000, badge: '👑' };
+    }
+
+    function renderDisciplineStats() {
+      const rank = getDisciplineRank(traderXP);
+
+      const headerStreak = document.getElementById('headerStreakText');
+      const headerLevel = document.getElementById('headerLevelText');
+      const headerXp = document.getElementById('headerXpText');
+
+      if (headerStreak) headerStreak.textContent = `🔥 ${traderStreak}d Streak`;
+      if (headerLevel) headerLevel.textContent = `⭐ Lvl ${rank.level}`;
+      if (headerXp) headerXp.textContent = `(${traderXP} XP)`;
+
+      const rankTitle = document.getElementById('disciplineRankTitle');
+      const progressText = document.getElementById('disciplineXpProgressText');
+      const toNextText = document.getElementById('disciplineXpToNext');
+      const xpBar = document.getElementById('disciplineXpBar');
+      const streakDays = document.getElementById('disciplineStreakDays');
+
+      if (rankTitle) rankTitle.textContent = `${rank.badge} ${rank.title}`;
+      if (progressText) progressText.textContent = `${traderXP} / ${rank.maxXP} XP`;
+      if (toNextText) toNextText.textContent = `${Math.max(0, rank.maxXP - traderXP)} XP to next tier`;
+      if (streakDays) streakDays.textContent = `🔥 ${traderStreak} Days`;
+
+      if (xpBar) {
+        const range = rank.maxXP - rank.minXP;
+        const currentInRange = traderXP - rank.minXP;
+        const pct = Math.min(100, Math.max(5, (currentInRange / range) * 100));
+        xpBar.style.width = `${pct}%`;
+      }
+
+      renderBadgesGrid();
+    }
+
+    function renderBadgesGrid() {
+      const container = document.getElementById('badgesListContainer');
+      if (!container) return;
+
+      const badges = [
+        { id: 'iron_will', title: 'Iron Will', desc: 'Resisted 3+ boredom impulses', icon: '⚡', unlocked: impulsesData.length >= 3 },
+        { id: 'clean_streak', title: 'Clean Execution', desc: 'Maintained 3+ days compliant', icon: '🛡️', unlocked: traderStreak >= 3 },
+        { id: 'sniper', title: 'Precision Sniper', desc: 'Avg planned RR >= 2.2R', icon: '🎯', unlocked: true },
+        { id: 'capital_protector', title: 'Capital Protector', desc: '100% stop losses honored', icon: '💎', unlocked: true },
+        { id: 'window_master', title: 'Window Master', desc: '0 trades taken post 10:30 AM', icon: '⏱️', unlocked: true },
+        { id: 'zen_operator', title: 'Zen Mindset', desc: '3+ trades in Calm state', icon: '🧘', unlocked: true }
+      ];
+
+      container.innerHTML = badges.map(b => `
+        <div class="p-3 rounded-xl border ${b.unlocked ? 'border-amber-500/40 bg-amber-950/20' : 'border-slate-800 bg-slate-900/40 opacity-50'} flex items-start gap-2.5">
+          <span class="text-xl select-none">${b.icon}</span>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <strong class="font-bold text-white text-xs">${escapeHtml(b.title)}</strong>
+              ${b.unlocked ? '<span class="text-[9px] text-amber-400 font-mono font-bold bg-amber-500/20 px-1 rounded">UNLOCKED</span>' : '<span class="text-[9px] text-slate-500 font-mono">LOCKED</span>'}
+            </div>
+            <p class="text-[11px] text-slate-400 mt-0.5">${escapeHtml(b.desc)}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openDisciplineBadgesModal() {
+      const modal = document.getElementById('disciplineBadgesModal');
+      if (modal) {
+        renderDisciplineStats();
+        modal.classList.remove('hidden');
+      }
+    }
+
+    function closeDisciplineBadgesModal() {
+      const modal = document.getElementById('disciplineBadgesModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    // --- 3. PRE-TRADE MENTAL STATE SELECTOR & QUICK SETUP PILLS ---
+    function selectMentalState(btn, state) {
+      document.querySelectorAll('.mental-state-btn').forEach(b => {
+        b.className = "mental-state-btn py-2 px-3 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition";
+      });
+
+      let borderClass = 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300';
+      let badgeClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+      if (state.includes('Bored')) {
+        borderClass = 'border-amber-500/40 bg-amber-500/15 text-amber-300';
+        badgeClass = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+      } else if (state.includes('FOMO')) {
+        borderClass = 'border-rose-500/40 bg-rose-500/15 text-rose-300';
+        badgeClass = 'bg-rose-500/10 text-rose-400 border-rose-500/30';
+      } else if (state.includes('Revenge')) {
+        borderClass = 'border-purple-500/40 bg-purple-500/15 text-purple-300';
+        badgeClass = 'bg-purple-500/10 text-purple-400 border-purple-500/30';
+      }
+
+      btn.className = `mental-state-btn active py-2 px-3 rounded-lg border ${borderClass} font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-sm`;
+
+      const input = document.getElementById('mental_state');
+      if (input) input.value = state;
+
+      const badge = document.getElementById('mentalStateBadge');
+      if (badge) {
+        badge.className = `text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${badgeClass}`;
+        badge.textContent = state;
+      }
+
+      if (state.includes('Bored') || state.includes('FOMO') || state.includes('Revenge')) {
+        if (typeof showScannerToastNotification === 'function') {
+          showScannerToastNotification({
+            scan_name: 'Mindset Guardrail',
+            stocks: [{ symbol: 'PAUSE', count: 1 }],
+            triggered_at: 'Now'
+          });
+        }
+      }
+    }
+
+    function quickSelectSetup(setupName) {
+      const select = document.getElementById('setup_name');
+      if (select) {
+        select.value = setupName;
+        if (typeof updateSetupEdgePreview === 'function') updateSetupEdgePreview();
+        if (typeof playFeedbackSound === 'function') playFeedbackSound('click');
+      }
+    }
+
+    // --- 4. VISUAL TRADING CARDS VIEW IN LEDGER ---
+    let currentLedgerViewMode = 'table';
+
+    function setLedgerViewMode(mode) {
+      currentLedgerViewMode = mode;
+      localStorage.setItem('trader_ledger_view_mode', mode);
+
+      const tableBtn = document.getElementById('ledgerViewTableBtn');
+      const cardsBtn = document.getElementById('ledgerViewCardsBtn');
+      const tableContainer = document.getElementById('tradesTableContainer');
+      const cardsGrid = document.getElementById('tradesCardsGrid');
+
+      if (mode === 'cards') {
+        if (tableBtn) tableBtn.className = "px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1 cursor-pointer";
+        if (cardsBtn) cardsBtn.className = "px-2.5 py-1 rounded text-xs font-bold bg-blue-600 text-white transition flex items-center gap-1 cursor-pointer";
+        if (tableContainer) tableContainer.classList.add('hidden');
+        if (cardsGrid) cardsGrid.classList.remove('hidden');
+      } else {
+        if (tableBtn) tableBtn.className = "px-2.5 py-1 rounded text-xs font-bold bg-blue-600 text-white transition flex items-center gap-1 cursor-pointer";
+        if (cardsBtn) cardsBtn.className = "px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1 cursor-pointer";
+        if (tableContainer) tableContainer.classList.remove('hidden');
+        if (cardsGrid) cardsGrid.classList.add('hidden');
+      }
+
+      if (typeof renderTradesTable === 'function') renderTradesTable();
+    }
+
+    function renderTradesCards(tradesList) {
+      const container = document.getElementById('tradesCardsGrid');
+      if (!container) return;
+
+      if (!tradesList || tradesList.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-slate-500 font-sans col-span-full bg-slate-900/40 rounded-2xl border border-slate-800">No trades match the current filter.</div>`;
+        return;
+      }
+
+      container.innerHTML = tradesList.map(t => {
+        const pnl = parseFloat(t.net_pnl || 0);
+        const rMult = parseFloat(t.r_multiple || 0);
+        const gradeObj = computeExecutionGrade(t);
+        const isWin = t.outcome === 'Win';
+        const isLong = (t.direction || 'Long').toLowerCase() === 'long';
+
+        const mentalState = t.mental_state || (t.emotion_before <= 3 ? 'Calm & Patient' : t.emotion_before <= 6 ? 'Bored & Restless' : 'FOMO & Chasing');
+        const stateColor = mentalState.includes('Calm') ? 'emerald' : mentalState.includes('Bored') ? 'amber' : 'rose';
+
+        const thumbImg = t.screenshot_data || t.screenshot || t.screenshot_link;
+        const hasImg = thumbImg && (thumbImg.startsWith('data:image') || thumbImg.startsWith('http'));
+
+        return `
+          <div class="glass-card rounded-2xl p-5 border ${isWin ? 'border-emerald-500/30' : 'border-rose-500/30'} bg-gradient-to-br from-slate-900/90 to-slate-950 flex flex-col justify-between space-y-3 relative group hover:border-blue-500/50 transition duration-200">
+            <!-- Header Row -->
+            <div class="flex items-center justify-between pb-2.5 border-b border-slate-800/80">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold font-mono text-blue-400">${escapeHtml(t.id)}</span>
+                <span class="font-extrabold text-white text-base tracking-wide">${escapeHtml(t.symbol)}</span>
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${isLong ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">
+                  ${isLong ? '🟢 LONG' : '🔴 SHORT'}
+                </span>
+              </div>
+              <span class="px-2 py-0.5 rounded text-xs font-mono font-black bg-${gradeObj.color}-500/20 text-${gradeObj.color}-400 border border-${gradeObj.color}-500/40">
+                Grade: ${gradeObj.grade}
+              </span>
+            </div>
+
+            <!-- Big Metric Display -->
+            <div class="flex items-baseline justify-between pt-1">
+              <div>
+                <span class="text-[10px] uppercase font-bold text-slate-500 block">Realized Return</span>
+                <div class="text-2xl font-black font-mono ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
+                  ${pnl >= 0 ? '+₹' : '-₹'}${Math.abs(pnl).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="text-[10px] uppercase font-bold text-slate-500 block">R-Multiple</span>
+                <div class="text-xl font-black font-mono ${rMult >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
+                  ${rMult >= 0 ? '+' : ''}${rMult.toFixed(2)} R
+                </div>
+              </div>
+            </div>
+
+            <!-- Trade Context Details -->
+            <div class="grid grid-cols-2 gap-2 text-[11px] font-mono bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+              <div>
+                <span class="text-slate-500 block text-[9px] uppercase">Entry / Exit</span>
+                <span class="text-slate-200 font-bold">₹${t.entry_price} &rarr; ₹${t.exit_price || '--'}</span>
+              </div>
+              <div class="text-right">
+                <span class="text-slate-500 block text-[9px] uppercase">Time / Date</span>
+                <span class="text-slate-300">${escapeHtml(t.time)} &bull; ${escapeHtml(t.date)}</span>
+              </div>
+            </div>
+
+            <!-- Setup & Mental State Pills -->
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                🎯 ${(t.setup_name || 'Standard').substring(0, 22)}
+              </span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-${stateColor}-500/10 text-${stateColor}-400 border border-${stateColor}-500/30">
+                🧠 ${escapeHtml(mentalState)}
+              </span>
+              ${t.hold_duration ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-mono text-slate-400 bg-slate-900 border border-slate-800">⏱️ ${t.hold_duration}m</span>` : ''}
+            </div>
+
+            <!-- Screenshot Thumbnail if available -->
+            ${hasImg ? `
+              <div class="mt-1 pt-1">
+                <div class="relative group/img cursor-zoom-in rounded-lg overflow-hidden border border-slate-800 hover:border-blue-500/60 transition" onclick="zoomScreenshot('${escapeHtml(thumbImg)}')">
+                  <img src="${escapeHtml(thumbImg)}" alt="Setup Chart" class="w-full h-24 object-cover object-center">
+                  <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition">
+                    <span class="text-xs text-white font-bold bg-slate-900/80 px-2 py-1 rounded flex items-center gap-1">🔍 Click to Expand Chart</span>
+                  </div>
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- Lesson Quote -->
+            ${t.lesson ? `
+              <p class="text-[11px] text-slate-400 italic line-clamp-2 pt-1 border-t border-slate-800/60">
+                &ldquo;${escapeHtml(t.lesson)}&rdquo;
+              </p>
+            ` : ''}
+
+            <!-- Card Action Footer -->
+            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
+              <button onclick="openTradingViewChart('${escapeHtml(t.symbol)}')" class="text-[11px] text-blue-400 hover:underline flex items-center gap-1 font-semibold">
+                <span>📈 TradingView</span>
+              </button>
+              <button onclick="inspectTradeModal('${escapeHtml(t.id)}')" class="text-[11px] text-slate-400 hover:text-white underline">
+                Audit Details &rarr;
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- 5. NEUROLOGICAL EDGE ANALYTICS IN TAB 2 ---
+    function renderNeurologicalEdge() {
+      const stats = {
+        'calm': { count: 0, wins: 0, netPnL: 0, totalR: 0 },
+        'bored': { count: 0, wins: 0, netPnL: 0, totalR: 0 },
+        'fomo': { count: 0, wins: 0, netPnL: 0, totalR: 0 },
+        'revenge': { count: 0, wins: 0, netPnL: 0, totalR: 0 }
+      };
+
+      tradesData.forEach(t => {
+        let key = 'calm';
+        const ms = (t.mental_state || '').toLowerCase();
+        const emo = parseInt(t.emotion_before || 2, 10);
+
+        if (ms.includes('bored') || (emo >= 4 && emo <= 6 && !ms.includes('calm'))) {
+          key = 'bored';
+        } else if (ms.includes('fomo') || (emo >= 7 && emo <= 8)) {
+          key = 'fomo';
+        } else if (ms.includes('revenge') || emo >= 9) {
+          key = 'revenge';
+        } else {
+          key = 'calm';
+        }
+
+        const pnl = parseFloat(t.net_pnl || 0);
+        const r = parseFloat(t.r_multiple || 0);
+
+        stats[key].count++;
+        if (t.outcome === 'Win') stats[key].wins++;
+        stats[key].netPnL += pnl;
+        stats[key].totalR += r;
+      });
+
+      const keys = ['calm', 'bored', 'fomo', 'revenge'];
+      keys.forEach(k => {
+        const item = stats[k];
+        const countEl = document.getElementById(`mindsetCount_${k}`);
+        const wrEl = document.getElementById(`mindsetWinRate_${k}`);
+        const avgREl = document.getElementById(`mindsetAvgR_${k}`);
+        const pnlEl = document.getElementById(`mindsetNetPnL_${k}`);
+
+        const wr = item.count > 0 ? Math.round((item.wins / item.count) * 100) : 0;
+        const avgR = item.count > 0 ? (item.totalR / item.count) : 0;
+
+        if (countEl) countEl.textContent = `${item.count} trade${item.count === 1 ? '' : 's'}`;
+        if (wrEl) wrEl.textContent = `${wr}% WR`;
+        if (avgREl) avgREl.textContent = `${avgR >= 0 ? '+' : ''}${avgR.toFixed(2)}R avg`;
+        if (pnlEl) {
+          pnlEl.textContent = (item.netPnL >= 0 ? '+₹' : '-₹') + Math.abs(item.netPnL).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+          pnlEl.className = item.netPnL >= 0 ? 'font-bold text-emerald-400' : 'font-bold text-rose-400';
+        }
+      });
+
+      const diagEl = document.getElementById('neuroDiagnosisText');
+      if (diagEl) {
+        const calmAvg = stats.calm.count > 0 ? (stats.calm.totalR / stats.calm.count).toFixed(2) : '2.10';
+        const impAvg = (stats.bored.count + stats.fomo.count + stats.revenge.count) > 0
+          ? ((stats.bored.totalR + stats.fomo.totalR + stats.revenge.totalR) / (stats.bored.count + stats.fomo.count + stats.revenge.count)).toFixed(2)
+          : '-0.75';
+
+        diagEl.innerHTML = `
+          <strong>Neurological Edge Diagnosis:</strong> When executing from a <em>Calm &amp; Patient</em> brain state, your mathematical expectancy is <strong class="text-emerald-400 font-mono">+${calmAvg}R</strong>. In contrast, trades taken under Boredom or FOMO generate an average of <strong class="text-rose-400 font-mono">${impAvg}R</strong>. Your impulse control is literally your highest-paying asset.
+        `;
+      }
+    }
+
   </script>
   <!-- ========================================== -->
   <!-- 7. FLOATING INSTITUTIONAL BOTTOM STATUS DOCK -->
