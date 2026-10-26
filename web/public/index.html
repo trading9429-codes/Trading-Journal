@@ -828,11 +828,11 @@
         </label>
         <div class="relative min-w-[280px] sm:min-w-[340px]">
           <select id="tabSelectorDropdown" onchange="switchTab(parseInt(this.value))" class="w-full bg-slate-900/95 hover:bg-slate-800 border-2 border-blue-500/60 hover:border-blue-400 text-white font-bold text-xs sm:text-sm rounded-xl px-4 py-2.5 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition shadow-lg shadow-blue-950/40 font-sans">
-            <option value="1">⚡ Tab 1: Live Execution &amp; Trade Log</option>
-            <option value="2">📈 Tab 2: Performance &amp; Equity Curves</option>
-            <option value="3">🧠 Tab 3: Edge Attribution &amp; Leak Matrix</option>
-            <option value="4">🎲 Tab 4: Quant Risk &amp; Monte Carlo Sim</option>
-            <option value="5">📡 Tab 5: 1-Min Chartink Webhook Radar</option>
+            <option value="1">📊 Tab 1: Dashboard (Overview &amp; Scorecard)</option>
+            <option value="2">📈 Tab 2: Advanced Analytics (Curves &amp; Quant Ratios)</option>
+            <option value="3">🎯 Tab 3: Attribution &amp; Leaks (Strategy &amp; Excursions)</option>
+            <option value="4">🎲 Tab 4: Quant Risk &amp; Sim (Monte Carlo &amp; Stress Test)</option>
+            <option value="5">📡 Tab 5: Chartink Radar (1-Min Live Webhook Feed)</option>
           </select>
           <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-blue-400 font-black text-xs">
             ▼
@@ -1733,54 +1733,7 @@
         </div>
       </div>
 
-      <!-- SPACIOUS CORE SCORECARD (6 KEY CARDS) -->
-      <div id="secCoreScorecard" class="space-y-2">
-        <div class="flex items-center justify-between px-1">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Core Performance Scorecard</span>
-          <button onclick="toggleSectionFromCard('secCoreScorecard')" class="text-slate-500 hover:text-white text-xs p-1 rounded transition cursor-pointer" title="Hide this section">
-            <span id="eye_secCoreScorecard">👁️</span>
-          </button>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div class="glass-card rounded-2xl p-4 border border-slate-800">
-          <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Net P&amp;L</div>
-          <div class="text-xl font-black font-mono mt-1 text-emerald-400" id="statNetPnL">₹0.00</div>
-          <div class="text-[10px] text-slate-500 mt-1" id="statGrossCostSub">Gross: ₹0 &bull; Cost: ₹0</div>
-        </div>
 
-        <div class="glass-card rounded-2xl p-4 border border-slate-800">
-          <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Win Rate</div>
-          <div class="text-xl font-black font-mono mt-1 text-white" id="statWinRate">0.0%</div>
-          <div class="text-[10px] text-slate-500 mt-1" id="statWinLossRatio">0 Wins &bull; 0 Losses</div>
-        </div>
-
-        <div class="glass-card rounded-2xl p-4 border border-slate-800">
-          <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Profit Factor</div>
-          <div class="text-xl font-black font-mono mt-1 text-blue-400" id="statProfitFactor">0.00</div>
-          <div class="text-[10px] text-slate-500 mt-1" id="statTotalRSub">Total Net R: 0.00R</div>
-        </div>
-
-        <div class="glass-card rounded-2xl p-4 border border-slate-800">
-          <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Expectancy (R/Trade)</div>
-          <div class="text-xl font-black font-mono mt-1 text-indigo-400" id="statExpectancyR">+0.00 R</div>
-          <div class="text-[10px] text-slate-500 mt-1">Mathematical Edge</div>
-        </div>
-
-        <div class="glass-card rounded-2xl p-4 border border-slate-800">
-          <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">R-Efficiency Score</div>
-          <div class="text-xl font-black font-mono mt-1 text-teal-400" id="statEfficiencyScore">0%</div>
-          <div class="text-[10px] text-slate-500 mt-1" id="statEfficiencyDesc">Realized vs Planned</div>
-        </div>
-
-        <div class="glass-card rounded-2xl p-4 border border-slate-800">
-          <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Discipline Adherence</div>
-          <div class="text-xl font-black font-mono mt-1 text-emerald-400" id="statDisciplineScore">100%</div>
-          <div class="text-[10px] text-slate-500 mt-1" id="statViolationsCount">0 Rule Violations</div>
-        </div>
-      </div>
-
-      </div>
-      </div>
 
       <!-- INSTITUTIONAL EDGE & PAYOFF METRICS (4 ADVANCED METRIC CARDS) -->
       <div id="secInstitutionalEdge" class="space-y-2">
@@ -1908,29 +1861,7 @@
             <!-- SPACIOUS MAIN CHARTS: EQUITY, R-ALPHA, UNDERWATER & DONUTS (2x2 GRID) -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        <!-- High-Resolution Cumulative Net Equity Curve (₹) -->
-        <div id="secEquityCurve" class="glass-card rounded-2xl p-6 border border-slate-800 flex flex-col justify-between">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-            <div>
-              <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                <span>📈</span>
-                <span>Cumulative Net Equity Curve (₹)</span>
-              </h3>
-              <p class="text-[11px] text-slate-400">Account balance progression strictly factoring FYERS turnover &amp; taxes</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20" id="chartTotalReturnBadge">
-                +0.00% ROI
-              </span>
-              <button onclick="toggleSectionFromCard('secEquityCurve')" class="text-slate-500 hover:text-white text-xs p-1 rounded transition cursor-pointer" title="Hide chart">
-                <span id="eye_secEquityCurve">👁️</span>
-              </button>
-            </div>
-          </div>
-          <div class="mt-4 relative" style="height: 290px;">
-            <canvas id="equityChart"></canvas>
-          </div>
-        </div>
+
 
         <!-- Pure Technical Alpha: Cumulative Realized R-Multiple Curve (R) -->
         <div id="secRCurve" class="glass-card rounded-2xl p-6 border border-slate-800 flex flex-col justify-between">
@@ -6067,6 +5998,25 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       }
     }
 
+    
+    function toggleInlineExecutionForm() {
+      const container = document.getElementById('inlineExecutionFormContainer');
+      const text = document.getElementById('inlineFormToggleText');
+      const arrow = document.getElementById('inlineFormToggleArrow');
+      if (!container) return;
+
+      const isHidden = container.classList.contains('hidden');
+      if (isHidden) {
+        container.classList.remove('hidden');
+        if (text) text.textContent = 'Hide Form';
+        if (arrow) arrow.textContent = '▲';
+      } else {
+        container.classList.add('hidden');
+        if (text) text.textContent = 'Show Form';
+        if (arrow) arrow.textContent = '▼';
+      }
+    }
+
     function switchTab(tabNum) {
       currentTab = tabNum;
 
@@ -6127,12 +6077,14 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         fetchScannerAlerts();
       }
 
-      // Safe chart rendering wrapped in try/catch so chart errors never block tab switching
-      try {
-        renderAllChartsAndMetrics();
-      } catch (err) {
-        console.warn("Chart render warning on tab switch:", err);
-      }
+      // Render charts AFTER DOM paint so canvas elements have non-zero dimensions
+      setTimeout(() => {
+        try {
+          renderAllChartsAndMetrics();
+        } catch (err) {
+          console.warn("Chart render warning on tab switch:", err);
+        }
+      }, 40);
     }
 
     // --- Urgency Slider Control ---
@@ -8875,12 +8827,10 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         if (typeof renderNeurologicalEdge === 'function') renderNeurologicalEdge();
       }
 
-      // Render clean primary Dashboard equity curve on Tab 1
-      renderDashboardEquityChart(trades);
-
-      // Charts render
-      if (currentTab === 2) {
-        renderEquityChart(trades);
+      // Charts render strictly for the active tab to prevent hidden canvas sizing bugs
+      if (currentTab === 1) {
+        renderDashboardEquityChart(trades);
+      } else if (currentTab === 2) {
         renderRCurveChart(trades);
         renderUnderwaterChart(trades);
         renderDonutCharts(totalWins, totalLosses, trades.length - totalClosed, violations, trades.length);
