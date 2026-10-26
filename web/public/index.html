@@ -627,7 +627,7 @@
 
         <button onclick="switchTab(2)" id="sidebarNav_2" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-slate-400 hover:text-white hover:bg-slate-900/80 transition cursor-pointer group">
           <span class="text-base flex-shrink-0">📈</span>
-          <span class="sidebar-label font-sans">Edge &amp; Analytics</span>
+          <span class="sidebar-label font-sans">Advanced Analytics</span>
           <span class="sidebar-label ml-auto text-[10px] font-mono text-slate-500 group-hover:text-slate-400">2</span>
         </button>
 
@@ -1002,6 +1002,28 @@
         </div>
       </section>
 
+
+      
+      <!-- DASHBOARD MAIN GRAPH: CUMULATIVE NET EQUITY CURVE (CLEAN EXECUTIVE VIEW) -->
+      <section id="dashboardPrimaryGraphSection" class="glass-card rounded-2xl p-6 border border-slate-800 shadow-2xl flex flex-col justify-between">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div>
+            <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+              <span>📈</span>
+              <span>Cumulative Net Equity Curve (₹)</span>
+            </h3>
+            <p class="text-xs text-slate-400">Primary account capital progression strictly factoring turnover &amp; statutory charges</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20" id="dashEquityRoiBadge">
+              +0.00% ROI
+            </span>
+          </div>
+        </div>
+        <div class="mt-4 relative" style="height: 310px;">
+          <canvas id="dashboardEquityChart"></canvas>
+        </div>
+      </section>
 
       <!-- COMBAT MODE HIGH-FOCUS HUD BANNER (Toggled by H) -->
       <div id="combatBanner" class="hidden bg-gradient-to-r from-amber-950/80 via-slate-900 to-amber-950/80 border border-amber-500/40 p-3.5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-2xl">
@@ -6067,7 +6089,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       // Synchronize Top Bar View Title
       const titleMap = {
         1: { icon: '📊', title: 'Dashboard Overview & Scorecard' },
-        2: { icon: '📈', title: 'Performance Curves & Edge Metrics' },
+        2: { icon: '📈', title: 'Advanced Analytics, Curves & Quant Ratios' },
         3: { icon: '🎯', title: 'Attribution, Leaks & Strategy Matrix' },
         4: { icon: '🎲', title: 'Quant Risk & Monte Carlo Simulation' },
         5: { icon: '📡', title: '1-Minute Chartink Webhook Radar' }
@@ -8853,6 +8875,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         if (typeof renderNeurologicalEdge === 'function') renderNeurologicalEdge();
       }
 
+      // Render clean primary Dashboard equity curve on Tab 1
+      renderDashboardEquityChart(trades);
+
       // Charts render
       if (currentTab === 2) {
         renderEquityChart(trades);
@@ -9472,6 +9497,69 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
               grid: { color: 'rgba(255, 255, 255, 0.05)' },
               ticks: { color: '#64748B', font: { size: 10 }, callback: v => `+${v}R` }
             }
+          }
+        }
+      });
+    }
+
+    
+    let chartDashboardEquity = null;
+
+    function renderDashboardEquityChart(trades) {
+      const ctx = document.getElementById('dashboardEquityChart');
+      if (!ctx) return;
+
+      const labels = ['Start', ...trades.map((t, idx) => `T-${idx + 1}`)];
+      let runningCapital = startingCapital;
+      const dataPoints = [startingCapital];
+
+      trades.forEach(t => {
+        runningCapital += (parseFloat(t.net_pnl) || 0);
+        dataPoints.push(runningCapital);
+      });
+
+      const totalNet = runningCapital - startingCapital;
+      const totalReturnPct = startingCapital > 0 ? (totalNet / startingCapital) * 100 : 0;
+      const badge = document.getElementById('dashEquityRoiBadge');
+      if (badge) {
+        badge.textContent = `${totalReturnPct >= 0 ? '+' : ''}${totalReturnPct.toFixed(2)}% ROI`;
+        badge.className = totalReturnPct >= 0
+          ? 'text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20'
+          : 'text-xs font-mono font-bold text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20';
+      }
+
+      if (chartDashboardEquity) chartDashboardEquity.destroy();
+
+      chartDashboardEquity = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Net Account Capital (₹)',
+            data: dataPoints,
+            borderColor: '#10B981',
+            backgroundColor: 'rgba(16, 185, 129, 0.08)',
+            fill: true,
+            tension: 0.25,
+            pointBackgroundColor: '#10B981',
+            pointRadius: 4,
+            borderWidth: 2.5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `Account Equity: ₹${Math.round(ctx.parsed.y).toLocaleString('en-IN')}`
+              }
+            }
+          },
+          scales: {
+            x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#64748B', font: { size: 10 } } },
+            y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#64748B', font: { size: 10 }, callback: v => '₹' + v.toLocaleString('en-IN') } }
           }
         }
       });
