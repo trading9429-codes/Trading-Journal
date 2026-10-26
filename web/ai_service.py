@@ -14,6 +14,19 @@ Your core rules:
 5. Empathize with boredom, restlessness, and FOMO urges. Strongly encourage using the Dopamine Relief Valve (Impulse Sandbox) rather than real capital.
 Be concise, mathematically sharp, candid, empathetic, and actionable."""
 
+
+def _safe_float(val, default=0.0):
+    try:
+        return float(val) if val is not None and str(val).strip() != '' else default
+    except (ValueError, TypeError):
+        return default
+
+def _safe_int(val, default=0):
+    try:
+        return int(float(val)) if val is not None and str(val).strip() != '' else default
+    except (ValueError, TypeError):
+        return default
+
 class AIService:
     def __init__(self):
         pass
@@ -110,15 +123,15 @@ Format the autopsy in markdown with these exact 4 sections:
     def _heuristic_trade_autopsy(self, trade):
         symbol = trade.get("symbol", "N/A")
         direction = trade.get("direction", "Long")
-        pnl = float(trade.get("net_pnl", 0))
-        r_mult = float(trade.get("r_multiple", 0))
-        planned_rr = float(trade.get("rr_planned", 2.2))
-        hold_mins = int(trade.get("hold_duration", 6))
+        pnl = _safe_float(trade.get("net_pnl"), 0.0)
+        r_mult = _safe_float(trade.get("r_multiple"), 0.0)
+        planned_rr = _safe_float(trade.get("rr_planned"), 2.2)
+        hold_mins = _safe_int(trade.get("hold_duration"), 6)
         setup = trade.get("setup_name", "1m Momentum Setup")
         mental_state = trade.get("mental_state", "Calm & Patient")
-        urgency = int(trade.get("emotion_before", 2))
+        urgency = _safe_int(trade.get("emotion_before"), 2)
         violation = trade.get("rule_violation", "N") == "Y"
-        checklist = int(trade.get("checklist_score", 5))
+        checklist = _safe_int(trade.get("checklist_score"), 5)
 
         # Calculate Score
         score = 85

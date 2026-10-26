@@ -187,7 +187,7 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
                 res = ai_service.generate_trade_autopsy(trade_data, custom_api_key=api_key, provider=provider)
                 self._send_json(res)
             except Exception as e:
-                self._send_json({"error": str(e)}, status=500)
+                self._send_json({"error": str(e), "analysis": f"Autopsy error: {e}"}, status=500)
         elif path == "/api/ai/session-debrief":
             try:
                 from ai_service import ai_service
@@ -198,7 +198,7 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
                 res = ai_service.generate_session_debrief(session_date, trades, custom_api_key=api_key, provider=provider)
                 self._send_json(res)
             except Exception as e:
-                self._send_json({"error": str(e)}, status=500)
+                self._send_json({"error": str(e), "debrief": f"Debrief error: {e}"}, status=500)
         elif path == "/api/ai/chat":
             try:
                 from ai_service import ai_service
@@ -210,7 +210,7 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
                 res = ai_service.chat_with_coach(message, history, trades_context, custom_api_key=api_key, provider=provider)
                 self._send_json(res)
             except Exception as e:
-                self._send_json({"error": str(e)}, status=500)
+                self._send_json({"error": str(e), "reply": f"⚠️ Desk Risk Engine notice: {e}"}, status=500)
         else:
             self.send_error(404, "Endpoint not found.")
 

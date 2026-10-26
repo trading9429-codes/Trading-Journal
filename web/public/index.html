@@ -12263,6 +12263,31 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
     let aiVoiceReadEnabled = false;
     let aiConversationHistory = [];
+
+    function sanitizeTradesForAI(trades) {
+      if (!Array.isArray(trades)) return [];
+      return trades.slice(0, 40).map(t => ({
+        id: t.id,
+        date: t.date,
+        time: t.time,
+        symbol: t.symbol,
+        setup_name: t.setup_name,
+        direction: t.direction,
+        entry_price: t.entry_price,
+        stop_price: t.stop_price,
+        exit_price: t.exit_price,
+        net_pnl: t.net_pnl,
+        r_multiple: t.r_multiple,
+        rr_planned: t.rr_planned,
+        outcome: t.outcome,
+        hold_duration: t.hold_duration,
+        mental_state: t.mental_state,
+        emotion_before: t.emotion_before,
+        rule_violation: t.rule_violation,
+        lesson: t.lesson
+      }));
+    }
+
     let currentAutopsyText = "";
 
     function getAISettings() {
@@ -12372,7 +12397,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         const payload = {
           message: msg,
           history: aiConversationHistory,
-          trades: tradesData,
+          trades: sanitizeTradesForAI(tradesData),
           api_key: settings.apiKey || null,
           provider: settings.provider
         };
@@ -12398,7 +12423,12 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             speakCoach(cleanText);
           }
         } else {
-          appendChatMessage('assistant', '⚠️ Unable to connect to Risk Engine. Check terminal connection.');
+          let errDetail = '';
+          try {
+            const errData = await res.json();
+            if (errData && errData.error) errDetail = ' (' + errData.error + ')';
+          } catch(e) {}
+          appendChatMessage('assistant', '⚠️ Unable to connect to Risk Engine' + errDetail + '. Check server status.');
         }
       } catch (err) {
         console.error('AI chat error:', err);
@@ -12413,7 +12443,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       if (!container) return;
 
       const isUser = role === 'user';
-      const formattedText = text
+      let formattedText = text
         .replace(/### (.*)/g, '<h4 class="font-bold text-white text-xs mt-1">$1</h4>')
         .replace(/#### (.*)/g, '<h5 class="font-semibold text-cyan-300 text-xs mt-1">$1</h5>')
         .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
@@ -12488,8 +12518,11 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
       try {
         const settings = getAISettings();
+        const cleanTrade = { ...trade };
+        delete cleanTrade.screenshot;
+        delete cleanTrade.screenshot_data;
         const payload = {
-          trade: trade,
+          trade: cleanTrade,
           api_key: settings.apiKey || null,
           provider: settings.provider
         };
@@ -12503,7 +12536,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         if (res.ok) {
           const data = await res.json();
           currentAutopsyText = data.analysis || '';
-          const formatted = currentAutopsyText
+          let formatted = currentAutopsyText
             .replace(/### (.*)/g, '<h3 class="text-sm font-extrabold text-white mt-1 border-b border-slate-800 pb-1">$1</h3>')
             .replace(/#### (.*)/g, '<h4 class="text-xs font-bold text-cyan-300 mt-2">$1</h4>')
             .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
@@ -12549,7 +12582,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         const settings = getAISettings();
         const payload = {
           date: targetDate,
-          trades: tradesData,
+          trades: sanitizeTradesForAI(tradesData),
           api_key: settings.apiKey || null,
           provider: settings.provider
         };
@@ -12563,7 +12596,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         if (res.ok) {
           const data = await res.json();
           const debrief = data.debrief || '';
-          const formatted = debrief
+          let formatted = debrief
             .replace(/### (.*)/g, '<h4 class="font-bold text-cyan-300 text-xs mb-1">$1</h4>')
             .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>');
           formatted = formatted.split('\n\n').join('<br><br>').split('\n').join('<br>');
