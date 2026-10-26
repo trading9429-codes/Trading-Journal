@@ -913,26 +913,25 @@
     <!-- ========================================== -->
     <div id="tabContent1" class="mt-2 space-y-6">
 
-      <!-- TRADESYNC HIGH-IMPACT EXECUTIVE KPI STRIP -->
-      <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- TRADESYNC HIGH-IMPACT EXECUTIVE KPI STRIP (6-METRIC ROW WITH EXPECTANCY & FRICTION) -->
+      <section class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3.5">
         <!-- 1. Net Realized P&L -->
-        <div class="kpi-gradient-card rounded-2xl p-5 border border-slate-800 flex flex-col justify-between">
+        <div class="kpi-gradient-card rounded-2xl p-4 sm:p-5 border border-slate-800 flex flex-col justify-between shadow-lg">
           <div class="flex items-center justify-between">
             <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Net Realized P&amp;L</span>
             <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300" id="kpiNetPnLBadge">+0.0% ROI</span>
           </div>
-          <div class="text-2xl lg:text-3xl font-black font-mono text-emerald-400 mt-2" id="kpiNetPnL">₹0.00</div>
-          <div class="text-[10px] text-slate-400 mt-1 font-mono" id="kpiGrossCostSub">Gross: ₹0 &bull; Taxes/Charges: ₹0</div>
+          <div class="text-2xl font-black font-mono text-emerald-400 mt-2 truncate" id="kpiNetPnL">₹0.00</div>
+          <div class="text-[10px] text-slate-400 mt-1 font-mono truncate" id="kpiGrossCostSub">Gross: ₹0 &bull; Taxes: ₹0</div>
         </div>
 
         <!-- 2. Win Rate & Asymmetry -->
-        <div class="kpi-gradient-card rounded-2xl p-5 border border-slate-800 flex flex-col justify-between">
+        <div class="kpi-gradient-card rounded-2xl p-4 sm:p-5 border border-slate-800 flex flex-col justify-between shadow-lg">
           <div class="flex items-center justify-between">
-            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Session Win Rate</span>
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Win Rate</span>
             <span class="text-[10px] font-mono text-slate-400" id="kpiWinLossCount">0W - 0L</span>
           </div>
-          <div class="text-2xl lg:text-3xl font-black font-mono text-white mt-2" id="kpiWinRate">0.0%</div>
-          <!-- Mini Progress Bar -->
+          <div class="text-2xl font-black font-mono text-white mt-2" id="kpiWinRate">0.0%</div>
           <div class="w-full bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden flex">
             <div id="kpiWinRateBar" class="bg-emerald-500 h-1.5 transition-all duration-500" style="width: 0%"></div>
             <div id="kpiLossRateBar" class="bg-rose-500 h-1.5 transition-all duration-500" style="width: 0%"></div>
@@ -940,23 +939,43 @@
         </div>
 
         <!-- 3. Profit Factor & Edge -->
-        <div class="kpi-gradient-card rounded-2xl p-5 border border-slate-800 flex flex-col justify-between">
+        <div class="kpi-gradient-card rounded-2xl p-4 sm:p-5 border border-slate-800 flex flex-col justify-between shadow-lg">
           <div class="flex items-center justify-between">
             <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Profit Factor</span>
             <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300" id="kpiPFBadge">0.00x</span>
           </div>
-          <div class="text-2xl lg:text-3xl font-black font-mono text-blue-400 mt-2" id="kpiProfitFactor">0.00</div>
-          <div class="text-[10px] text-slate-400 mt-1 font-mono" id="kpiExpectancySub">Expectancy: +0.00R / Trade</div>
+          <div class="text-2xl font-black font-mono text-blue-400 mt-2" id="kpiProfitFactor">0.00</div>
+          <div class="text-[10px] text-slate-400 mt-1 font-mono truncate" id="kpiPFSub">Payoff: 0.00x Ratio</div>
         </div>
 
-        <!-- 4. Execution Discipline Score -->
-        <div class="kpi-gradient-card rounded-2xl p-5 border border-slate-800 flex flex-col justify-between">
+        <!-- 4. Average Expectancy (Edge Per Trade) -->
+        <div class="kpi-gradient-card rounded-2xl p-4 sm:p-5 border border-slate-800 flex flex-col justify-between shadow-lg">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Avg Expectancy</span>
+            <span class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300" id="kpiExpectancyBadge">+0.00R</span>
+          </div>
+          <div class="text-2xl font-black font-mono text-indigo-400 mt-2 truncate" id="kpiExpectancyValue">+0.00 R</div>
+          <div class="text-[10px] text-slate-400 mt-1 font-mono truncate" id="kpiExpectancySub">₹0.00 / execution</div>
+        </div>
+
+        <!-- 5. Broker & Statutory Friction Drag -->
+        <div class="kpi-gradient-card rounded-2xl p-4 sm:p-5 border border-slate-800 flex flex-col justify-between shadow-lg">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Friction &amp; Drag</span>
+            <span class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300" id="kpiFrictionBadge">0.0% Drag</span>
+          </div>
+          <div class="text-2xl font-black font-mono text-amber-400 mt-2 truncate" id="kpiFrictionValue">₹0.00 / trd</div>
+          <div class="text-[10px] text-slate-400 mt-1 font-mono truncate" id="kpiFrictionSub">Total: ₹0 &bull; FYERS STT/GST</div>
+        </div>
+
+        <!-- 6. Execution Discipline Score -->
+        <div class="kpi-gradient-card rounded-2xl p-4 sm:p-5 border border-slate-800 flex flex-col justify-between shadow-lg">
           <div class="flex items-center justify-between">
             <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Discipline Adherence</span>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Max 2 Trades/Day</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Max 2 Trd/Day</span>
           </div>
-          <div class="text-2xl lg:text-3xl font-black font-mono text-emerald-400 mt-2" id="kpiDisciplineScore">100%</div>
-          <div class="text-[10px] text-slate-400 mt-1 font-mono" id="kpiDemeritsSub">0 Demerit Strikes &bull; Clean Process</div>
+          <div class="text-2xl font-black font-mono text-emerald-400 mt-2" id="kpiDisciplineScore">100%</div>
+          <div class="text-[10px] text-slate-400 mt-1 font-mono truncate" id="kpiDemeritsSub">0 Demerit Strikes &bull; Clean</div>
         </div>
       </section>
 
@@ -1066,8 +1085,28 @@
             </div>
           </div>
 
+          <!-- Live Edge Expectancy & Friction Micro-Bar -->
+          <div class="grid grid-cols-2 gap-2 pt-2.5 border-t border-slate-800/80 font-mono text-[10px]">
+            <div class="bg-slate-950/80 p-2 rounded-xl border border-slate-800/80 flex flex-col justify-between shadow-inner">
+              <div class="flex items-center justify-between text-slate-400 text-[9px] uppercase font-semibold">
+                <span>Avg Expectancy</span>
+                <span id="dashExpEdgeBadge" class="text-indigo-400 font-bold">+0.00R</span>
+              </div>
+              <div class="text-sm font-black text-white mt-1 font-mono" id="dashAvgExpectancy">+0.00 R</div>
+              <div class="text-[9px] text-slate-400 mt-0.5 truncate" id="dashAvgExpectancySub">₹0 / trade</div>
+            </div>
+            <div class="bg-slate-950/80 p-2 rounded-xl border border-slate-800/80 flex flex-col justify-between shadow-inner">
+              <div class="flex items-center justify-between text-slate-400 text-[9px] uppercase font-semibold">
+                <span>Statutory Friction</span>
+                <span id="dashFrictionBadge" class="text-amber-400 font-bold">0.0%</span>
+              </div>
+              <div class="text-sm font-black text-amber-300 mt-1 font-mono" id="dashAvgFriction">₹0 / trd</div>
+              <div class="text-[9px] text-slate-400 mt-0.5 truncate" id="dashAvgFrictionSub">Total: ₹0</div>
+            </div>
+          </div>
+
           <!-- Bottom Micro-Insight Footer -->
-          <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-mono text-slate-400">
+          <div class="pt-2 flex items-center justify-between text-[10px] font-mono text-slate-400">
             <span>Daily Limit: <strong class="text-white">Max 2 Trades</strong></span>
             <span class="text-emerald-400 font-bold">0 Demerit Strikes</span>
           </div>
@@ -8774,8 +8813,87 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             pfBadge.textContent = profitFactor >= 2.0 ? 'Tier 1 Edge' : (profitFactor >= 1.2 ? 'Moderate' : 'Low PF');
             pfBadge.className = profitFactor >= 2.0 ? 'text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300' : 'text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300';
           }
-          const kpiExp = document.getElementById('kpiExpectancySub');
-          if (kpiExp) kpiExp.textContent = 'Expectancy: ' + (expectancyR >= 0 ? '+' : '') + expectancyR.toFixed(2) + 'R • Net: ' + (totalRealizedR >= 0 ? '+' : '') + totalRealizedR.toFixed(2) + 'R';
+          const pfSub = document.getElementById('kpiPFSub');
+          if (pfSub) pfSub.textContent = `Payoff: ${payoffB.toFixed(2)}x Asymmetry`;
+        }
+
+        // --- Average Expectancy Metric (Dashboard Card & Side Panel) ---
+        let expectancyRs = trades.length > 0 ? (totalNet / trades.length) : 0;
+        const isZenMode = typeof isZenModeActive !== 'undefined' && isZenModeActive;
+
+        const kpiExpVal = document.getElementById('kpiExpectancyValue');
+        const kpiExpBadge = document.getElementById('kpiExpectancyBadge');
+        const kpiExpSub = document.getElementById('kpiExpectancySub');
+        if (kpiExpVal) {
+          kpiExpVal.textContent = isZenMode 
+            ? `${expectancyR >= 0 ? '+' : ''}${expectancyR.toFixed(2)} R` 
+            : `${expectancyRs >= 0 ? '+₹' : '-₹'}${Math.abs(Math.round(expectancyRs)).toLocaleString('en-IN')}`;
+          kpiExpVal.className = expectancyR >= 0 ? 'text-2xl font-black font-mono text-indigo-400 mt-2 truncate' : 'text-2xl font-black font-mono text-rose-400 mt-2 truncate';
+        }
+        if (kpiExpBadge) {
+          kpiExpBadge.textContent = `${expectancyR >= 0 ? '+' : ''}${expectancyR.toFixed(2)}R`;
+          kpiExpBadge.className = expectancyR >= 0.25 
+            ? 'text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300' 
+            : (expectancyR >= 0 ? 'text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300' : 'text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-300');
+        }
+        if (kpiExpSub) {
+          kpiExpSub.textContent = isZenMode 
+            ? `${(expectancyR >= 0 ? '+' : '')}${expectancyR.toFixed(2)}R/trd • ${trades.length} trds` 
+            : `${expectancyRs >= 0 ? '+' : ''}₹${Math.round(expectancyRs).toLocaleString('en-IN')}/trd • ${trades.length} trds`;
+        }
+
+        // --- Friction & Statutory Drag Metric (Dashboard Card & Side Panel) ---
+        const avgFrictionRs = trades.length > 0 ? (totalCosts / trades.length) : 0;
+        const kpiFricVal = document.getElementById('kpiFrictionValue');
+        const kpiFricBadge = document.getElementById('kpiFrictionBadge');
+        const kpiFricSub = document.getElementById('kpiFrictionSub');
+        if (kpiFricVal) {
+          kpiFricVal.textContent = isZenMode 
+            ? `${costDrag.toFixed(1)}% Drag` 
+            : `₹${Math.round(avgFrictionRs).toLocaleString('en-IN')} / trd`;
+          kpiFricVal.className = 'text-2xl font-black font-mono text-amber-400 mt-2 truncate';
+        }
+        if (kpiFricBadge) {
+          const dragLabel = costDrag < 15 ? 'Optimal' : (costDrag < 30 ? 'Moderate' : 'High');
+          kpiFricBadge.textContent = `${dragLabel} (${costDrag.toFixed(1)}%)`;
+          kpiFricBadge.className = costDrag < 15 
+            ? 'text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300' 
+            : (costDrag < 30 ? 'text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300' : 'text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-300');
+        }
+        if (kpiFricSub) {
+          kpiFricSub.textContent = isZenMode 
+            ? `₹ ••• Total Costs • FYERS` 
+            : `Total: ₹${Math.round(totalCosts).toLocaleString('en-IN')} • FYERS STT/GST`;
+        }
+
+        // --- Side Panel Telemetry (Execution Edge & Health) ---
+        const dashExp = document.getElementById('dashAvgExpectancy');
+        const dashExpB = document.getElementById('dashExpEdgeBadge');
+        const dashExpS = document.getElementById('dashAvgExpectancySub');
+        if (dashExp) {
+          dashExp.textContent = `${expectancyR >= 0 ? '+' : ''}${expectancyR.toFixed(2)} R`;
+          dashExp.className = expectancyR >= 0 ? 'text-sm font-black text-indigo-300 mt-1 font-mono' : 'text-sm font-black text-rose-300 mt-1 font-mono';
+        }
+        if (dashExpB) {
+          dashExpB.textContent = `${expectancyR >= 0 ? '+' : ''}${expectancyR.toFixed(2)}R`;
+          dashExpB.className = expectancyR >= 0 ? 'text-indigo-400 font-bold' : 'text-rose-400 font-bold';
+        }
+        if (dashExpS) {
+          dashExpS.textContent = isZenMode ? 'Edge per execution' : `${expectancyRs >= 0 ? '+' : ''}₹${Math.round(expectancyRs)} / trade`;
+        }
+
+        const dashFric = document.getElementById('dashAvgFriction');
+        const dashFricB = document.getElementById('dashFrictionBadge');
+        const dashFricS = document.getElementById('dashAvgFrictionSub');
+        if (dashFric) {
+          dashFric.textContent = isZenMode ? `${costDrag.toFixed(1)}% Drag` : `₹${Math.round(avgFrictionRs)} / trd`;
+        }
+        if (dashFricB) {
+          dashFricB.textContent = `${costDrag.toFixed(1)}%`;
+          dashFricB.className = costDrag < 15 ? 'text-emerald-400 font-bold' : (costDrag < 30 ? 'text-amber-400 font-bold' : 'text-rose-400 font-bold');
+        }
+        if (dashFricS) {
+          dashFricS.textContent = isZenMode ? 'Statutory friction' : `Total: ₹${Math.round(totalCosts)}`;
         }
 
         const kpiDisc = document.getElementById('kpiDisciplineScore');
@@ -8895,7 +9013,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         const expRsElem = document.getElementById('statExpectancyRupees');
         const tailBadge = document.getElementById('tailAsymmetryBadge');
         const tailSub = document.getElementById('statTailSub');
-        const expectancyRs = trades.length > 0 ? (totalNet / trades.length) : 0;
+        expectancyRs = trades.length > 0 ? (totalNet / trades.length) : 0;
         const winAmounts = trades.filter(t => (parseFloat(t.net_pnl) || 0) > 0).map(t => parseFloat(t.net_pnl) || 0);
         const lossAmounts = trades.filter(t => (parseFloat(t.net_pnl) || 0) < 0).map(t => Math.abs(parseFloat(t.net_pnl) || 0));
         const maxWinRupees = winAmounts.length > 0 ? Math.max(...winAmounts) : 0;
