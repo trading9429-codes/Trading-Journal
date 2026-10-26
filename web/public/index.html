@@ -949,25 +949,99 @@
 
 
       
-      <!-- DASHBOARD MAIN GRAPH: CUMULATIVE NET EQUITY CURVE (CLEAN EXECUTIVE VIEW) -->
-      <section id="dashboardPrimaryGraphSection" class="glass-card rounded-2xl p-6 border border-slate-800 shadow-2xl flex flex-col justify-between">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-          <div>
-            <h3 class="text-base font-extrabold text-white flex items-center gap-2">
-              <span>📈</span>
-              <span>Cumulative Net Equity Curve (₹)</span>
-            </h3>
-            <p class="text-xs text-slate-400">Primary account capital progression strictly factoring turnover &amp; statutory charges</p>
+      <!-- DASHBOARD EXECUTIVE CHARTS ROW: CUMULATIVE EQUITY + WIN/LOSS & DISCIPLINE DONUTS -->
+      <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        
+        <!-- Main: Cumulative Net Equity Curve (2 cols on xl) -->
+        <div id="dashboardPrimaryGraphSection" class="xl:col-span-2 glass-card rounded-2xl p-6 border border-slate-800 shadow-2xl flex flex-col justify-between">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div>
+              <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+                <span>📈</span>
+                <span>Cumulative Net Equity Curve (₹)</span>
+              </h3>
+              <p class="text-xs text-slate-400">Primary account capital progression strictly factoring turnover &amp; statutory charges</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20" id="dashEquityRoiBadge">
+                +0.00% ROI
+              </span>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20" id="dashEquityRoiBadge">
-              +0.00% ROI
+          <div class="mt-4 relative" style="height: 300px;">
+            <canvas id="dashboardEquityChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Side: Win/Loss & Discipline Execution Health Panel (1 col on xl) -->
+        <div id="dashboardHealthDonutsSection" class="glass-card rounded-2xl p-6 border border-slate-800 shadow-2xl flex flex-col justify-between">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div>
+              <h3 class="text-sm font-extrabold text-white flex items-center gap-2">
+                <span>🎯</span>
+                <span>Execution Health</span>
+              </h3>
+              <p class="text-[11px] text-slate-400">Outcome ratio &amp; rule adherence integrity</p>
+            </div>
+            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+              Live Edge
             </span>
           </div>
+
+          <!-- Two Donut Charts Side-by-Side in Card -->
+          <div class="grid grid-cols-2 gap-4 mt-4">
+            
+            <!-- 1. Win / Loss Outcome Donut -->
+            <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 flex flex-col items-center justify-between">
+              <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1 flex items-center gap-1">
+                <span>⚡</span>
+                <span>Win / Loss</span>
+              </div>
+              <div class="relative w-28 h-28 my-1 flex items-center justify-center">
+                <canvas id="dashWinLossChart"></canvas>
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span id="dashWinRateLabel" class="text-xs font-black font-mono text-emerald-400">0%</span>
+                  <span class="text-[8px] text-slate-500 uppercase tracking-tighter">Win Rate</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-center gap-1.5 text-[10px] font-mono mt-1 flex-wrap">
+                <span class="text-emerald-400 font-bold" id="dashWinCountText">0W</span>
+                <span class="text-slate-600">&bull;</span>
+                <span class="text-rose-400 font-bold" id="dashLossCountText">0L</span>
+                <span class="text-slate-600">&bull;</span>
+                <span class="text-slate-400" id="dashBeCountText">0 BE</span>
+              </div>
+            </div>
+
+            <!-- 2. Rule Discipline Donut -->
+            <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 flex flex-col items-center justify-between">
+              <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1 flex items-center gap-1">
+                <span>🛡️</span>
+                <span>Discipline</span>
+              </div>
+              <div class="relative w-28 h-28 my-1 flex items-center justify-center">
+                <canvas id="dashDisciplineChart"></canvas>
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span id="dashDisciplineLabel" class="text-xs font-black font-mono text-blue-400">100%</span>
+                  <span class="text-[8px] text-slate-500 uppercase tracking-tighter">Adherent</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-center gap-1.5 text-[10px] font-mono mt-1 flex-wrap">
+                <span class="text-blue-400 font-bold" id="dashCleanTradesText">0 Clean</span>
+                <span class="text-slate-600">&bull;</span>
+                <span class="text-rose-400 font-bold" id="dashViolationsText">0 Breach</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Micro-Insight Footer -->
+          <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono">
+            <span class="text-slate-400">Rule 3 Limit:</span>
+            <span class="text-emerald-400 font-bold">Max 2 Trades / Day</span>
+          </div>
         </div>
-        <div class="mt-4 relative" style="height: 310px;">
-          <canvas id="dashboardEquityChart"></canvas>
-        </div>
+
       </section>
 
       <!-- COMBAT MODE HIGH-FOCUS HUD BANNER (Toggled by H) -->
@@ -8814,6 +8888,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       // Charts render strictly for the active tab to prevent hidden canvas sizing bugs
       if (currentTab === 1) {
         renderDashboardEquityChart(trades);
+        renderDashboardDonutCharts(totalWins, totalLosses, trades.length - totalClosed, violations, trades.length);
       } else if (currentTab === 2) {
         renderRCurveChart(trades);
         renderUnderwaterChart(trades);
@@ -9438,6 +9513,98 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
     
     let chartDashboardEquity = null;
+
+    let chartDashWinLoss = null;
+    let chartDashDiscipline = null;
+
+    function renderDashboardDonutCharts(wins, losses, be, violations, total) {
+      const ctxOutcome = document.getElementById('dashWinLossChart');
+      const ctxDisc = document.getElementById('dashDisciplineChart');
+      if (!ctxOutcome || !ctxDisc) return;
+
+      const totalTrades = Math.max(0, total);
+      const closed = wins + losses;
+      const winPct = closed > 0 ? Math.round((wins / closed) * 100) : 0;
+      const cleanTrades = Math.max(0, totalTrades - violations);
+      const discPct = totalTrades > 0 ? Math.round((cleanTrades / totalTrades) * 100) : 100;
+
+      // Update text indicators
+      const winPctEl = document.getElementById('dashWinRateLabel');
+      if (winPctEl) winPctEl.textContent = `${winPct}%`;
+      const winCountEl = document.getElementById('dashWinCountText');
+      if (winCountEl) winCountEl.textContent = `${wins}W`;
+      const lossCountEl = document.getElementById('dashLossCountText');
+      if (lossCountEl) lossCountEl.textContent = `${losses}L`;
+      const beCountEl = document.getElementById('dashBeCountText');
+      if (beCountEl) beCountEl.textContent = `${be} BE`;
+
+      const discPctEl = document.getElementById('dashDisciplineLabel');
+      if (discPctEl) discPctEl.textContent = `${discPct}%`;
+      const cleanCountEl = document.getElementById('dashCleanTradesText');
+      if (cleanCountEl) cleanCountEl.textContent = `${cleanTrades} Clean`;
+      const violCountEl = document.getElementById('dashViolationsText');
+      if (violCountEl) violCountEl.textContent = `${violations} Violations`;
+
+      // 1. Win/Loss Donut Chart
+      if (chartDashWinLoss) chartDashWinLoss.destroy();
+      chartDashWinLoss = new Chart(ctxOutcome, {
+        type: 'doughnut',
+        data: {
+          labels: ['Wins', 'Losses', 'Breakeven'],
+          datasets: [{
+            data: totalTrades > 0 ? [wins, losses, be] : [1, 0, 0],
+            backgroundColor: totalTrades > 0 ? ['#10B981', '#F43F5E', '#64748B'] : ['#334155', '#1E293B', '#0F172A'],
+            borderColor: '#020617',
+            borderWidth: 2,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '72%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              enabled: totalTrades > 0,
+              callbacks: {
+                label: (ctx) => ` ${ctx.label}: ${ctx.raw} (${totalTrades > 0 ? Math.round((ctx.raw / totalTrades) * 100) : 0}%)`
+              }
+            }
+          }
+        }
+      });
+
+      // 2. Discipline / Adherence Donut Chart
+      if (chartDashDiscipline) chartDashDiscipline.destroy();
+      chartDashDiscipline = new Chart(ctxDisc, {
+        type: 'doughnut',
+        data: {
+          labels: ['Followed Rules', 'Violations'],
+          datasets: [{
+            data: totalTrades > 0 ? [cleanTrades, violations] : [1, 0],
+            backgroundColor: totalTrades > 0 ? ['#3B82F6', '#EF4444'] : ['#334155', '#1E293B'],
+            borderColor: '#020617',
+            borderWidth: 2,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '72%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              enabled: totalTrades > 0,
+              callbacks: {
+                label: (ctx) => ` ${ctx.label}: ${ctx.raw} (${totalTrades > 0 ? Math.round((ctx.raw / totalTrades) * 100) : 0}%)`
+              }
+            }
+          }
+        }
+      });
+    }
 
     function renderDashboardEquityChart(trades) {
       const ctx = document.getElementById('dashboardEquityChart');
