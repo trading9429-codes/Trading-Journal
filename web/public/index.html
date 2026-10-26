@@ -5492,13 +5492,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     function updateSoundUI() {
       const icon = document.getElementById('soundIcon');
       const text = document.getElementById('soundText');
-      if (soundEnabled) {
-        icon.textContent = '🔊';
-        text.textContent = 'Audio ON';
-      } else {
-        icon.textContent = '🔇';
-        text.textContent = 'Muted';
-      }
+      if (icon) icon.textContent = soundEnabled ? '🔊' : '🔇';
+      if (text) text.textContent = soundEnabled ? 'Audio ON' : 'Muted';
     }
 
     function playWinChime() {
@@ -6101,8 +6096,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       }
       const banner = document.getElementById('cooldownBanner');
       const badge = document.getElementById('cooldownHeaderBadge');
-      banner.classList.remove('hidden');
-      badge.classList.remove('hidden');
+      if (banner) banner.classList.remove('hidden');
+      if (badge) badge.classList.remove('hidden');
 
       if (cooldownInterval) clearInterval(cooldownInterval);
 
@@ -6120,8 +6115,10 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const m = Math.floor(remaining / 60000);
       const s = Math.floor((remaining % 60000) / 1000);
       const str = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-      document.getElementById('cooldownCountdownSpan').textContent = str;
-      document.getElementById('cooldownTimerText').textContent = str;
+      const countdownSpan = document.getElementById('cooldownCountdownSpan');
+      if (countdownSpan) countdownSpan.textContent = str;
+      const timerText = document.getElementById('cooldownTimerText');
+      if (timerText) timerText.textContent = str;
     }
 
     function clearCooldownTimer() {
@@ -6129,8 +6126,10 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       cooldownInterval = null;
       cooldownEndTime = null;
       localStorage.removeItem('cooldownEndTime');
-      document.getElementById('cooldownBanner').classList.add('hidden');
-      document.getElementById('cooldownHeaderBadge').classList.add('hidden');
+      const banner = document.getElementById('cooldownBanner');
+      if (banner) banner.classList.add('hidden');
+      const badge = document.getElementById('cooldownHeaderBadge');
+      if (badge) badge.classList.add('hidden');
     }
 
     function overrideCooldown() {
@@ -6179,7 +6178,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       if (saved) {
         startingCapital = parseFloat(saved) || 200000;
       }
-      document.getElementById('startingCapitalInput').value = startingCapital;
+      const capInput = document.getElementById('startingCapitalInput');
+      if (capInput) capInput.value = startingCapital;
       renderTopCapitalHeader();
     }
 
@@ -6196,19 +6196,23 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
     function resetSeedCapitalPrompt() {
       updateStartingCapital(200000);
-      document.getElementById('startingCapitalInput').value = 200000;
+      const capInput = document.getElementById('startingCapitalInput');
+      if (capInput) capInput.value = 200000;
     }
 
     function renderTopCapitalHeader() {
-      document.getElementById('headerStartingCapDisplay').textContent = `₹${startingCapital.toLocaleString('en-IN')}`;
+      const startDisp = document.getElementById('headerStartingCapDisplay');
+      if (startDisp) startDisp.textContent = `₹${startingCapital.toLocaleString('en-IN')}`;
+
+      const sidebarCap = document.getElementById('sidebarStartingCapital');
+      if (sidebarCap) sidebarCap.textContent = `₹${startingCapital.toLocaleString('en-IN')}`;
+
       const totalNetPnL = tradesData.reduce((acc, t) => acc + (parseFloat(t.net_pnl) || 0), 0);
       const currentCap = startingCapital + totalNetPnL;
       const curDisp = document.getElementById('headerCurrentCapDisplay');
-      curDisp.textContent = `₹${Math.round(currentCap).toLocaleString('en-IN')}`;
-      if (totalNetPnL >= 0) {
-        curDisp.className = 'font-bold font-mono text-emerald-400';
-      } else {
-        curDisp.className = 'font-bold font-mono text-rose-400';
+      if (curDisp) {
+        curDisp.textContent = `₹${Math.round(currentCap).toLocaleString('en-IN')}`;
+        curDisp.className = totalNetPnL >= 0 ? 'font-bold font-mono text-emerald-400' : 'font-bold font-mono text-rose-400';
       }
 
       const btn025 = document.getElementById('riskMode_025');
@@ -7415,6 +7419,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             renderTradesTable();
             renderTopCapitalHeader();
             checkDailyCircuitBreaker();
+            renderAllChartsAndMetrics();
+            if (typeof renderCalendarHeatmap === 'function') renderCalendarHeatmap(tradesData);
+            if (typeof renderDisciplineStats === 'function') renderDisciplineStats();
             return;
           }
         }
@@ -7437,6 +7444,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       renderTradesTable();
       renderTopCapitalHeader();
       checkDailyCircuitBreaker();
+      renderAllChartsAndMetrics();
+      if (typeof renderCalendarHeatmap === 'function') renderCalendarHeatmap(tradesData);
+      if (typeof renderDisciplineStats === 'function') renderDisciplineStats();
     }
 
     function resetToBenchmarkData() {
@@ -8526,25 +8536,39 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       if (netPnLElem) {
         netPnLElem.textContent = `₹${totalNet.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         netPnLElem.className = totalNet >= 0 ? 'text-xl font-black font-mono mt-1 text-emerald-400' : 'text-xl font-black font-mono mt-1 text-rose-400';
-        document.getElementById('statGrossCostSub').textContent = `Gross: ₹${Math.round(totalGross).toLocaleString('en-IN')} • Costs: ₹${Math.round(totalCosts).toLocaleString('en-IN')}`;
+      }
+      const grossSub = document.getElementById('statGrossCostSub');
+      if (grossSub) grossSub.textContent = `Gross: ₹${Math.round(totalGross).toLocaleString('en-IN')} • Costs: ₹${Math.round(totalCosts).toLocaleString('en-IN')}`;
 
-        document.getElementById('statWinRate').textContent = `${winRate.toFixed(1)}%`;
-        document.getElementById('statWinLossRatio').textContent = `${totalWins} Wins • ${totalLosses} Losses`;
+      const winRateElem = document.getElementById('statWinRate');
+      if (winRateElem) winRateElem.textContent = `${winRate.toFixed(1)}%`;
 
-        document.getElementById('statProfitFactor').textContent = profitFactor.toFixed(2);
-        document.getElementById('statTotalRSub').textContent = `Total Net R: ${totalRealizedR >= 0 ? '+' : ''}${totalRealizedR.toFixed(2)}R`;
+      const winLossElem = document.getElementById('statWinLossRatio');
+      if (winLossElem) winLossElem.textContent = `${totalWins} Wins • ${totalLosses} Losses`;
 
-        const expElem = document.getElementById('statExpectancyR');
+      const pfElem = document.getElementById('statProfitFactor');
+      if (pfElem) pfElem.textContent = profitFactor.toFixed(2);
+
+      const totalRElem = document.getElementById('statTotalRSub');
+      if (totalRElem) totalRElem.textContent = `Total Net R: ${totalRealizedR >= 0 ? '+' : ''}${totalRealizedR.toFixed(2)}R`;
+
+      const expElem = document.getElementById('statExpectancyR');
+      if (expElem) {
         expElem.textContent = `${expectancyR >= 0 ? '+' : ''}${expectancyR.toFixed(2)} R`;
         expElem.className = expectancyR >= 0 ? 'text-xl font-black font-mono mt-1 text-indigo-400' : 'text-xl font-black font-mono mt-1 text-rose-400';
+      }
 
-        document.getElementById('statEfficiencyScore').textContent = `${efficiencyScore}%`;
-        document.getElementById('statEfficiencyDesc').textContent = efficiencyScore >= 75 ? 'Optimal Hold Target' : 'Check for Early Exits';
+      const effScoreElem = document.getElementById('statEfficiencyScore');
+      if (effScoreElem) effScoreElem.textContent = `${efficiencyScore}%`;
 
-        document.getElementById('statDisciplineScore').textContent = `${disciplineScore}%`;
+      const effDescElem = document.getElementById('statEfficiencyDesc');
+      if (effDescElem) effDescElem.textContent = efficiencyScore >= 75 ? 'Optimal Hold Target' : 'Check for Early Exits';
 
-        // Update TradeSync Executive KPI Strip
-        const kpiNet = document.getElementById('kpiNetPnL');
+      const discScoreElem = document.getElementById('statDisciplineScore');
+      if (discScoreElem) discScoreElem.textContent = `${disciplineScore}%`;
+
+      // Update TradeSync Executive KPI Strip
+      const kpiNet = document.getElementById('kpiNetPnL');
         const kpiBadge = document.getElementById('kpiNetPnLBadge');
         if (kpiNet) {
           kpiNet.textContent = '₹' + totalNet.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -8605,14 +8629,17 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           topR.className = todayNet >= 0 ? 'text-[10px] text-blue-300 font-bold' : 'text-[10px] text-rose-300 font-bold';
         }
 
-        document.getElementById('statViolationsCount').textContent = `${violations} Violations`;
+        const violElem = document.getElementById('statViolationsCount');
+        if (violElem) violElem.textContent = `${violations} Violations`;
 
         const longTotal = longWins + longLosses;
         const shortTotal = shortWins + shortLosses;
         const longWR = longTotal > 0 ? Math.round((longWins / longTotal) * 100) : 0;
         const shortWR = shortTotal > 0 ? Math.round((shortWins / shortTotal) * 100) : 0;
-        document.getElementById('longStatsText').textContent = `${longWR}% WR (₹${Math.round(longNet).toLocaleString('en-IN')})`;
-        document.getElementById('shortStatsText').textContent = `${shortWR}% WR (₹${Math.round(shortNet).toLocaleString('en-IN')})`;
+        const longStats = document.getElementById('longStatsText');
+        if (longStats) longStats.textContent = `${longWR}% WR (₹${Math.round(longNet).toLocaleString('en-IN')})`;
+        const shortStats = document.getElementById('shortStatsText');
+        if (shortStats) shortStats.textContent = `${shortWR}% WR (₹${Math.round(shortNet).toLocaleString('en-IN')})`;
         
         const dirBadge = document.getElementById('directionalBiasBadge');
         if (dirBadge) {
@@ -8783,7 +8810,6 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
         updateSetupEdgePreview();
         if (typeof renderNeurologicalEdge === 'function') renderNeurologicalEdge();
-      }
 
       // Charts render strictly for the active tab to prevent hidden canvas sizing bugs
       if (currentTab === 1) {
@@ -9811,21 +9837,25 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       if (dateElem) dateElem.value = today;
       if (timeElem) timeElem.value = '09:25';
 
-      const savedSound = localStorage.getItem('soundEnabled');
-      if (savedSound !== null) soundEnabled = (savedSound === 'true');
-      updateSoundUI();
+      try {
+        const savedSound = localStorage.getItem('soundEnabled');
+        if (savedSound !== null) soundEnabled = (savedSound === 'true');
+        updateSoundUI();
+      } catch(e) { console.warn("Sound init error:", e); }
 
-      initStartingCapital();
-      checkCooldownStatus();
-      loadTrades();
-      recalculateCalculators();
+      try { initStartingCapital(); } catch(e) { console.warn("Capital init error:", e); }
+      try { checkCooldownStatus(); } catch(e) { console.warn("Cooldown init error:", e); }
+      try { loadTrades(); } catch(e) { console.warn("Load trades error:", e); }
+      try { recalculateCalculators(); } catch(e) { console.warn("Calculators init error:", e); }
 
-      updateISTMarketClock();
-      setInterval(updateISTMarketClock, 1000);
+      try {
+        updateISTMarketClock();
+        setInterval(updateISTMarketClock, 1000);
+      } catch(e) { console.warn("Clock init error:", e); }
 
       // Initialize Dashboard Visibility Customizer
-      applyDashboardVisibility();
-      initSidebarState();
+      try { applyDashboardVisibility(); } catch(e) { console.warn("Visibility init error:", e); }
+      try { initSidebarState(); } catch(e) { console.warn("Sidebar init error:", e); }
     });
 
     // ==========================================
