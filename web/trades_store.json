@@ -34,7 +34,8 @@
     "emotion_after": 2,
     "trade_valid": "Y",
     "lesson": "Executed strictly on 9EMA system",
-    "screenshot_link": "https://www.tradingview.com/chart/?symbol=NSE:CYIENT"
+    "screenshot_link": "https://www.tradingview.com/chart/?symbol=NSE:CYIENT",
+    "post_exit_behavior": "Reversed / Fell Back"
   },
   {
     "id": "T-002",
@@ -71,7 +72,8 @@
     "emotion_after": 2,
     "trade_valid": "Y",
     "lesson": "Honored stop loss immediately; taking mandatory 30m cooldown.",
-    "screenshot_link": "https://www.tradingview.com/chart/?symbol=NSE:OMNI"
+    "screenshot_link": "https://www.tradingview.com/chart/?symbol=NSE:OMNI",
+    "post_exit_behavior": "Chopped / Stagnated"
   },
   {
     "id": "T-003",
@@ -108,7 +110,8 @@
     "emotion_after": 2,
     "trade_valid": "Y",
     "lesson": "Executed strictly on 9EMA system, honored planned target.",
-    "screenshot_link": "https://www.tradingview.com/chart/?symbol=NSE:APOLLO"
+    "screenshot_link": "https://www.tradingview.com/chart/?symbol=NSE:APOLLO",
+    "post_exit_behavior": "Reversed / Fell Back"
   },
   {
     "id": "T-004",
@@ -145,7 +148,8 @@
     "emotion_after": 4,
     "trade_valid": "N",
     "lesson": "Honored stop loss immediately; taking mandatory 30m cooldown.",
-    "screenshot_link": "https://www.tradingview.com/chart/?symbol=NSE:CHENNPETRO"
+    "screenshot_link": "https://www.tradingview.com/chart/?symbol=NSE:CHENNPETRO",
+    "post_exit_behavior": "Chopped / Stagnated"
   },
   {
     "id": "T-005",
@@ -182,7 +186,8 @@
     "emotion_after": 2,
     "trade_valid": "N",
     "lesson": "Executed strictly on 9EMA system, honored planned target.",
-    "screenshot_link": "https://www.tradingview.com/chart/?symbol=NSE:CHENNPETRO"
+    "screenshot_link": "https://www.tradingview.com/chart/?symbol=NSE:CHENNPETRO",
+    "post_exit_behavior": "Continued Trending"
   },
   {
     "id": "T-006",
@@ -222,7 +227,8 @@
     "screenshot_data": "",
     "trade_valid": "Y",
     "lesson": "Executed strictly on 9EMA system, honored planned target.",
-    "screenshot_link": "https://www.tradingview.com/chart/?symbol=NSE:ATHERENERG"
+    "screenshot_link": "https://www.tradingview.com/chart/?symbol=NSE:ATHERENERG",
+    "post_exit_behavior": "Reversed / Fell Back"
   },
   {
     "id": "T-007",
@@ -262,6 +268,7 @@
     "screenshot_data": "",
     "trade_valid": "Y",
     "lesson": "Executed strictly on 9EMA system, honored planned target.",
-    "screenshot_link": "https://www.tradingview.com/chart/?symbol=NSE:AGIIL"
+    "screenshot_link": "https://www.tradingview.com/chart/?symbol=NSE:AGIIL",
+    "post_exit_behavior": "Reversed / Fell Back"
   }
 ]

@@ -501,6 +501,50 @@
       color: #F1F5F9 !important;
     }
 
+    /* --- TRUE OLED PURE BLACK THEME --- */
+    html[data-theme="oled"],
+    body[data-theme="oled"],
+    [data-theme="oled"] body {
+      background-color: #000000 !important;
+      background-image: none !important;
+      color: #F8FAFC !important;
+    }
+    [data-theme="oled"] header {
+      background: #000000 !important;
+      border-bottom-color: #1E293B !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 1) !important;
+    }
+    [data-theme="oled"] .glass-card,
+    [data-theme="oled"] [class*="glass-card"] {
+      background-color: #050505 !important;
+      background-image: none !important;
+      border-color: #1E293B !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.95) !important;
+    }
+    [data-theme="oled"] #quickStatDockletBar {
+      background: rgba(0, 0, 0, 0.95) !important;
+      border-bottom-color: #1E293B !important;
+    }
+    [data-theme="oled"] input,
+    [data-theme="oled"] select,
+    [data-theme="oled"] textarea {
+      background-color: #000000 !important;
+      border-color: #334155 !important;
+      color: #FFFFFF !important;
+    }
+    [data-theme="oled"] table thead tr,
+    [data-theme="oled"] table thead {
+      background-color: #080808 !important;
+      color: #94A3B8 !important;
+    }
+    [data-theme="oled"] .bg-slate-900,
+    [data-theme="oled"] .bg-slate-950,
+    [data-theme="oled"] .bg-slate-900\/80,
+    [data-theme="oled"] .bg-slate-950\/80,
+    [data-theme="oled"] .bg-slate-950\/90 {
+      background-color: #040404 !important;
+    }
+
     /* 5. High-Density Compact Pro Density Mode */
     body.compact-density .glass-card {
       padding: 0.85rem !important;
@@ -831,6 +875,12 @@
           <span id="topBarTodayRValue" class="text-[10px] text-blue-300 font-bold">(0.00R)</span>
         </div>
 
+        <!-- 100 Clean Trades Challenge Pill (A5) -->
+        <button onclick="openCleanTradesChallengeModal()" id="cleanTradesChallengePill" class="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 hover:from-emerald-500/20 hover:to-cyan-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-mono font-bold shadow-sm transition cursor-pointer" title="100 Clean Trades Challenge: View Consecutive Rule-Adherent Streak &amp; Desk Tiers">
+          <span>🏆</span>
+          <span id="headerCleanStreakText">6/100 Clean</span>
+        </button>
+
         <!-- Discipline Streak & XP Pill -->
         <button onclick="openDisciplineBadgesModal()" id="disciplineXpPill" class="hidden md:flex items-center gap-2 px-3 py-1 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 hover:from-amber-500/20 hover:to-orange-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold shadow-sm transition cursor-pointer" title="Process Gamification: View Discipline Level, XP &amp; Badges">
           <span id="headerStreakText">0d Streak</span>
@@ -842,11 +892,24 @@
 
       <!-- ZONE 3: Actions & Controls Hub (Right) -->
       <div class="flex items-center gap-2">
+        <!-- Omni Command Palette Trigger (C1) -->
+        <button onclick="openCommandPalette()" class="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 text-xs font-mono transition cursor-pointer shadow-inner" title="Omni Command Palette (Hotkey: Ctrl+K or Cmd+K)">
+          <span class="text-blue-400 font-bold">⌘</span>
+          <span class="text-[11px] text-slate-400">Search</span>
+          <kbd class="px-1 py-0.2 rounded bg-slate-800 text-[9px] text-slate-400 border border-slate-700">Ctrl+K</kbd>
+        </button>
+
         <!-- Primary Action: + Log Trade (Shortcut: L / T) -->
         <button onclick="openTradeSyncSlideOver()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider flex items-center gap-2 transition shadow-lg shadow-emerald-600/30 cursor-pointer" title="Quick Log Trade Popup (Shortcut: L or T)">
           <span class="text-sm font-black leading-none">+</span>
           <span>Log Trade</span>
           <kbd class="px-1.5 py-0.2 rounded bg-black/35 border border-emerald-400/30 text-[9px] font-mono text-emerald-200">L</kbd>
+        </button>
+
+        <!-- Instant AI Session Audit (B1) -->
+        <button onclick="openAISessionAuditModal()" class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-900/40 to-indigo-900/40 hover:from-purple-900/60 hover:to-indigo-900/60 text-purple-200 border border-purple-500/40 text-xs font-bold flex items-center gap-1.5 transition shadow-sm cursor-pointer" title="Instant AI Post-Session Edge &amp; Leak Audit">
+          <span>⚡</span>
+          <span class="hidden sm:inline">AI Audit</span>
         </button>
 
         <!-- AI Desk Coach Button -->
@@ -855,13 +918,18 @@
           <span class="hidden sm:inline">AI Desk</span>
         </button>
 
-        <!-- Neurodivergent & Execution Quick Bar (Zen, Soundscapes, Pre-Flight) -->
+        <!-- Neurodivergent & Execution Quick Bar (Zen, Soundscapes, Pre-Flight, Voice) -->
         <div class="flex items-center gap-1 bg-slate-900/70 p-0.5 rounded-xl border border-slate-800/80">
           <!-- Zen Mode -->
           <button onclick="toggleZenMode()" id="zenModeToggleBtn" class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-mono font-bold transition cursor-pointer" title="Zen Masking Mode (Hotkey: Z) - Hides raw ₹ figures to eliminate greed &amp; emotional tilt">
             <span id="zenModeIcon">🧘</span>
             <span id="zenModeLabel" class="hidden 2xl:inline text-[11px]">Zen</span>
             <span class="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700 font-sans">Z</span>
+          </button>
+
+          <!-- Audio Voice Trade Confirmation (C5) -->
+          <button onclick="toggleVoiceConfirmation()" id="voiceConfirmToggleBtn" class="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-teal-300 hover:text-white border border-teal-500/30 text-xs transition cursor-pointer flex items-center gap-1" title="Audio Voice Confirmation: ON (Announces fills &amp; exits via voice)">
+            <span id="voiceConfirmIcon">🔊</span>
           </button>
 
           <!-- Focus Soundscapes -->
@@ -876,7 +944,7 @@
           </button>
 
           <!-- Statutory Charges Ledger -->
-          <button onclick="openStatutoryChargesModal()" class="hidden xl:flex items-center gap-1 p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-cyan-300 hover:text-white border border-cyan-500/30 text-xs transition cursor-pointer" title="Indian Statutory Tax & Charges Ledger (STT, GST, NSE, Stamp Duty)">
+          <button onclick="openStatutoryChargesModal()" class="hidden xl:flex items-center gap-1 p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-cyan-300 hover:text-white border border-cyan-500/30 text-xs transition cursor-pointer" title="Indian Statutory Tax &amp; Charges Ledger (STT, GST, NSE, Stamp Duty)">
             <span>⚖️</span>
           </button>
 
@@ -891,6 +959,7 @@
         <div class="flex items-center gap-1 pl-1.5 border-l border-slate-800/80">
           <select id="themeSelector" onchange="switchTheme(this.value)" class="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-300 font-mono focus:outline-none focus:border-blue-500 transition cursor-pointer" title="Switch Theme">
             <option value="obsidian">🌌 Obsidian</option>
+            <option value="oled">⬛ True OLED</option>
             <option value="bloomberg">⚡ Bloomberg</option>
             <option value="linear">📐 Linear</option>
             <option value="nordic">❄️ Nordic</option>
@@ -3280,6 +3349,339 @@
   <!-- ========================================== -->
   
   <!-- ========================================== -->
+  <!-- MODAL: 100 CLEAN TRADES CHALLENGE (A5)        -->
+  <!-- ========================================== -->
+  <div id="cleanTradesChallengeModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card bg-slate-900 rounded-2xl max-w-2xl w-full border border-emerald-500/40 shadow-2xl p-6 relative font-sans my-8">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white text-xl shadow-lg shadow-emerald-500/20">
+            🏆
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+              100 Clean Trades Challenge
+              <span id="challengeCurrentTierBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                Tier 1: Apprentice
+              </span>
+            </h3>
+            <p class="text-xs text-slate-400">Institutional Process Execution &bull; Zero Rule Breaches Goal</p>
+          </div>
+        </div>
+        <button onclick="closeCleanTradesChallengeModal()" class="text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+      </div>
+
+      <!-- Challenge Metrics Grid -->
+      <div class="grid grid-cols-3 gap-3 my-5 text-center font-mono">
+        <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+          <span class="text-[10px] uppercase font-bold text-slate-400 font-sans block">Current Streak</span>
+          <span id="challengeCurrentStreak" class="text-2xl font-black text-emerald-400 mt-1 block">6</span>
+          <span class="text-[10px] text-slate-500">Consecutive Clean</span>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+          <span class="text-[10px] uppercase font-bold text-slate-400 font-sans block">Best Streak</span>
+          <span id="challengeBestStreak" class="text-2xl font-black text-blue-400 mt-1 block">6</span>
+          <span class="text-[10px] text-slate-500">Desk Record</span>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+          <span class="text-[10px] uppercase font-bold text-slate-400 font-sans block">Process Adherence</span>
+          <span id="challengeAdherencePct" class="text-2xl font-black text-amber-400 mt-1 block">100%</span>
+          <span class="text-[10px] text-slate-500">Rule Compliance</span>
+        </div>
+      </div>
+
+      <!-- Visual Progress Bar -->
+      <div class="p-4 rounded-xl bg-slate-950/90 border border-slate-800 space-y-2">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-bold text-slate-300 flex items-center gap-1.5">
+            <span>🎯</span> Milestone Progress to 100
+          </span>
+          <span id="challengeProgressText" class="font-mono font-bold text-emerald-400">6 / 100 Trades (6%)</span>
+        </div>
+        <div class="w-full bg-slate-900 rounded-full h-3 border border-slate-800 overflow-hidden relative">
+          <div id="challengeProgressBar" class="bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 h-full rounded-full transition-all duration-500" style="width: 6%;"></div>
+        </div>
+        <div class="flex justify-between text-[9px] font-mono text-slate-500 pt-1">
+          <span>0 (Start)</span>
+          <span>25 (Consistent)</span>
+          <span>50 (Master)</span>
+          <span>75 (Compounder)</span>
+          <span>100 (Institutional)</span>
+        </div>
+      </div>
+
+      <!-- Desk Tier Roadmap -->
+      <div class="mt-5 space-y-2 text-xs">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-sans">Desk Tier Milestones</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+          <div id="tierCard1" class="p-2.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 flex items-center gap-2.5">
+            <span class="text-lg">🥉</span>
+            <div>
+              <div class="font-bold text-emerald-300">1–10 Clean: Apprentice Executor</div>
+              <div class="text-[10px] text-slate-400">Mastering 2 trades/day ceiling</div>
+            </div>
+          </div>
+          <div id="tierCard2" class="p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 opacity-60 flex items-center gap-2.5">
+            <span class="text-lg">🥈</span>
+            <div>
+              <div class="font-bold text-slate-300">11–25 Clean: Consistent Operator</div>
+              <div class="text-[10px] text-slate-400">Honoring stops with zero hesitation</div>
+            </div>
+          </div>
+          <div id="tierCard3" class="p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 opacity-60 flex items-center gap-2.5">
+            <span class="text-lg">🥇</span>
+            <div>
+              <div class="font-bold text-slate-300">26–50 Clean: Discipline Master</div>
+              <div class="text-[10px] text-slate-400">Eliminating boredom and FOMO completely</div>
+            </div>
+          </div>
+          <div id="tierCard4" class="p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 opacity-60 flex items-center gap-2.5">
+            <span class="text-lg">💎</span>
+            <div>
+              <div class="font-bold text-slate-300">51–75 Clean: Edge Compounder</div>
+              <div class="text-[10px] text-slate-400">Mathematical R compounding active</div>
+            </div>
+          </div>
+          <div id="tierCard5" class="p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 opacity-60 flex items-center gap-2.5 sm:col-span-2">
+            <span class="text-lg">👑</span>
+            <div>
+              <div class="font-bold text-slate-300">76–100 Clean: Institutional Executioner</div>
+              <div class="text-[10px] text-slate-400">Proprietary desk level emotional immunity</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- The 5 Non-Negotiable Laws -->
+      <div class="mt-5 p-3.5 bg-slate-950/80 rounded-xl border border-slate-800 text-[11px] text-slate-300 space-y-1.5">
+        <span class="text-[10px] uppercase font-bold text-amber-400 block tracking-wider">The 5 Rules of a Clean Trade:</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[10px] text-slate-400">
+          <div>✓ Hard Max 2 Trades / Day Ceiling</div>
+          <div>✓ Strictly 09:15–10:30 AM IST Window</div>
+          <div>✓ Hard Pre-set Stop Loss Never Widened</div>
+          <div>✓ Planned Asymmetry &ge; 2.2R</div>
+          <div class="sm:col-span-2">✓ Process Over Outcome (A loss honoring rules is 100% CLEAN!)</div>
+        </div>
+      </div>
+
+      <div class="mt-5 pt-3 border-t border-slate-800 flex justify-end">
+        <button onclick="closeCleanTradesChallengeModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition">
+          Close Challenge
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: INSTANT AI POST-SESSION AUDIT (B1)   -->
+  <!-- ========================================== -->
+  <div id="aiSessionAuditModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card bg-slate-900 rounded-2xl max-w-2xl w-full border border-purple-500/40 shadow-2xl p-6 relative font-sans my-8">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white text-xl shadow-lg shadow-purple-500/20">
+            ⚡
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+              Gemini AI Post-Session Audit &amp; Edge Diagnosis
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30">
+                Desk Quant Partner
+              </span>
+            </h3>
+            <p class="text-xs text-slate-400">Clinical session debrief, capital leak detection &amp; tactical prescription</p>
+          </div>
+        </div>
+        <button onclick="closeAISessionAuditModal()" class="text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+      </div>
+
+      <!-- Audit Body Area -->
+      <div id="aiSessionAuditBody" class="my-5 min-h-[220px] max-h-[60vh] overflow-y-auto space-y-4 pr-1 text-xs">
+        <div class="flex flex-col items-center justify-center py-12 text-slate-400 space-y-3">
+          <div class="w-8 h-8 rounded-full border-2 border-purple-400 border-t-transparent animate-spin"></div>
+          <span class="font-mono text-xs text-purple-300">Analyzing execution ledger, discipline metrics &amp; leaks...</span>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
+        <button onclick="copyAISessionAudit()" id="copyAuditBtn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition">
+          <span>📋</span>
+          <span id="copyAuditBtnText">Copy Audit</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="fetchAISessionAudit()" class="px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 text-xs font-bold transition flex items-center gap-1.5">
+            <span>🔄</span> Re-Audit
+          </button>
+          <button onclick="closeAISessionAuditModal()" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- SLIDE-OVER TRADE INSPECTION DRAWER (C2 & B3)-->
+  <!-- ========================================== -->
+  <div id="tradeInspectBackdrop" onclick="closeTradeInspectDrawer()" class="hidden fixed inset-0 z-40 bg-black/75 backdrop-blur-sm transition-opacity duration-300"></div>
+  <aside id="tradeInspectDrawer" class="fixed inset-y-0 right-0 z-50 w-full max-w-xl bg-slate-950/95 backdrop-blur-xl border-l border-slate-800 shadow-2xl transition-transform duration-300 translate-x-full overflow-y-auto font-sans flex flex-col justify-between">
+    
+    <div>
+      <!-- Drawer Header -->
+      <div class="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/60 sticky top-0 z-10 backdrop-blur-md">
+        <div class="flex items-center gap-2.5">
+          <div id="inspectOutcomeIcon" class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            ✓
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="inspectTradeSymbol" class="text-base font-black text-white font-mono">RELIANCE</span>
+              <span id="inspectTradeDir" class="text-[10px] font-bold px-2 py-0.5 rounded font-mono uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Long</span>
+              <span id="inspectTradeId" class="text-[11px] font-mono text-slate-500">#T-001</span>
+            </div>
+            <div id="inspectTradeSub" class="text-xs text-slate-400 mt-0.5 font-mono">2026-10-23 &bull; 09:18 IST &bull; 1m Pullback</div>
+          </div>
+        </div>
+        <button onclick="closeTradeInspectDrawer()" class="p-2 rounded-lg bg-slate-900 text-slate-400 hover:text-white transition text-lg">&times;</button>
+      </div>
+
+      <!-- Drawer Content -->
+      <div class="p-5 space-y-5 text-xs">
+        
+        <!-- VISUAL RISK-TO-REWARD TIMELINE RULER -->
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2.5">
+          <div class="flex items-center justify-between text-[11px] font-bold">
+            <span class="text-slate-400 uppercase text-[10px] tracking-wider font-mono">Execution Price Geometry</span>
+            <span id="inspectRulerGrade" class="text-emerald-400 font-mono">+2.55R Realized</span>
+          </div>
+          
+          <!-- Graphical Bar -->
+          <div class="relative pt-6 pb-2">
+            <div class="w-full bg-slate-950 h-2 rounded-full border border-slate-800 relative overflow-hidden">
+              <div id="inspectRulerFill" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full" style="width: 75%;"></div>
+            </div>
+            <!-- Labels -->
+            <div class="flex justify-between text-[10px] font-mono pt-2">
+              <div>
+                <span class="text-rose-400 font-bold block" id="inspectStopPriceDisp">₹0.00</span>
+                <span class="text-slate-500 text-[9px]">Stop Loss</span>
+              </div>
+              <div class="text-center">
+                <span class="text-slate-200 font-bold block" id="inspectEntryPriceDisp">₹0.00</span>
+                <span class="text-slate-500 text-[9px]">Entry Fill</span>
+              </div>
+              <div class="text-center">
+                <span class="text-emerald-400 font-bold block" id="inspectExitPriceDisp">₹0.00</span>
+                <span class="text-slate-500 text-[9px]">Exit Fill</span>
+              </div>
+              <div class="text-right">
+                <span class="text-cyan-300 font-bold block" id="inspectTargetPriceDisp">₹0.00</span>
+                <span class="text-slate-500 text-[9px]">Planned Target</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Key Financial Metrics -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 font-mono text-center">
+          <div class="p-2.5 rounded-xl bg-slate-900/70 border border-slate-800">
+            <span class="text-[9px] uppercase font-bold text-slate-500 block font-sans">Net P&amp;L</span>
+            <span id="inspectNetPnL" class="text-sm font-black text-emerald-400 mt-0.5 block">+₹0</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-900/70 border border-slate-800">
+            <span class="text-[9px] uppercase font-bold text-slate-500 block font-sans">Realized R</span>
+            <span id="inspectRealizedR" class="text-sm font-black text-blue-400 mt-0.5 block">+0.00R</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-900/70 border border-slate-800">
+            <span class="text-[9px] uppercase font-bold text-slate-500 block font-sans">Planned RR</span>
+            <span id="inspectPlannedRR" class="text-sm font-black text-white mt-0.5 block">2.20</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-900/70 border border-slate-800">
+            <span class="text-[9px] uppercase font-bold text-slate-500 block font-sans">Friction / Tax</span>
+            <span id="inspectTotalTaxes" class="text-sm font-black text-amber-400 mt-0.5 block">₹0.00</span>
+          </div>
+        </div>
+
+        <!-- Execution & Window Breakdown -->
+        <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-sans">Execution &amp; Sizing Specs</span>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-[11px]">
+            <div><span class="text-slate-500 text-[10px] block">Shares / Quantity:</span> <span id="inspectQty" class="font-bold text-white">0</span></div>
+            <div><span class="text-slate-500 text-[10px] block">Hold Duration:</span> <span id="inspectHoldDur" class="font-bold text-white">0 mins</span></div>
+            <div><span class="text-slate-500 text-[10px] block">Window Adherence:</span> <span id="inspectWindowBadge" class="font-bold text-emerald-400">09:15-10:30 ✓</span></div>
+            <div><span class="text-slate-500 text-[10px] block">Gross P&amp;L:</span> <span id="inspectGrossPnL" class="font-bold text-white">₹0.00</span></div>
+            <div><span class="text-slate-500 text-[10px] block">Capital Risked:</span> <span id="inspectRiskAmt" class="font-bold text-rose-300">₹5,000.00</span></div>
+            <div><span class="text-slate-500 text-[10px] block">Setup Name:</span> <span id="inspectSetupName" class="font-bold text-cyan-300 truncate block">1m Pullback</span></div>
+          </div>
+        </div>
+
+        <!-- Neurological & Psychology Audit -->
+        <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-sans">Neurological &amp; Mindset Audit</span>
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="inspectUrgencyBadge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              Urgency: 2/10 (Calm)
+            </span>
+            <span id="inspectChecklistBadge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+              Checklist: 5/5 Full Confluence
+            </span>
+            <span id="inspectBreachBadge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              0 Rule Breaches
+            </span>
+          </div>
+        </div>
+
+        <!-- POST-EXIT "FOMO CHECK" AUDIT (B3) -->
+        <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-sans">Post-Exit FOMO Audit (B3)</span>
+            <span id="inspectFomoBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              🛡️ Exit Defended Edge
+            </span>
+          </div>
+          <p id="inspectFomoDesc" class="text-[11px] text-slate-300 leading-relaxed">
+            Stock reversed after target was met. Exiting on plan successfully defended capital against market giveback.
+          </p>
+        </div>
+
+        <!-- Trader Lesson & Voice Audio -->
+        <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-sans">Trader Lesson &amp; Post-Trade Notes</span>
+            <button onclick="speakCurrentTradeLesson()" class="text-[10px] font-semibold text-teal-300 hover:text-white flex items-center gap-1 transition" title="Listen to lesson notes via Speech Synthesizer">
+              <span>🔊</span> Listen
+            </button>
+          </div>
+          <p id="inspectLessonText" class="text-xs text-slate-300 font-mono italic leading-relaxed">
+            "No lesson notes logged."
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Sticky Drawer Actions -->
+    <div class="p-4 border-t border-slate-800 bg-slate-900/90 backdrop-blur-md flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <button onclick="openEditFromInspector()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 transition">
+          <span>✏️</span> Edit Trade
+        </button>
+        <button onclick="runAiAutopsyFromInspector()" class="px-3 py-2 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 font-bold text-xs flex items-center gap-1.5 transition">
+          <span>🤖</span> AI Autopsy
+        </button>
+      </div>
+      <button onclick="deleteTradeFromInspector()" class="px-3 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 font-bold text-xs flex items-center gap-1.5 transition">
+        <span>🗑️</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ========================================== -->
   <!-- MODAL: EDIT TRADE EXECUTION & DATE         -->
   <!-- ========================================== -->
   <div id="editTradeModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
@@ -3439,7 +3841,28 @@
           </div>
         </div>
 
-        <!-- Row 5: Journal Lesson with Voice Dictation -->
+        <!-- Row 5: Post-Exit FOMO Audit (B3) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+          <div>
+            <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">
+              🛡️ Post-Exit Stock Action (FOMO Check)
+            </label>
+            <select id="editTrade_post_exit_behavior" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-white font-sans text-xs focus:outline-none focus:border-blue-500">
+              <option value="Reversed / Fell Back">🛡️ Reversed / Fell Back (Exit Defended Capital)</option>
+              <option value="Continued Trending">🚀 Continued Trending Higher (Runner Upside)</option>
+              <option value="Chopped / Stagnated">⏸️ Chopped / Stagnated (Optimal Exit)</option>
+              <option value="Unspecified">None Noted</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">
+              Post-Exit 15m Price (₹ Optional)
+            </label>
+            <input type="number" step="0.05" id="editTrade_post_exit_price" placeholder="Price reached after exit" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-white font-mono text-xs focus:outline-none focus:border-blue-500">
+          </div>
+        </div>
+
+        <!-- Row 6: Journal Lesson with Voice Dictation -->
         <div>
           <div class="flex items-center justify-between mb-1">
             <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider">
@@ -6807,6 +7230,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           if (typeof playWinChime === 'function') playWinChime();
           if (typeof loadTrades === 'function') await loadTrades();
           if (typeof renderAllChartsAndMetrics === 'function') renderAllChartsAndMetrics();
+          if (typeof speakTradeConfirmation === 'function') speakTradeConfirmation(data.trade || payload, false);
           alert(`Trade ${data.trade ? data.trade.id : ''} (${symbol}) logged successfully!`);
         } else {
           alert('Error logging trade to server.');
@@ -7105,6 +7529,10 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const btn050 = document.getElementById('riskMode_050');
       if (btn025) btn025.textContent = `0.25% (₹${Math.round(startingCapital * 0.0025).toLocaleString('en-IN')})`;
       if (btn050) btn050.textContent = `0.50% (₹${Math.round(startingCapital * 0.0050).toLocaleString('en-IN')})`;
+
+      if (typeof computeCleanTradesStats === 'function') {
+        try { computeCleanTradesStats(); } catch(e) { console.warn('Clean trades challenge update error:', e); }
+      }
     }
 
     // --- Date Filtering & Indiscipline Simulator ---
@@ -7416,7 +7844,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       renderTopCapitalHeader();
       checkDailyCircuitBreaker();
       dispatchAccountabilityAlert("TRADE_LOGGED", { trade: tradeObj });
-      if (typeof speakCoach === "function") {
+      if (typeof speakTradeConfirmation === 'function') {
+        speakTradeConfirmation(tradeObj, false);
+      } else if (typeof speakCoach === "function") {
         if (tradeObj.outcome === 'Win') {
           speakCoach("Trade logged. Nice execution on " + tradeObj.symbol + ". Target reached.");
         } else if (tradeObj.outcome === 'Loss') {
@@ -8584,6 +9014,10 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       document.getElementById('editTrade_qty').value = trade.qty || 1;
       document.getElementById('editTrade_checklist').value = String(trade.checklist_score || 5);
       document.getElementById('editTrade_mental_state').value = trade.mental_state || 'Calm & Patient';
+      const postExitEl = document.getElementById('editTrade_post_exit_behavior');
+      if (postExitEl) postExitEl.value = trade.post_exit_behavior || 'Reversed / Fell Back';
+      const postExitPriceEl = document.getElementById('editTrade_post_exit_price');
+      if (postExitPriceEl) postExitPriceEl.value = trade.post_exit_price || '';
       document.getElementById('editTrade_lesson').value = trade.lesson || '';
 
       calcEditTradePreview();
@@ -8729,10 +9163,18 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       trade.checklist_score = checklistScore;
       trade.rule_violation = checklistScore < 5 ? 'Y' : 'N';
       trade.mental_state = mentalState;
+      const postExitEl = document.getElementById('editTrade_post_exit_behavior');
+      if (postExitEl) trade.post_exit_behavior = postExitEl.value;
+      const postExitPriceEl = document.getElementById('editTrade_post_exit_price');
+      if (postExitPriceEl && postExitPriceEl.value) trade.post_exit_price = parseFloat(postExitPriceEl.value);
       trade.lesson = lesson;
 
       saveTradesLocally();
       await syncTradesWithBackend();
+
+      if (typeof speakTradeConfirmation === 'function') {
+        speakTradeConfirmation(trade, true);
+      }
 
       closeEditTradeModal();
       if (typeof activeModalTradeId !== 'undefined' && activeModalTradeId === activeEditTradeId && typeof openTradeModal === 'function') {
@@ -8754,80 +9196,404 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       }
     }
 
-    // --- Modal Trade Inspection & Journal ---
-    function openTradeModal(tradeId) {
+    // ==========================================
+    // A5: 100 CLEAN TRADES CHALLENGE ENGINE
+    // ==========================================
+    function computeCleanTradesStats() {
+      let currentStreak = 0;
+      let bestStreak = 0;
+      let totalClean = 0;
+      let tempStreak = 0;
+
+      const sortedTrades = [...tradesData].sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+
+      sortedTrades.forEach(t => {
+        const isClean = t.rule_violation !== 'Y' && (parseInt(t.checklist_score) || 5) >= 5;
+        if (isClean) {
+          tempStreak++;
+          totalClean++;
+          if (tempStreak > bestStreak) bestStreak = tempStreak;
+        } else {
+          tempStreak = 0;
+        }
+      });
+
+      // Current active streak from the most recent trades backwards
+      let activeRun = 0;
+      for (let i = sortedTrades.length - 1; i >= 0; i--) {
+        const t = sortedTrades[i];
+        const isClean = t.rule_violation !== 'Y' && (parseInt(t.checklist_score) || 5) >= 5;
+        if (isClean) activeRun++;
+        else break;
+      }
+      currentStreak = activeRun;
+
+      const adherencePct = sortedTrades.length > 0 ? Math.round((totalClean / sortedTrades.length) * 100) : 100;
+
+      // Update header pill
+      const headerPill = document.getElementById('headerCleanStreakText');
+      if (headerPill) headerPill.textContent = `${currentStreak}/100 Clean`;
+
+      // Update modal elements
+      const curElem = document.getElementById('challengeCurrentStreak');
+      if (curElem) curElem.textContent = currentStreak;
+      const bestElem = document.getElementById('challengeBestStreak');
+      if (bestElem) bestElem.textContent = bestStreak;
+      const adhElem = document.getElementById('challengeAdherencePct');
+      if (adhElem) adhElem.textContent = `${adherencePct}%`;
+
+      const pct = Math.min(100, Math.round((currentStreak / 100) * 100));
+      const progBar = document.getElementById('challengeProgressBar');
+      if (progBar) progBar.style.width = `${Math.max(4, pct)}%`;
+      const progText = document.getElementById('challengeProgressText');
+      if (progText) progText.textContent = `${currentStreak} / 100 Trades (${pct}%)`;
+
+      // Determine Tier
+      let tierName = 'Tier 1: Apprentice Executor 🥉';
+      let tierCardActive = 1;
+      if (currentStreak >= 76) { tierName = 'Tier 5: Institutional Executioner 👑'; tierCardActive = 5; }
+      else if (currentStreak >= 51) { tierName = 'Tier 4: Edge Compounder 💎'; tierCardActive = 4; }
+      else if (currentStreak >= 26) { tierName = 'Tier 3: Discipline Master 🥇'; tierCardActive = 3; }
+      else if (currentStreak >= 11) { tierName = 'Tier 2: Consistent Operator 🥈'; tierCardActive = 2; }
+
+      const tierBadge = document.getElementById('challengeCurrentTierBadge');
+      if (tierBadge) tierBadge.textContent = tierName;
+
+      for (let c = 1; c <= 5; c++) {
+        const card = document.getElementById(`tierCard${c}`);
+        if (card) {
+          if (c <= tierCardActive) {
+            card.className = "p-2.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 flex items-center gap-2.5 opacity-100 transition";
+          } else {
+            card.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 opacity-50 flex items-center gap-2.5 transition";
+          }
+        }
+      }
+
+      return { currentStreak, bestStreak, adherencePct, pct };
+    }
+
+    function openCleanTradesChallengeModal() {
+      computeCleanTradesStats();
+      const modal = document.getElementById('cleanTradesChallengeModal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeCleanTradesChallengeModal() {
+      const modal = document.getElementById('cleanTradesChallengeModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    // ==========================================
+    // B1: GEMINI AI INSTANT POST-SESSION AUDIT
+    // ==========================================
+    let lastAISessionAuditText = '';
+
+    async function openAISessionAuditModal() {
+      const modal = document.getElementById('aiSessionAuditModal');
+      if (modal) modal.classList.remove('hidden');
+      await fetchAISessionAudit();
+    }
+
+    function closeAISessionAuditModal() {
+      const modal = document.getElementById('aiSessionAuditModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function fetchAISessionAudit() {
+      const container = document.getElementById('aiSessionAuditBody');
+      if (!container) return;
+
+      container.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-12 text-slate-400 space-y-3">
+          <div class="w-8 h-8 rounded-full border-2 border-purple-400 border-t-transparent animate-spin"></div>
+          <span class="font-mono text-xs text-purple-300">Desk Quant Engine & Gemini Flash analyzing execution ledger...</span>
+        </div>
+      `;
+
+      try {
+        const todayStr = typeof getActiveSessionDate === 'function' ? getActiveSessionDate() : new Date().toISOString().split('T')[0];
+        const res = await fetch('/api/ai/session-debrief', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            date: todayStr,
+            trades: tradesData
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const rawText = data.debrief || data.reply || 'Audit generated successfully.';
+          lastAISessionAuditText = rawText;
+          
+          let formattedHtml = rawText
+            .replace(/### (.*?)\n/g, '<h4 class="text-sm font-black text-purple-300 pb-1 border-b border-purple-500/20 mt-3 mb-2 font-sans">$1</h4>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold">$1</strong>')
+            .replace(/\n\n/g, '</p><p class="mt-2 text-slate-300 leading-relaxed font-sans text-xs">')
+            .replace(/\n- (.*?)/g, '<li class="ml-4 list-disc text-slate-300 text-xs">$1</li>');
+
+          container.innerHTML = `
+            <div class="p-4 rounded-xl bg-slate-950/90 border border-purple-500/20 text-slate-300 space-y-3">
+              <p class="text-slate-300 leading-relaxed font-sans text-xs">${formattedHtml}</p>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `<div class="p-4 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-300">Error connecting to AI Audit Engine. Please verify server status.</div>`;
+        }
+      } catch (err) {
+        console.error("AI Audit error:", err);
+        container.innerHTML = `<div class="p-4 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-300">Connection offline. Unable to complete live audit.</div>`;
+      }
+    }
+
+    function copyAISessionAudit() {
+      if (!lastAISessionAuditText) return;
+      navigator.clipboard.writeText(lastAISessionAuditText).then(() => {
+        const btnText = document.getElementById('copyAuditBtnText');
+        if (btnText) {
+          btnText.textContent = 'Copied!';
+          setTimeout(() => { btnText.textContent = 'Copy Audit'; }, 2000);
+        }
+      });
+    }
+
+    // ==========================================
+    // C5: AUDIO VOICE CONFIRMATION ENGINE
+    // ==========================================
+    function isVoiceFeedbackEnabled() {
+      return localStorage.getItem('trade_voice_confirm') !== 'false';
+    }
+
+    function toggleVoiceConfirmation() {
+      const current = isVoiceFeedbackEnabled();
+      const next = !current;
+      localStorage.setItem('trade_voice_confirm', next ? 'true' : 'false');
+      
+      const icon = document.getElementById('voiceConfirmIcon');
+      const btn = document.getElementById('voiceConfirmToggleBtn');
+      if (icon) icon.textContent = next ? '🔊' : '🔇';
+      if (btn) {
+        btn.title = `Audio Voice Confirmation: ${next ? 'ON' : 'OFF'}`;
+        btn.className = next 
+          ? 'p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-teal-300 hover:text-white border border-teal-500/30 text-xs transition cursor-pointer flex items-center gap-1'
+          : 'p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-500 hover:text-white border border-slate-800 text-xs transition cursor-pointer flex items-center gap-1';
+      }
+      
+      speakVoiceNotification(next ? "Voice feedback activated." : "Voice feedback muted.");
+    }
+
+    function speakTradeConfirmation(trade, isEdit = false) {
+      if (!isVoiceFeedbackEnabled() || !trade) return;
+      const sym = trade.symbol || 'Position';
+      const dir = trade.direction || 'Long';
+      const pnl = Math.round(parseFloat(trade.net_pnl) || 0);
+      const r = parseFloat(trade.r_multiple) || 0;
+      const isWin = pnl >= 0;
+
+      let msg = '';
+      if (isEdit) {
+        msg = `Trade #${trade.id} updated. ${sym} ${dir}, ${isWin ? 'plus' : 'minus'} ${Math.abs(pnl).toLocaleString('en-IN')} rupees, ${r} R multiple. Synchronized.`;
+      } else if (isWin) {
+        msg = `Trade logged. ${sym} ${dir}, plus ${Math.abs(pnl).toLocaleString('en-IN')} rupees profit, ${r >= 0 ? '+' : ''}${r.toFixed(2)} R multiple. Discipline intact.`;
+      } else {
+        msg = `Stop loss honored on ${sym}. Minus ${Math.abs(pnl).toLocaleString('en-IN')} rupees. Mandatory 30 minute reset active. Process over outcome.`;
+      }
+      speakVoiceNotification(msg);
+    }
+
+    // ==========================================
+    // C2: SLIDE-OVER TRADE INSPECTION DRAWER & B3 FOMO AUDIT
+    // ==========================================
+    let activeInspectTradeId = null;
+
+    function openTradeInspectDrawer(tradeId) {
       const trade = tradesData.find(t => t.id === tradeId);
       if (!trade) return;
-      activeModalTradeId = tradeId;
+      activeInspectTradeId = tradeId;
 
-      const tradeGrade = typeof computeExecutionGrade === 'function' ? computeExecutionGrade(trade) : { grade: 'A', label: 'Disciplined', reason: '' };
-      document.getElementById('modalTradeTitle').innerHTML = `
-        <span>Trade ${trade.id} &bull; ${trade.symbol}</span>
-        <span class="px-2 py-0.5 rounded text-[11px] font-bold ${trade.direction === 'Long' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-rose-950 text-rose-400 border border-rose-800'}">
-          ${trade.direction}
-        </span>
-        <span class="px-2 py-0.5 rounded text-[11px] font-mono font-black ${tradeGrade.grade.startsWith('A') ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : (tradeGrade.grade === 'B' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30')}" title="${tradeGrade.label}: ${tradeGrade.reason}">
-          Execution: ${tradeGrade.grade} (${tradeGrade.label})
-        </span>
-      `;
-      document.getElementById('modalTradeSubtitle').textContent = `${trade.date} (${getTradeWeekday(trade.date, trade.day)}) &bull; ${trade.time} IST &bull; Setup: ${trade.setup_name || 'Standard'}`;
+      const isWin = trade.outcome === 'Win' || (parseFloat(trade.net_pnl) || 0) > 0;
+      const isLoss = trade.outcome === 'Loss' || (parseFloat(trade.net_pnl) || 0) < 0;
 
-      const r = parseFloat(trade.r_multiple || 0);
-      const isZen = typeof isZenModeActive !== 'undefined' && isZenModeActive;
-      document.getElementById('modalGrossPnL').textContent = isZen ? `${r >= 0 ? '+' : ''}${r.toFixed(2)} R` : `₹${Number(trade.gross_pnl || 0).toFixed(2)}`;
-      document.getElementById('modalCosts').textContent = isZen ? '₹ •••' : `₹${Number(trade.costs || 0).toFixed(2)}`;
+      // Icon & Symbol
+      const iconEl = document.getElementById('inspectOutcomeIcon');
+      if (iconEl) {
+        iconEl.textContent = isWin ? '✓' : (isLoss ? '✕' : '—');
+        iconEl.className = `w-9 h-9 rounded-xl flex items-center justify-center font-bold text-lg ${isWin ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : (isLoss ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-slate-800 text-slate-300')}`;
+      }
+      document.getElementById('inspectTradeSymbol').textContent = trade.symbol;
+      const dirEl = document.getElementById('inspectTradeDir');
+      if (dirEl) {
+        dirEl.textContent = trade.direction || 'Long';
+        dirEl.className = `text-[10px] font-bold px-2 py-0.5 rounded font-mono uppercase ${trade.direction === 'Long' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'}`;
+      }
+      document.getElementById('inspectTradeId').textContent = `#${trade.id}`;
+      document.getElementById('inspectTradeSub').textContent = `${trade.date} (${getTradeWeekday(trade.date, trade.day)}) • ${trade.time} IST • Setup: ${trade.setup_name || 'Standard'}`;
+
+      // Price Geometry & Visual Ruler
+      const entry = parseFloat(trade.entry_price) || 0;
+      const stop = parseFloat(trade.stop_price) || 0;
+      const exit = parseFloat(trade.exit_price) || 0;
+      const target = parseFloat(trade.target_price) || (entry + (trade.direction === 'Long' ? 1 : -1) * 2.2 * Math.abs(entry - stop));
+      const r = parseFloat(trade.r_multiple) || 0;
+
+      document.getElementById('inspectStopPriceDisp').textContent = `₹${stop.toFixed(2)}`;
+      document.getElementById('inspectEntryPriceDisp').textContent = `₹${entry.toFixed(2)}`;
+      document.getElementById('inspectExitPriceDisp').textContent = `₹${exit.toFixed(2)}`;
+      document.getElementById('inspectTargetPriceDisp').textContent = `₹${target.toFixed(2)}`;
       
-      const netElem = document.getElementById('modalNetPnL');
-      netElem.textContent = isZen ? `${r >= 0 ? '+' : ''}${r.toFixed(2)} R` : `₹${Number(trade.net_pnl || 0).toFixed(2)}`;
-      netElem.className = trade.net_pnl >= 0 ? 'text-xs font-mono font-bold text-emerald-400 mt-0.5' : 'text-xs font-mono font-bold text-rose-400 mt-0.5';
-
-      const rElem = document.getElementById('modalRealizedR');
-      rElem.textContent = `${r >= 0 ? '+' : ''}${r.toFixed(2)} R`;
-      rElem.className = r >= 0 ? 'text-xs font-mono font-bold text-blue-400 mt-0.5' : 'text-xs font-mono font-bold text-rose-400 mt-0.5';
-
-      if (typeof renderTradePriceLadder === 'function') {
-        renderTradePriceLadder(trade);
+      const rulerGrade = document.getElementById('inspectRulerGrade');
+      if (rulerGrade) {
+        rulerGrade.textContent = `${r >= 0 ? '+' : ''}${r.toFixed(2)}R Realized`;
+        rulerGrade.className = `font-mono font-bold ${r >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
       }
 
-      const buyTurnover = trade.direction === 'Long' ? (trade.entry_price * trade.qty) : (trade.exit_price * trade.qty);
-      const sellTurnover = trade.direction === 'Long' ? (trade.exit_price * trade.qty) : (trade.entry_price * trade.qty);
-      const fyers = computeFyersCharges(buyTurnover, sellTurnover);
+      // Visual progress ruler bar calculation
+      const fillEl = document.getElementById('inspectRulerFill');
+      if (fillEl) {
+        const span = Math.abs(target - stop);
+        let pct = span > 0 ? ((exit - stop) / (target - stop)) * 100 : 50;
+        if (trade.direction === 'Short') {
+          pct = span > 0 ? ((stop - exit) / (stop - target)) * 100 : 50;
+        }
+        pct = Math.max(5, Math.min(100, pct));
+        fillEl.style.width = `${pct}%`;
+        fillEl.className = `h-full rounded-full transition-all duration-300 ${isWin ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-gradient-to-r from-rose-500 to-amber-500'}`;
+      }
 
-      const chargesGrid = document.getElementById('modalChargesGrid');
-      chargesGrid.innerHTML = `
-        <div class="bg-slate-900 p-2 rounded">Buy Turnover: <span class="text-white">₹${buyTurnover.toFixed(2)}</span></div>
-        <div class="bg-slate-900 p-2 rounded">Sell Turnover: <span class="text-white">₹${sellTurnover.toFixed(2)}</span></div>
-        <div class="bg-slate-900 p-2 rounded">Total Brokerage: <span class="text-amber-300">₹${fyers.totalBrokerage.toFixed(2)}</span></div>
-        <div class="bg-slate-900 p-2 rounded">STT (0.025% Sell): <span class="text-amber-300">₹${fyers.stt.toFixed(2)}</span></div>
-        <div class="bg-slate-900 p-2 rounded">Exchange Chg (NSE): <span class="text-amber-300">₹${fyers.exchangeCharges.toFixed(2)}</span></div>
-        <div class="bg-slate-900 p-2 rounded">SEBI Turnover Fee: <span class="text-amber-300">₹${fyers.sebiFee.toFixed(2)}</span></div>
-        <div class="bg-slate-900 p-2 rounded">Stamp Duty: <span class="text-amber-300">₹${fyers.stampDuty.toFixed(2)}</span></div>
-        <div class="bg-slate-900 p-2 rounded">GST (18%): <span class="text-amber-300">₹${fyers.gst.toFixed(2)}</span></div>
-        <div class="bg-slate-900 p-2 rounded font-bold text-rose-300">Total Deductions: ₹${fyers.totalCosts.toFixed(2)}</div>
-      `;
+      // Key Metrics
+      const isZen = typeof isZenModeActive !== 'undefined' && isZenModeActive;
+      const net = parseFloat(trade.net_pnl) || 0;
+      const gross = parseFloat(trade.gross_pnl) || (net + (parseFloat(trade.costs) || 0));
+      const costs = parseFloat(trade.costs) || 0;
 
-      const tvLink = document.getElementById('modalTVLink');
-      tvLink.href = `https://www.tradingview.com/chart/?symbol=NSE:${trade.symbol}`;
+      const netEl = document.getElementById('inspectNetPnL');
+      if (netEl) {
+        netEl.textContent = isZen ? `${r >= 0 ? '+' : ''}${r.toFixed(2)} R` : ((net >= 0 ? '+₹' : '-₹') + Math.abs(net).toLocaleString('en-IN', { minimumFractionDigits: 2 }));
+        netEl.className = `text-sm font-black mt-0.5 block ${net >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+      }
+      const rEl = document.getElementById('inspectRealizedR');
+      if (rEl) {
+        rEl.textContent = `${r >= 0 ? '+' : ''}${r.toFixed(2)}R`;
+        rEl.className = `text-sm font-black mt-0.5 block ${r >= 0 ? 'text-blue-400' : 'text-rose-400'}`;
+      }
+      document.getElementById('inspectPlannedRR').textContent = parseFloat(trade.rr_planned || 2.2).toFixed(2);
+      document.getElementById('inspectTotalTaxes').textContent = isZen ? '₹ •••' : `₹${costs.toFixed(2)}`;
 
-      const ssContainer = document.getElementById('modalScreenshotContainer');
-      const ssImg = document.getElementById('modalScreenshotImg');
-      if (trade.screenshot) {
-        ssImg.src = trade.screenshot;
-        ssContainer.classList.remove('hidden');
-      } else if (trade.screenshot_link && trade.screenshot_link.match(/\.(jpeg|jpg|gif|png|webp)/i)) {
-        ssImg.src = trade.screenshot_link;
-        ssContainer.classList.remove('hidden');
+      // Execution specs
+      document.getElementById('inspectQty').textContent = `${trade.qty || 0} shares`;
+      document.getElementById('inspectHoldDur').textContent = `${trade.hold_duration || 6} mins`;
+      document.getElementById('inspectGrossPnL').textContent = `₹${gross.toFixed(2)}`;
+      document.getElementById('inspectRiskAmt').textContent = `₹${Number(trade.risk_amount || 5000).toLocaleString('en-IN')}`;
+      document.getElementById('inspectSetupName').textContent = trade.setup_name || 'Playbook Setup';
+
+      // Neurological state
+      const urg = parseInt(trade.emotion_before) || 2;
+      const urgEl = document.getElementById('inspectUrgencyBadge');
+      if (urgEl) {
+        urgEl.textContent = `Urgency: ${urg}/10 (${urg <= 3 ? 'Calm & Patient' : (urg <= 6 ? 'Alert' : 'High Urgency')})`;
+        urgEl.className = `px-2 py-0.5 rounded text-[10px] font-mono font-bold ${urg <= 3 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : (urg <= 6 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30')}`;
+      }
+      const score = trade.checklist_score || 5;
+      const scoreEl = document.getElementById('inspectChecklistBadge');
+      if (scoreEl) {
+        scoreEl.textContent = `Checklist: ${score}/5 Confluence`;
+        scoreEl.className = `px-2 py-0.5 rounded text-[10px] font-mono font-bold ${score >= 5 ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}`;
+      }
+      const breachEl = document.getElementById('inspectBreachBadge');
+      if (breachEl) {
+        const hasBreach = trade.rule_violation === 'Y' || score < 5;
+        breachEl.textContent = hasBreach ? '⚠️ Rule Breach Logged' : '✓ Clean Execution';
+        breachEl.className = `px-2 py-0.5 rounded text-[10px] font-mono font-bold ${hasBreach ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'}`;
+      }
+
+      // FOMO Post-Exit Audit (B3)
+      const fomoBadge = document.getElementById('inspectFomoBadge');
+      const fomoDesc = document.getElementById('inspectFomoDesc');
+      const postExit = trade.post_exit_behavior || (isWin ? 'Reversed / Fell Back' : 'Chopped / Stagnated');
+      if (fomoBadge && fomoDesc) {
+        if (postExit.includes('Reversed')) {
+          fomoBadge.textContent = '🛡️ Exit Defended Edge';
+          fomoBadge.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+          fomoDesc.textContent = 'Stock reversed after your planned exit. Taking profits on system defended capital against market giveback.';
+        } else if (postExit.includes('Continued')) {
+          fomoBadge.textContent = '🚀 Runner Upside';
+          fomoBadge.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30';
+          fomoDesc.textContent = 'Stock continued trending after exit. Consistent runner behavior across 20+ trades supports adding trailing runner scale-outs.';
+        } else {
+          fomoBadge.textContent = '⏸️ Stagnation Exit';
+          fomoBadge.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30';
+          fomoDesc.textContent = 'Stock entered sideways chop post-exit. Timely exit freed capital without incurring time decay or whipsaws.';
+        }
+      }
+
+      // Lesson Notes
+      const lessonEl = document.getElementById('inspectLessonText');
+      if (lessonEl) {
+        lessonEl.textContent = trade.lesson && trade.lesson.trim() ? `"${trade.lesson.trim()}"` : '"No lesson notes logged for this trade."';
+      }
+
+      // Open Drawer
+      const drawer = document.getElementById('tradeInspectDrawer');
+      const backdrop = document.getElementById('tradeInspectBackdrop');
+      if (drawer && backdrop) {
+        backdrop.classList.remove('hidden');
+        drawer.classList.remove('translate-x-full');
+      }
+    }
+
+    function closeTradeInspectDrawer() {
+      const drawer = document.getElementById('tradeInspectDrawer');
+      const backdrop = document.getElementById('tradeInspectBackdrop');
+      if (drawer) drawer.classList.add('translate-x-full');
+      if (backdrop) backdrop.classList.add('hidden');
+      activeInspectTradeId = null;
+    }
+
+    function speakCurrentTradeLesson() {
+      if (!activeInspectTradeId) return;
+      const trade = tradesData.find(t => t.id === activeInspectTradeId);
+      if (!trade || !trade.lesson) {
+        speakVoiceNotification("No lesson notes recorded for this trade.");
+        return;
+      }
+      speakVoiceNotification(`Trade ${trade.symbol} lesson: ${trade.lesson}`);
+    }
+
+    function openEditFromInspector() {
+      if (!activeInspectTradeId) return;
+      const id = activeInspectTradeId;
+      closeTradeInspectDrawer();
+      openEditTradeModal(id);
+    }
+
+    function runAiAutopsyFromInspector() {
+      if (!activeInspectTradeId) return;
+      const id = activeInspectTradeId;
+      closeTradeInspectDrawer();
+      if (typeof openTradeAutopsyModal === 'function') {
+        openTradeAutopsyModal(id);
       } else {
-        ssContainer.classList.add('hidden');
+        alert("AI Autopsy analyzing trade #" + id);
       }
+    }
 
-      document.getElementById('modalLessonInput').value = trade.lesson || '';
-      document.getElementById('tradeModal').classList.remove('hidden');
+    function deleteTradeFromInspector() {
+      if (!activeInspectTradeId) return;
+      const id = activeInspectTradeId;
+      if (confirm(`Are you sure you want to delete trade #${id}? This will recalculate all statistics and Excel tracking.`)) {
+        closeTradeInspectDrawer();
+        deleteTrade(id);
+      }
+    }
+
+    // --- Modal Trade Inspection & Journal (Delegates to Modern Slide-Over Drawer) ---
+    function openTradeModal(tradeId) {
+      openTradeInspectDrawer(tradeId);
     }
 
     function closeTradeModal() {
-      document.getElementById('tradeModal').classList.add('hidden');
-      activeModalTradeId = null;
+      closeTradeInspectDrawer();
     }
 
     function saveModalJournal() {
@@ -14553,6 +15319,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
     // --- 1. GLOBAL COMMAND PALETTE ENGINE ---
     let paletteSelectedIdx = 0;
+    let paletteActiveList = [];
     const paletteCommands = [
       { id: 'customizer', category: 'Views', title: 'Customize Dashboard Metrics & Charts (Show/Hide)', hotkey: 'V', action: () => openDashboardCustomizerModal() },
       { id: 'tab1', category: 'Views', title: 'Switch to Tab 1: Live Execution Desk', hotkey: '1', action: () => switchTab(1) },
@@ -14560,6 +15327,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       { id: 'tab3', category: 'Views', title: 'Switch to Tab 3: Edge Attribution & Leak Matrix', hotkey: '3', action: () => switchTab(3) },
       { id: 'tab4', category: 'Views', title: 'Switch to Tab 4: Quant Risk & Monte Carlo Sim', hotkey: '4', action: () => switchTab(4) },
       { id: 'tab5', category: 'Views', title: 'Switch to Tab 5: 1-Min Chartink Webhook Radar', hotkey: '5', action: () => switchTab(5) },
+      { id: 'clean_challenge', category: 'Discipline', title: '100 Clean Trades Challenge & Desk Milestones (A5)', action: () => openCleanTradesChallengeModal() },
+      { id: 'ai_audit', category: 'AI Intelligence', title: 'Instant AI Post-Session Edge & Leak Audit (B1)', action: () => openAISessionAuditModal() },
       { id: 'quick_log', category: 'Execution', title: 'Quick Log Trade Popup (Slide-Over Drawer)', hotkey: 'L / T', action: () => openTradeSyncSlideOver() },
       { id: 'long', category: 'Execution', title: 'Set Direction: LONG (Buy)', hotkey: 'Alt+L', action: () => setTradeDirection('Long') },
       { id: 'short', category: 'Execution', title: 'Set Direction: SHORT (Sell)', hotkey: 'S', action: () => setTradeDirection('Short') },
@@ -14570,6 +15339,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       { id: 'dossier', category: 'Reports', title: 'Open Monthly Institutional Dossier (PDF)', hotkey: 'M', action: () => openMonthlyDossierModal() },
       { id: 'scorecard', category: 'Reports', title: 'Generate EOD Execution Scorecard (PNG)', action: () => openEODCardModal() },
       { id: 'ai_coach', category: 'AI Intelligence', title: 'Open AI Desk Risk Partner (Chat Coach & Tilt Reset)', hotkey: 'Ctrl+J', action: () => openAICoachModal() },
+      { id: 'voice_toggle', category: 'Audio', title: 'Toggle Audio Voice-Over Trade Confirmation (C5)', action: () => toggleVoiceConfirmation() },
+      { id: 'statutory', category: 'Taxes', title: 'Indian Statutory Tax & Charges Ledger (STT, GST, NSE, Stamp)', action: () => openStatutoryChargesModal() },
+      { id: 'soundboard', category: 'Audio', title: 'Execution Audio Alarms & Soundboard Customizer', action: () => openSoundboardModal() },
       { id: 'impulse', category: 'Dopamine Valve', title: 'Log Impulse Trade in Sandbox (+50 XP)', action: () => openImpulseModal() },
       { id: 'zen_mode', category: 'Neurodivergent Tools', title: 'Toggle Zen Monetary Masking Mode (R-Only)', hotkey: 'Z', action: () => toggleZenMode() },
       { id: 'breathing_pacer', category: 'Neurodivergent Tools', title: 'Start 4-7-8 Anti-Tilt Breathing Pacer (4 Cycles)', action: () => openBreathingPacerModal() },
@@ -14578,6 +15350,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       { id: 'fyers', category: 'Import', title: 'Import FYERS Trades (Offline Copy-Paste)', action: () => openFyersIngestModal() },
       { id: 'alerts', category: 'Alerts', title: 'Test Audio Siren & Desktop Notification', action: () => toggleDesktopNotifications() },
       { id: 'theme_obsidian', category: 'Themes', title: 'Theme: Obsidian Blue (Default)', action: () => switchTheme('obsidian') },
+      { id: 'theme_oled', category: 'Themes', title: 'Theme: True OLED Pure Black (C4)', action: () => switchTheme('oled') },
       { id: 'theme_bloomberg', category: 'Themes', title: 'Theme: Bloomberg Amber (High Contrast)', action: () => switchTheme('bloomberg') },
       { id: 'theme_linear', category: 'Themes', title: 'Theme: Linear Monochrome (Graphite)', action: () => switchTheme('linear') },
       { id: 'theme_nordic', category: 'Themes', title: 'Theme: Nordic Frost (Cyan & Teal)', action: () => switchTheme('nordic') },
@@ -14593,7 +15366,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         input.value = '';
         setTimeout(() => input.focus(), 50);
       }
-      renderPaletteResults(paletteCommands);
+      paletteActiveList = [...paletteCommands];
+      renderPaletteResults(paletteActiveList);
     }
 
     function closeCommandPalette() {
@@ -14604,12 +15378,34 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     function filterPaletteCommands(query) {
       paletteSelectedIdx = 0;
       const q = (query || '').toLowerCase().trim();
-      const filtered = paletteCommands.filter(c => 
+
+      const matchedCmds = paletteCommands.filter(c => 
         c.title.toLowerCase().includes(q) || 
         c.category.toLowerCase().includes(q) || 
         (c.hotkey && c.hotkey.toLowerCase() === q)
       );
-      renderPaletteResults(filtered);
+
+      let matchedTrades = [];
+      if (q.length >= 2 && Array.isArray(tradesData)) {
+        matchedTrades = tradesData.filter(t => 
+          (t.id && t.id.toLowerCase().includes(q)) ||
+          (t.symbol && t.symbol.toLowerCase().includes(q)) ||
+          (t.setup_name && t.setup_name.toLowerCase().includes(q)) ||
+          (t.lesson && t.lesson.toLowerCase().includes(q))
+        ).slice(0, 6).map(t => {
+          const isWin = (parseFloat(t.net_pnl) || 0) >= 0;
+          return {
+            id: `trade_${t.id}`,
+            category: 'Trade Log',
+            title: `#${t.id}: ${t.symbol} (${t.direction}) • ${isWin ? '+' : ''}₹${Math.round(t.net_pnl).toLocaleString('en-IN')} (${t.r_multiple}R)`,
+            hotkey: t.date,
+            action: () => openTradeInspectDrawer(t.id)
+          };
+        });
+      }
+
+      paletteActiveList = [...matchedTrades, ...matchedCmds];
+      renderPaletteResults(paletteActiveList);
     }
 
     function renderPaletteResults(list) {
@@ -14617,14 +15413,14 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       if (!container) return;
 
       if (!list || list.length === 0) {
-        container.innerHTML = `<div class="p-4 text-center text-slate-500 font-mono text-xs">No matching commands found.</div>`;
+        container.innerHTML = `<div class="p-4 text-center text-slate-500 font-mono text-xs">No matching commands or trades found.</div>`;
         return;
       }
 
       container.innerHTML = list.map((cmd, idx) => `
         <div onclick="executePaletteCommand(${idx})" onmouseover="paletteSelectedIdx = ${idx}; highlightPaletteItem();" class="palette-item p-2.5 rounded-xl border border-transparent hover:border-slate-700/60 flex items-center justify-between cursor-pointer transition ${idx === paletteSelectedIdx ? 'selected' : ''}">
           <div class="flex items-center gap-2.5">
-            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${cmd.category}</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded ${cmd.category === 'Trade Log' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold' : 'bg-slate-800 text-slate-400'}">${cmd.category}</span>
             <span class="font-medium text-slate-200 text-xs">${cmd.title}</span>
           </div>
           ${cmd.hotkey ? `<kbd class="hotkey-badge text-[9px]">${cmd.hotkey}</kbd>` : ''}
@@ -14641,19 +15437,12 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     }
 
     function executePaletteCommand(idx) {
-      const input = document.getElementById('paletteSearchInput');
-      const q = (input?.value || '').toLowerCase().trim();
-      const list = paletteCommands.filter(c => 
-        c.title.toLowerCase().includes(q) || 
-        c.category.toLowerCase().includes(q) || 
-        (c.hotkey && c.hotkey.toLowerCase() === q)
-      );
       const targetIdx = idx !== undefined ? idx : paletteSelectedIdx;
-      const cmd = list[targetIdx];
+      const cmd = paletteActiveList[targetIdx];
       if (cmd && typeof cmd.action === 'function') {
         closeCommandPalette();
         cmd.action();
-        playFeedbackSound('click');
+        if (typeof playFeedbackSound === 'function') playFeedbackSound('click');
       }
     }
 
