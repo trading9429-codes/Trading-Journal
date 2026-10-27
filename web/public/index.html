@@ -827,7 +827,7 @@
   <!-- ========================================== -->
   <div id="mainAppShell" class="flex-1 md:ml-64 flex flex-col min-h-screen transition-all duration-300 pb-16">
 
-    <!-- Top TradeSync Application Bar -->
+    <!-- Top TradeSync Application Bar (Clean Streamlined Executive Header) -->
     <header class="sticky top-0 z-30 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/90 px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-4 shadow-sm select-none">
       
       <!-- ZONE 1: Context & Market Telemetry (Left) -->
@@ -848,18 +848,18 @@
         </div>
 
         <!-- Unified Market Time & System Status Capsule (Clock + Window + Vault) -->
-        <div class="hidden xl:flex items-center gap-2.5 px-3 py-1 rounded-xl bg-slate-900/80 border border-slate-800/80 text-xs font-mono shadow-inner">
-          <div class="flex items-center gap-1.5">
+        <div class="hidden xl:flex items-center gap-2 px-2.5 py-0.5 rounded-xl bg-slate-900/80 border border-slate-800/80 text-xs font-mono shadow-inner">
+          <div class="flex items-center gap-1">
             <span class="text-slate-500">🕒</span>
-            <span id="headerLiveISTClock" class="font-bold text-slate-200 tracking-wider">--:--:-- IST</span>
+            <span id="headerLiveISTClock" class="font-bold text-slate-200 tracking-wider text-[11px]">--:--:-- IST</span>
           </div>
           <span class="text-slate-700 font-sans">|</span>
-          <div id="headerWindowPill" class="flex items-center gap-1.5 text-xs font-bold font-mono text-emerald-400">
-            <span id="headerWindowDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <div id="headerWindowPill" class="flex items-center gap-1 text-[11px] font-bold font-mono text-emerald-400">
+            <span id="headerWindowDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
             <span id="headerWindowText">Window Active</span>
           </div>
           <span class="text-slate-700 font-sans">|</span>
-          <div id="indexedDbSyncPill" class="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono" title="Offline IndexedDB Auto-Vault active">
+          <div id="indexedDbSyncPill" class="flex items-center gap-1 text-[10px] text-slate-400 font-mono" title="Offline IndexedDB Auto-Vault active">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
             <span id="indexedDbSyncText">Auto-Vault</span>
           </div>
@@ -867,9 +867,9 @@
       </div>
 
       <!-- ZONE 2: Live Performance & Mindset (Center) -->
-      <div class="flex items-center gap-2.5">
+      <div class="flex items-center gap-2">
         <!-- Live Today Net P&L Pill -->
-        <div id="topBarTodayPnLPill" class="px-3.5 py-1 rounded-xl bg-slate-900 border border-slate-800/90 text-xs font-mono flex items-center gap-2 shadow-sm" title="Real-time today net P&amp;L">
+        <div id="topBarTodayPnLPill" class="px-3 py-1 rounded-xl bg-slate-900 border border-slate-800/90 text-xs font-mono flex items-center gap-1.5 shadow-sm" title="Real-time today net P&amp;L">
           <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Today:</span>
           <span id="topBarTodayPnLValue" class="font-black text-emerald-400">₹0.00</span>
           <span id="topBarTodayRValue" class="text-[10px] text-blue-300 font-bold">(0.00R)</span>
@@ -881,8 +881,14 @@
           <span id="headerCleanStreakText">6/100 Clean</span>
         </button>
 
-        <!-- Discipline Streak & XP Pill -->
-        <button onclick="openDisciplineBadgesModal()" id="disciplineXpPill" class="hidden md:flex items-center gap-2 px-3 py-1 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 hover:from-amber-500/20 hover:to-orange-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold shadow-sm transition cursor-pointer" title="Process Gamification: View Discipline Level, XP &amp; Badges">
+        <!-- Quick-Stat Docklets Toggle Pill -->
+        <button onclick="toggleDockletCollapse()" id="dockletHeaderToggleBtn" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-mono text-slate-400 hover:text-white transition cursor-pointer" title="Toggle Quick-Stat Docklet Bar">
+          <span>📊</span>
+          <span id="dockletHeaderToggleLabel">Docklets</span>
+        </button>
+
+        <!-- Discipline Streak & XP Pill (Wide screens) -->
+        <button onclick="openDisciplineBadgesModal()" id="disciplineXpPill" class="hidden 2xl:flex items-center gap-2 px-3 py-1 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 hover:from-amber-500/20 hover:to-orange-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold shadow-sm transition cursor-pointer" title="Process Gamification: View Discipline Level, XP &amp; Badges">
           <span id="headerStreakText">0d Streak</span>
           <span class="text-slate-600">|</span>
           <span id="headerLevelText">⭐ Lvl 1</span>
@@ -891,7 +897,7 @@
       </div>
 
       <!-- ZONE 3: Actions & Controls Hub (Right) -->
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 relative">
         <!-- Omni Command Palette Trigger (C1) -->
         <button onclick="openCommandPalette()" class="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 text-xs font-mono transition cursor-pointer shadow-inner" title="Omni Command Palette (Hotkey: Ctrl+K or Cmd+K)">
           <span class="text-blue-400 font-bold">⌘</span>
@@ -899,90 +905,192 @@
           <kbd class="px-1 py-0.2 rounded bg-slate-800 text-[9px] text-slate-400 border border-slate-700">Ctrl+K</kbd>
         </button>
 
+        <!-- Instant AI Session Audit (B1) -->
+        <button onclick="openAISessionAuditModal()" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-900/30 to-indigo-900/30 hover:from-purple-900/50 hover:to-indigo-900/50 text-purple-200 border border-purple-500/30 text-xs font-bold transition shadow-sm cursor-pointer" title="Instant AI Post-Session Edge &amp; Leak Audit">
+          <span>⚡</span>
+          <span>AI Audit</span>
+        </button>
+
+        <!-- Combat Mode Toggle Button -->
+        <button onclick="toggleCombatMode()" id="combatModeBtn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold transition cursor-pointer" title="Toggle Combat Mode HUD (Hotkey: H)">
+          <span>🎯</span>
+          <span id="combatModeLabel" class="hidden xl:inline">Combat</span>
+          <kbd class="hotkey-badge text-[9px] px-1 py-0">H</kbd>
+        </button>
+
         <!-- Primary Action: + Log Trade (Shortcut: L / T) -->
-        <button onclick="openTradeSyncSlideOver()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider flex items-center gap-2 transition shadow-lg shadow-emerald-600/30 cursor-pointer" title="Quick Log Trade Popup (Shortcut: L or T)">
+        <button onclick="openTradeSyncSlideOver()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider flex items-center gap-1.5 transition shadow-lg shadow-emerald-600/30 cursor-pointer" title="Quick Log Trade Popup (Shortcut: L or T)">
           <span class="text-sm font-black leading-none">+</span>
           <span>Log Trade</span>
           <kbd class="px-1.5 py-0.2 rounded bg-black/35 border border-emerald-400/30 text-[9px] font-mono text-emerald-200">L</kbd>
         </button>
 
-        <!-- Instant AI Session Audit (B1) -->
-        <button onclick="openAISessionAuditModal()" class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-900/40 to-indigo-900/40 hover:from-purple-900/60 hover:to-indigo-900/60 text-purple-200 border border-purple-500/40 text-xs font-bold flex items-center gap-1.5 transition shadow-sm cursor-pointer" title="Instant AI Post-Session Edge &amp; Leak Audit">
-          <span>⚡</span>
-          <span class="hidden sm:inline">AI Audit</span>
-        </button>
-
-        <!-- AI Desk Coach Button -->
-        <button onclick="openAICoachModal()" class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 text-xs font-bold flex items-center gap-1.5 transition shadow-sm cursor-pointer" title="AI Desk Risk Partner (Ctrl+J)">
-          <span>🤖</span>
-          <span class="hidden sm:inline">AI Desk</span>
-        </button>
-
-        <!-- Neurodivergent & Execution Quick Bar (Zen, Soundscapes, Pre-Flight, Voice) -->
-        <div class="flex items-center gap-1 bg-slate-900/70 p-0.5 rounded-xl border border-slate-800/80">
-          <!-- Zen Mode -->
-          <button onclick="toggleZenMode()" id="zenModeToggleBtn" class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-mono font-bold transition cursor-pointer" title="Zen Masking Mode (Hotkey: Z) - Hides raw ₹ figures to eliminate greed &amp; emotional tilt">
-            <span id="zenModeIcon">🧘</span>
-            <span id="zenModeLabel" class="hidden 2xl:inline text-[11px]">Zen</span>
-            <span class="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700 font-sans">Z</span>
-          </button>
-
-          <!-- Audio Voice Trade Confirmation (C5) -->
-          <button onclick="toggleVoiceConfirmation()" id="voiceConfirmToggleBtn" class="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-teal-300 hover:text-white border border-teal-500/30 text-xs transition cursor-pointer flex items-center gap-1" title="Audio Voice Confirmation: ON (Announces fills &amp; exits via voice)">
-            <span id="voiceConfirmIcon">🔊</span>
-          </button>
-
-          <!-- Focus Soundscapes -->
-          <button onclick="toggleSoundscapesModal()" id="soundscapesToggleBtn" class="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-purple-300 hover:text-white border border-purple-500/30 text-xs transition cursor-pointer flex items-center gap-1" title="Focus Soundscapes: Brownian Noise, 10Hz Alpha Waves, Tibetan Bells">
-            <span>🎧</span>
-            <span id="soundscapesWaveIcon" class="hidden w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></span>
-          </button>
-
-          <!-- Audio Alarms & Soundboard -->
-          <button onclick="openSoundboardModal()" class="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-300 hover:text-white border border-amber-500/30 text-xs transition cursor-pointer flex items-center gap-1" title="Execution Audio Alarms (09:15 Open, 10:25 Warning, 10:30 Hard Close)">
-            <span>🔔</span>
-          </button>
-
-          <!-- Statutory Charges Ledger -->
-          <button onclick="openStatutoryChargesModal()" class="hidden xl:flex items-center gap-1 p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-cyan-300 hover:text-white border border-cyan-500/30 text-xs transition cursor-pointer" title="Indian Statutory Tax &amp; Charges Ledger (STT, GST, NSE, Stamp Duty)">
-            <span>⚖️</span>
-          </button>
-
-          <!-- Pre-Market Readiness Gate -->
-          <button onclick="openPreMarketReadinessModal()" id="headerPreFlightPill" class="hidden lg:flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-300 border border-amber-500/30 text-[11px] font-mono font-bold transition cursor-pointer" title="Pre-Flight Readiness Gate (Shortcut: Shift+P)">
-            <span id="headerPreFlightIcon">☀️</span>
-            <span id="headerPreFlightText" class="hidden 2xl:inline">Pre-Flight</span>
+        <!-- Desk Tools & Settings Flyout Trigger -->
+        <div class="relative">
+          <button onclick="toggleDeskToolsMenu()" id="deskToolsMenuBtn" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-mono font-bold transition cursor-pointer shadow-sm" title="Desk Tools, Focus Controls &amp; Preferences">
+            <span>🎛️</span>
+            <span class="hidden xl:inline text-[11px]">Tools</span>
+            <span class="text-[8px] text-slate-500">▼</span>
           </button>
         </div>
 
-        <!-- Terminal Preferences Segment (Theme, Density, Customizer) -->
-        <div class="flex items-center gap-1 pl-1.5 border-l border-slate-800/80">
-          <select id="themeSelector" onchange="switchTheme(this.value)" class="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-300 font-mono focus:outline-none focus:border-blue-500 transition cursor-pointer" title="Switch Theme">
-            <option value="obsidian">🌌 Obsidian</option>
-            <option value="oled">⬛ True OLED</option>
-            <option value="bloomberg">⚡ Bloomberg</option>
-            <option value="linear">📐 Linear</option>
-            <option value="nordic">❄️ Nordic</option>
-          </select>
+        <!-- Desk Tools Popover Dropdown Menu -->
+        <div id="deskToolsDropdown" class="hidden absolute right-0 top-12 w-80 sm:w-88 rounded-2xl bg-slate-950/95 border border-slate-800/90 shadow-2xl backdrop-blur-xl z-50 p-3.5 space-y-3 animate-in fade-in zoom-in-95 duration-150">
+          
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800/80">
+            <div class="flex items-center gap-2">
+              <span class="text-sm">🎛️</span>
+              <h3 class="text-xs font-black text-white uppercase tracking-wider font-mono">Desk Tools &amp; Settings</h3>
+            </div>
+            <button onclick="closeDeskToolsMenu()" class="text-slate-400 hover:text-white text-xs font-bold p-1 rounded-lg hover:bg-slate-800 transition cursor-pointer">✕</button>
+          </div>
 
-          <button onclick="toggleDensityMode()" id="densityToggleBtn" class="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-xs transition cursor-pointer" title="Toggle Compact Density Mode">
-            <span id="densityIcon">📐</span>
-            <span id="densityLabel" class="hidden">Compact</span>
-          </button>
+          <!-- Section 1: AI Copilot & Risk -->
+          <div>
+            <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 block mb-1.5">AI Copilot &amp; Risk</span>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button onclick="closeDeskToolsMenu(); openAISessionAuditModal();" class="flex items-center gap-2 p-2 rounded-xl bg-purple-950/30 hover:bg-purple-900/40 text-purple-200 border border-purple-500/30 text-xs font-semibold transition cursor-pointer text-left">
+                <span>⚡</span>
+                <div>
+                  <div class="font-bold">AI Audit</div>
+                  <div class="text-[9px] text-purple-400/80 font-normal">Session Debrief</div>
+                </div>
+              </button>
 
-          <button onclick="openDashboardCustomizerModal()" class="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-teal-400 hover:text-white border border-teal-500/30 text-xs transition cursor-pointer" title="Customize Layout &amp; Charts (Hotkey: V)">
-            <span>🎛️</span>
-          </button>
+              <button onclick="closeDeskToolsMenu(); openAICoachModal();" class="flex items-center gap-2 p-2 rounded-xl bg-cyan-950/30 hover:bg-cyan-900/40 text-cyan-200 border border-cyan-500/30 text-xs font-semibold transition cursor-pointer text-left">
+                <span>🤖</span>
+                <div>
+                  <div class="font-bold">AI Desk Partner</div>
+                  <div class="text-[9px] text-cyan-400/80 font-normal">Risk &amp; Tilt advice</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Section 2: Sensory & Mental Focus -->
+          <div>
+            <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Sensory &amp; Mental Focus</span>
+            <div class="space-y-1 bg-slate-900/60 p-1.5 rounded-xl border border-slate-800/80">
+              
+              <!-- Zen Masking Toggle -->
+              <div class="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-800/60 transition">
+                <div class="flex items-center gap-2">
+                  <span>🧘</span>
+                  <div>
+                    <div class="text-xs font-bold text-slate-200">Zen Masking Mode</div>
+                    <div class="text-[10px] text-slate-400">Mask raw ₹ P&amp;L to stop tilt (Z)</div>
+                  </div>
+                </div>
+                <button onclick="toggleZenMode()" id="zenModeToggleBtn" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs font-bold transition cursor-pointer">
+                  <span id="zenModeIcon" class="hidden">🧘</span>
+                  <span id="zenModeLabel">Zen</span>
+                </button>
+              </div>
+
+              <!-- Voice Confirmation Toggle -->
+              <div class="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-800/60 transition">
+                <div class="flex items-center gap-2">
+                  <span>🔊</span>
+                  <div>
+                    <div class="text-xs font-bold text-slate-200">Audio Voice Fills</div>
+                    <div class="text-[10px] text-slate-400">Spoken trade fills &amp; exits</div>
+                  </div>
+                </div>
+                <button onclick="toggleVoiceConfirmation()" id="voiceConfirmToggleBtn" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 font-mono text-xs font-bold transition cursor-pointer flex items-center gap-1">
+                  <span id="voiceConfirmIcon">🔊</span>
+                  <span>Voice</span>
+                </button>
+              </div>
+
+              <!-- Focus Soundscapes & Alarms Row -->
+              <div class="grid grid-cols-2 gap-1 pt-1 border-t border-slate-800/60">
+                <button onclick="closeDeskToolsMenu(); toggleSoundscapesModal();" id="soundscapesToggleBtn" class="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-slate-800 text-xs text-purple-300 font-medium transition cursor-pointer">
+                  <span>🎧</span>
+                  <span>Soundscapes</span>
+                  <span id="soundscapesWaveIcon" class="hidden w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></span>
+                </button>
+
+                <button onclick="closeDeskToolsMenu(); openSoundboardModal();" class="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-slate-800 text-xs text-amber-300 font-medium transition cursor-pointer">
+                  <span>🔔</span>
+                  <span>Trade Alarms</span>
+                </button>
+              </div>
+
+              <!-- Pre-Flight & Taxes Row -->
+              <div class="grid grid-cols-2 gap-1 pt-1 border-t border-slate-800/60">
+                <button onclick="closeDeskToolsMenu(); openPreMarketReadinessModal();" id="headerPreFlightPill" class="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-slate-800 text-xs text-amber-300 font-medium transition cursor-pointer">
+                  <span id="headerPreFlightIcon">☀️</span>
+                  <span id="headerPreFlightText">Pre-Flight</span>
+                </button>
+
+                <button onclick="closeDeskToolsMenu(); openStatutoryChargesModal();" class="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-slate-800 text-xs text-cyan-300 font-medium transition cursor-pointer">
+                  <span>⚖️</span>
+                  <span>Taxes Ledger</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Section 3: Appearance & Layout -->
+          <div>
+            <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Terminal Preferences</span>
+            <div class="space-y-2 bg-slate-900/60 p-2 rounded-xl border border-slate-800/80">
+              
+              <!-- Theme Switcher -->
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-300 font-medium flex items-center gap-1.5">
+                  <span>🎨</span>
+                  <span>Theme</span>
+                </span>
+                <select id="themeSelector" onchange="switchTheme(this.value)" class="bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-300 font-mono focus:outline-none focus:border-blue-500 transition cursor-pointer">
+                  <option value="obsidian">🌌 Obsidian</option>
+                  <option value="oled">⬛ True OLED</option>
+                  <option value="bloomberg">⚡ Bloomberg</option>
+                  <option value="linear">📐 Linear</option>
+                  <option value="nordic">❄️ Nordic</option>
+                </select>
+              </div>
+
+              <!-- Density & Layout Customizer -->
+              <div class="flex items-center justify-between pt-1.5 border-t border-slate-800/60">
+                <button onclick="toggleDensityMode()" id="densityToggleBtn" class="flex items-center gap-1.5 text-xs text-slate-300 hover:text-white transition cursor-pointer">
+                  <span id="densityIcon">📐</span>
+                  <span id="densityLabel">Compact Density</span>
+                </button>
+                <button onclick="closeDeskToolsMenu(); openDashboardCustomizerModal();" class="flex items-center gap-1 text-xs text-teal-400 hover:text-teal-300 font-medium transition cursor-pointer">
+                  <span>🎛️</span>
+                  <span>Customize</span>
+                </button>
+              </div>
+
+              <!-- Hotkeys & Help -->
+              <div class="pt-1.5 border-t border-slate-800/60 flex items-center justify-between text-xs">
+                <button onclick="closeDeskToolsMenu(); openDisciplineBadgesModal();" class="text-amber-300 hover:text-amber-200 flex items-center gap-1.5 transition cursor-pointer">
+                  <span>⭐</span>
+                  <span>Discipline XP &amp; Badges</span>
+                </button>
+                <button onclick="closeDeskToolsMenu(); openHotkeysModal();" class="text-slate-400 hover:text-slate-300 text-[11px] font-mono flex items-center gap-1 transition cursor-pointer">
+                  <span>⌨️ Hotkeys (?)</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+
         </div>
       </div>
     </header>
 
-    <!-- STICKY DRAGGABLE QUICK-STAT DOCKLET BAR (CUSTOMIZABLE PINNED METRICS) -->
+    <!-- STICKY DRAGGABLE QUICK-STAT DOCKLET BAR (CUSTOMIZABLE PINNED METRICS WITH MINIMIZE) -->
     <div id="quickStatDockletBar" class="sticky top-[49px] z-20 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 lg:px-8 py-1.5 flex items-center justify-between gap-3 text-xs font-mono transition-all duration-200 select-none overflow-x-auto scrollbar-none shadow-sm">
       <div class="flex items-center gap-1.5 min-w-0 flex-1 overflow-x-auto scrollbar-none" id="dockletContainer">
         <!-- Docklets dynamically rendered and drag-reorderable -->
       </div>
       <div class="flex items-center gap-1 pl-2 border-l border-slate-800 flex-shrink-0">
+        <button onclick="toggleDockletCollapse()" id="dockletMinimizeBtn" class="px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-[10px] transition cursor-pointer" title="Minimize Docklets bar to reclaim vertical screen space">
+          ▲ Hide
+        </button>
         <button onclick="toggleDockletPin()" id="dockletPinBtn" class="p-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-[10px] transition cursor-pointer" title="Pin / Unpin Sticky Docklets">
           📌
         </button>
@@ -1052,7 +1160,41 @@
     <div id="tabContent1" class="mt-2 space-y-6">
 
       <!-- TRADESYNC HIGH-IMPACT EXECUTIVE KPI STRIP (6-METRIC ROW WITH EXPECTANCY & FRICTION) -->
-      <section class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3.5">
+            <!-- TAB 1 EXECUTIVE SUB-VIEW SWITCHER & ERGONOMIC WORKSPACE CONTROLS -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900/60 p-1.5 rounded-2xl border border-slate-800/80 backdrop-blur-sm select-none">
+        <!-- Segmented Mode Switcher -->
+        <div class="flex items-center gap-1 bg-slate-950/90 p-1 rounded-xl border border-slate-800/80 text-xs font-mono">
+          <button type="button" onclick="switchTab1SubView('all')" id="tab1SubViewBtn_all" class="px-3 py-1.5 rounded-lg font-bold transition cursor-pointer bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm" title="Show all metrics, charts, form and ledger">
+            ✨ All-in-One
+          </button>
+          <button type="button" onclick="switchTab1SubView('journal')" id="tab1SubViewBtn_journal" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer" title="Focus exclusively on Trade Form &amp; History Ledger">
+            📔 Trade Journal
+          </button>
+          <button type="button" onclick="switchTab1SubView('analytics')" id="tab1SubViewBtn_analytics" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer" title="Focus on Performance Metrics &amp; Equity Curves">
+            📊 Analytics &amp; Charts
+          </button>
+          <button type="button" onclick="switchTab1SubView('radar')" id="tab1SubViewBtn_radar" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer" title="Focus on 30-Day Reset &amp; Chartink Scanner">
+            📡 Radar &amp; Reset
+          </button>
+        </div>
+
+        <!-- Right Quick Controls -->
+        <div class="flex items-center gap-2">
+          <!-- Toggle Trade Logger Form -->
+          <button type="button" onclick="toggleTradeLoggerCollapse()" id="tradeLoggerToggleBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-xs font-mono text-slate-300 hover:text-white transition cursor-pointer" title="Collapse / Expand Inline Trade Logger">
+            <span id="tradeLoggerToggleIcon">⚡</span>
+            <span id="tradeLoggerToggleText">Minimize Logger</span>
+          </button>
+
+          <!-- Drawer Quick Launch Button -->
+          <button type="button" onclick="openTradeSyncSlideOver()" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-xs font-mono text-teal-300 hover:text-white transition cursor-pointer" title="Open Trade Logger in Slide-Over Drawer">
+            <span>↗</span>
+            <span>Drawer Logger</span>
+          </button>
+        </div>
+      </div>
+
+      <section id="tab1KpiStrip" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3.5">
         <!-- 1. Net Realized P&L -->
         <div class="kpi-gradient-card rounded-2xl p-4 sm:p-5 border border-slate-800 flex flex-col justify-between shadow-lg">
           <div class="flex items-center justify-between">
@@ -1128,7 +1270,7 @@
 
       
       <!-- DASHBOARD EXECUTIVE CHARTS ROW: CUMULATIVE EQUITY + WIN/LOSS & DISCIPLINE DONUTS -->
-      <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <section id="tab1ChartsRow" class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         
         <!-- Main: Cumulative Net Equity Curve (2 cols on xl) -->
         <div id="dashboardPrimaryGraphSection" class="xl:col-span-2 glass-card rounded-2xl p-5 sm:p-6 border border-slate-800/90 shadow-2xl flex flex-col justify-between">
@@ -1284,7 +1426,7 @@
       </div>
 
       <!-- DUAL OPERATIONAL SYSTEMS ROW: GRADUATION TRACKER + 1-MIN RADAR (2-COL BALANCED GRID) -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div id="tab1OperationalRow" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         <!-- 30-DAY PHASE GRADUATION & DISCIPLINE TRACKER WIDGET -->
         <section id="phaseTrackerSection" class="glass-card rounded-2xl p-5 border border-blue-500/20 bg-gradient-to-br from-slate-900/95 via-slate-900/80 to-blue-950/30 shadow-xl flex flex-col justify-between">
@@ -1384,7 +1526,7 @@
       </div>
 
       <!-- Quick Trade Entry Card -->
-      <section id="executionFormCard" class="glass-card rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+      <section id="executionFormCard" class="glass-card rounded-2xl p-5 sm:p-6 shadow-2xl relative overflow-hidden">
         <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-800/80 gap-3">
           <div>
             <h2 class="text-base font-bold text-white flex items-center gap-2">
@@ -1394,11 +1536,37 @@
             <p class="text-xs text-slate-400">Position Sizer (Presets + Custom ₹) &bull; Planned RR &ge; 2.2 Validation &bull; Real-time FYERS Costs</p>
           </div>
           
-          <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-800 px-3 py-1.5 rounded-xl">
-            <span class="text-xs text-slate-400">Mindset State:</span>
-            <span id="urgencyStateBadge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              Calm &amp; Focused (Level 2/10)
-            </span>
+          <div class="flex items-center gap-2">
+            <div class="hidden sm:flex items-center gap-2 bg-slate-900/90 border border-slate-800 px-3 py-1.5 rounded-xl">
+              <span class="text-xs text-slate-400">Mindset State:</span>
+              <span id="urgencyStateBadge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                Calm &amp; Focused (Level 2/10)
+              </span>
+            </div>
+            <button type="button" onclick="toggleTradeLoggerCollapse()" id="tradeLoggerCollapseBtn" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80 text-xs font-mono font-semibold transition cursor-pointer flex items-center gap-1.5" title="Collapse / Expand Logger Form">
+              <span id="tradeLoggerCollapseIcon">−</span>
+              <span id="tradeLoggerCollapseLabel">Collapse</span>
+            </button>
+            <button type="button" onclick="openTradeSyncSlideOver()" class="hidden md:flex px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-teal-300 border border-teal-500/30 text-xs font-mono font-semibold transition cursor-pointer items-center gap-1.5" title="Open in Slide-Over Drawer">
+              <span>↗</span>
+              <span>Drawer</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Collapsed Placeholder Banner -->
+        <div id="tradeLoggerCollapsedPlaceholder" class="hidden py-4 px-5 mt-4 rounded-xl bg-slate-900/70 border border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+          <div class="flex items-center gap-2.5">
+            <span class="text-emerald-400 text-base">⚡</span>
+            <span><strong>Fast Intraday Trade Logger</strong> is minimized. Screen real estate optimized.</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="toggleTradeLoggerCollapse()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 font-bold font-mono text-xs transition cursor-pointer">
+              + Expand Logger
+            </button>
+            <button type="button" onclick="openTradeSyncSlideOver()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 font-mono text-xs transition cursor-pointer">
+              Open Drawer (L)
+            </button>
           </div>
         </div>
 
@@ -9285,6 +9453,166 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     }
 
     // ==========================================
+    // STREAMLINED UI/UX WORKSPACE CONTROLLERS
+    // ==========================================
+    
+    // --- Desk Tools Popover Dropdown ---
+    function toggleDeskToolsMenu() {
+      const menu = document.getElementById('deskToolsDropdown');
+      if (!menu) return;
+      menu.classList.toggle('hidden');
+    }
+
+    function closeDeskToolsMenu() {
+      const menu = document.getElementById('deskToolsDropdown');
+      if (menu) menu.classList.add('hidden');
+    }
+
+    // Dismiss popover on click outside
+    document.addEventListener('click', function(e) {
+      const menu = document.getElementById('deskToolsDropdown');
+      const btn = document.getElementById('deskToolsMenuBtn');
+      if (menu && !menu.classList.contains('hidden')) {
+        if (!menu.contains(e.target) && btn && !btn.contains(e.target)) {
+          menu.classList.add('hidden');
+        }
+      }
+    });
+
+    // --- Sticky Quick-Stat Docklet Bar Collapse ---
+    let isDockletBarCollapsed = localStorage.getItem('docklet_bar_collapsed') === 'true';
+
+    function toggleDockletCollapse() {
+      isDockletBarCollapsed = !isDockletBarCollapsed;
+      localStorage.setItem('docklet_bar_collapsed', isDockletBarCollapsed ? 'true' : 'false');
+      applyDockletBarCollapseUI();
+      if (typeof showSystemToast === 'function') {
+        showSystemToast(isDockletBarCollapsed ? '📊 Docklet Bar Minimized' : '📊 Docklet Bar Expanded', 'info');
+      }
+    }
+
+    function applyDockletBarCollapseUI() {
+      const bar = document.getElementById('quickStatDockletBar');
+      const headerBtnLabel = document.getElementById('dockletHeaderToggleLabel');
+      const minimizeBtn = document.getElementById('dockletMinimizeBtn');
+      if (bar) {
+        if (isDockletBarCollapsed) {
+          bar.classList.add('hidden');
+        } else {
+          bar.classList.remove('hidden');
+        }
+      }
+      if (headerBtnLabel) {
+        headerBtnLabel.textContent = isDockletBarCollapsed ? 'Show Docklets' : 'Docklets';
+      }
+      if (minimizeBtn) {
+        minimizeBtn.textContent = isDockletBarCollapsed ? '▼ Show' : '▲ Hide';
+      }
+    }
+
+    // --- Tab 1 Sub-View Switcher ---
+    let activeTab1SubView = localStorage.getItem('tab1_sub_view') || 'all';
+
+    function switchTab1SubView(view) {
+      activeTab1SubView = view;
+      localStorage.setItem('tab1_sub_view', view);
+
+      const buttons = [
+        { id: 'all', el: document.getElementById('tab1SubViewBtn_all') },
+        { id: 'journal', el: document.getElementById('tab1SubViewBtn_journal') },
+        { id: 'analytics', el: document.getElementById('tab1SubViewBtn_analytics') },
+        { id: 'radar', el: document.getElementById('tab1SubViewBtn_radar') }
+      ];
+
+      buttons.forEach(b => {
+        if (!b.el) return;
+        if (b.id === view) {
+          b.el.className = "px-3 py-1.5 rounded-lg font-bold transition cursor-pointer bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm";
+        } else {
+          b.el.className = "px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer";
+        }
+      });
+
+      const kpiStrip = document.getElementById('tab1KpiStrip');
+      const lockbox = document.getElementById('dailyLockboxHud');
+      const chartsRow = document.getElementById('tab1ChartsRow');
+      const operRow = document.getElementById('tab1OperationalRow');
+      const formCard = document.getElementById('executionFormCard');
+      const calendar = document.getElementById('tab1MiniCalendarSection');
+      const ledger = document.getElementById('tradesLedgerSection');
+
+      if (view === 'all') {
+        if (kpiStrip) kpiStrip.classList.remove('hidden');
+        if (lockbox) lockbox.classList.remove('hidden');
+        if (chartsRow) chartsRow.classList.remove('hidden');
+        if (operRow) operRow.classList.remove('hidden');
+        if (formCard) formCard.classList.remove('hidden');
+        if (calendar) calendar.classList.remove('hidden');
+        if (ledger) ledger.classList.remove('hidden');
+      } else if (view === 'journal') {
+        if (kpiStrip) kpiStrip.classList.remove('hidden');
+        if (lockbox) lockbox.classList.remove('hidden');
+        if (chartsRow) chartsRow.classList.add('hidden');
+        if (operRow) operRow.classList.add('hidden');
+        if (formCard) formCard.classList.remove('hidden');
+        if (calendar) calendar.classList.remove('hidden');
+        if (ledger) ledger.classList.remove('hidden');
+      } else if (view === 'analytics') {
+        if (kpiStrip) kpiStrip.classList.remove('hidden');
+        if (lockbox) lockbox.classList.remove('hidden');
+        if (chartsRow) chartsRow.classList.remove('hidden');
+        if (operRow) operRow.classList.add('hidden');
+        if (formCard) formCard.classList.add('hidden');
+        if (calendar) calendar.classList.remove('hidden');
+        if (ledger) ledger.classList.remove('hidden');
+      } else if (view === 'radar') {
+        if (kpiStrip) kpiStrip.classList.remove('hidden');
+        if (lockbox) lockbox.classList.remove('hidden');
+        if (chartsRow) chartsRow.classList.add('hidden');
+        if (operRow) operRow.classList.remove('hidden');
+        if (formCard) formCard.classList.add('hidden');
+        if (calendar) calendar.classList.add('hidden');
+        if (ledger) ledger.classList.add('hidden');
+      }
+    }
+
+    // --- Inline Trade Logger Minimize / Expand ---
+    let isTradeLoggerCollapsed = localStorage.getItem('trade_logger_collapsed') === 'true';
+
+    function toggleTradeLoggerCollapse() {
+      isTradeLoggerCollapsed = !isTradeLoggerCollapsed;
+      localStorage.setItem('trade_logger_collapsed', isTradeLoggerCollapsed ? 'true' : 'false');
+      applyTradeLoggerCollapseUI();
+    }
+
+    function applyTradeLoggerCollapseUI() {
+      const form = document.getElementById('tradeForm');
+      const placeholder = document.getElementById('tradeLoggerCollapsedPlaceholder');
+      const btnLabel = document.getElementById('tradeLoggerCollapseLabel');
+      const btnIcon = document.getElementById('tradeLoggerCollapseIcon');
+      const toggleBtnText = document.getElementById('tradeLoggerToggleText');
+
+      if (form) {
+        if (isTradeLoggerCollapsed) {
+          form.classList.add('hidden');
+        } else {
+          form.classList.remove('hidden');
+        }
+      }
+      if (placeholder) {
+        if (isTradeLoggerCollapsed) {
+          placeholder.classList.remove('hidden');
+        } else {
+          placeholder.classList.add('hidden');
+        }
+      }
+      if (btnLabel) btnLabel.textContent = isTradeLoggerCollapsed ? 'Expand' : 'Collapse';
+      if (btnIcon) btnIcon.textContent = isTradeLoggerCollapsed ? '+' : '−';
+      if (toggleBtnText) toggleBtnText.textContent = isTradeLoggerCollapsed ? 'Expand Logger' : 'Minimize Logger';
+    }
+
+
+    // ==========================================
     // B1: GEMINI AI INSTANT POST-SESSION AUDIT
     // ==========================================
     let lastAISessionAuditText = '';
@@ -14752,6 +15080,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     }
 
     function closeAllModals() {
+      if (typeof closeDeskToolsMenu === 'function') closeDeskToolsMenu();
       const modalIds = [
         'editTradeModal', 'hotkeysModal', 'revengeTradeModal', 'preMarketReadinessModal',
         'monthlyDossierModal', 'calendarDayModal', 'fyersIngestModal',
@@ -15321,6 +15650,13 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     let paletteSelectedIdx = 0;
     let paletteActiveList = [];
     const paletteCommands = [
+      { id: 'desk_tools', category: 'Controls', title: 'Open Desk Tools, Sensory Controls & Preferences Menu', action: () => toggleDeskToolsMenu() },
+      { id: 'view_all', category: 'Views', title: 'Sub-View: ✨ All-in-One Dashboard (Full Execution Desk)', action: () => switchTab1SubView('all') },
+      { id: 'view_journal', category: 'Views', title: 'Sub-View: 📔 Trade Journal Focus (Hide Heavy Charts & Radar)', action: () => switchTab1SubView('journal') },
+      { id: 'view_analytics', category: 'Views', title: 'Sub-View: 📊 Analytics & Charts Focus (Review Edge & Curves)', action: () => switchTab1SubView('analytics') },
+      { id: 'view_radar', category: 'Views', title: 'Sub-View: 📡 Market Radar & 30-Day Reset Focus', action: () => switchTab1SubView('radar') },
+      { id: 'toggle_docklets', category: 'Views', title: 'Toggle Quick-Stat Docklets Bar (Reclaim Vertical Space)', action: () => toggleDockletCollapse() },
+      { id: 'toggle_logger', category: 'Execution', title: 'Toggle Inline Trade Logger Form (Minimize/Expand)', action: () => toggleTradeLoggerCollapse() },
       { id: 'customizer', category: 'Views', title: 'Customize Dashboard Metrics & Charts (Show/Hide)', hotkey: 'V', action: () => openDashboardCustomizerModal() },
       { id: 'tab1', category: 'Views', title: 'Switch to Tab 1: Live Execution Desk', hotkey: '1', action: () => switchTab(1) },
       { id: 'tab2', category: 'Views', title: 'Switch to Tab 2: Performance & Equity Curves', hotkey: '2', action: () => switchTab(2) },
@@ -16205,6 +16541,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       initDensity();
       initSoundPrefs();
       initQuickStatDocklets();
+      applyDockletBarCollapseUI();
+      applyTradeLoggerCollapseUI();
+      switchTab1SubView(activeTab1SubView);
       updateRRVisualizer();
       updateBottomDockMetrics();
       setInterval(updateBottomDockMetrics, 1000);
