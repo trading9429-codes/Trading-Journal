@@ -2676,29 +2676,31 @@
                 <span>🎯</span>
                 <span>Setup Expectancy Matrix</span>
               </h3>
-              <span class="text-[10px] text-slate-400">By Strategy</span>
+              <span class="text-[10px] text-slate-400 font-mono">Statistical Edge per Setup</span>
             </div>
 
             <div class="overflow-x-auto mt-4 rounded-xl border border-slate-800">
-              <table class="w-full text-left text-xs">
+              <table class="w-full text-left text-xs font-mono">
                 <thead>
-                  <tr class="bg-slate-900 text-slate-400 uppercase text-[10px] border-b border-slate-800">
-                    <th class="py-2.5 px-2 font-sans">Setup</th>
+                  <tr class="bg-slate-900 text-slate-400 uppercase text-[10px] border-b border-slate-800 font-sans">
+                    <th class="py-2.5 px-3">Setup</th>
                     <th class="py-2.5 px-1 text-center">Trds</th>
                     <th class="py-2.5 px-1 text-center">Win%</th>
+                    <th class="py-2.5 px-1.5 text-center">Exp (R)</th>
                     <th class="py-2.5 px-1 text-center">PF</th>
-                    <th class="py-2.5 px-2 text-right">Net P&amp;L</th>
+                    <th class="py-2.5 px-3 text-right">Net P&amp;L</th>
                   </tr>
                 </thead>
-                <tbody id="setupMatrixBody" class="divide-y divide-slate-800/60 font-mono text-xs">
+                <tbody id="setupMatrixBody" class="divide-y divide-slate-800/60 text-xs">
                   <!-- Populated via JS -->
                 </tbody>
               </table>
             </div>
           </div>
 
-          <div class="mt-4 p-2.5 bg-blue-950/20 border border-blue-500/20 rounded-xl text-[10px] text-blue-300">
-            💡 Prioritize setups with positive Net R and eliminate losing variants.
+          <div class="mt-4 p-3 bg-slate-900/60 rounded-xl border border-slate-800 text-[11px] text-slate-400 flex justify-between items-center">
+            <span>Peak: <strong class="text-emerald-400 font-mono" id="bestSetupText">--</strong></span>
+            <span>Drain: <strong class="text-rose-400 font-mono" id="worstSetupText">None</strong></span>
           </div>
         </div>
 
@@ -7251,9 +7253,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const wr = Math.round((wins / matching.length) * 100);
       const grossW = matching.filter(t => (parseFloat(t.net_pnl) || 0) > 0).reduce((s, t) => s + (parseFloat(t.net_pnl) || 0), 0);
       const grossL = matching.filter(t => (parseFloat(t.net_pnl) || 0) < 0).reduce((s, t) => s + Math.abs(parseFloat(t.net_pnl) || 0), 0);
-      const pf = grossL > 0 ? (grossW / grossL).toFixed(2) : (grossW > 0 ? '99.0' : '0.00');
+      const pfText = grossL > 0 ? `${(grossW / grossL).toFixed(2)} PF` : (grossW > 0 ? '∞ MAX (Zero Loss)' : '0.00 PF');
 
-      pill.textContent = `Edge: ${pf} PF \u2022 ${wr}% WR (${matching.length} trds)`;
+      pill.textContent = `Edge: ${pfText} \u2022 ${wr}% WR (${matching.length} trds)`;
       pill.className = wr >= 50 
         ? 'text-[9px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20' 
         : 'text-[9px] font-mono font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20';
@@ -9399,7 +9401,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
       const totalClosed = totalWins + totalLosses;
       const winRate = totalClosed > 0 ? (totalWins / totalClosed) * 100 : 0;
-      const profitFactor = grossLoss > 0 ? (grossProfit / grossLoss) : (grossProfit > 0 ? 99.0 : 0.0);
+      const isInfinitePF = grossLoss === 0 && grossProfit > 0;
+      const profitFactor = grossLoss > 0 ? (grossProfit / grossLoss) : (isInfinitePF ? Infinity : 0.0);
       const expectancyR = trades.length > 0 ? (totalRealizedR / trades.length) : 0;
       const disciplineScore = trades.length > 0 ? Math.round(((trades.length - violations) / trades.length) * 100) : 100;
       const efficiencyScore = totalPlannedRR > 0 ? Math.max(0, Math.min(100, Math.round((Math.max(0, totalRealizedR) / totalPlannedRR) * 100))) : 0;
@@ -9603,7 +9606,21 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         weekdayTbody.innerHTML = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map(day => {
           const item = weekdayMatrix[day];
           const wr = item.count > 0 ? Math.round((item.wins / item.count) * 100) : 0;
-          const pf = item.grossLoss > 0 ? (item.grossWin / item.grossLoss).toFixed(2) : (item.grossWin > 0 ? '99.0' : (item.count > 0 ? '0.00' : '--'));
+          let pfDisplay = '--';
+          let pfClass = 'text-slate-500';
+          if (item.count > 0) {
+            if (item.grossLoss > 0) {
+              const ratio = item.grossWin / item.grossLoss;
+              pfDisplay = ratio.toFixed(2);
+              pfClass = ratio >= 1.5 ? 'text-emerald-400' : (ratio >= 1.0 ? 'text-blue-400' : 'text-rose-400');
+            } else if (item.grossWin > 0) {
+              pfDisplay = '<span class="text-emerald-400 font-black text-sm" title="Zero Losses • 100% Win Rate">∞ <span class="text-[9px] font-sans font-bold text-emerald-400/80 uppercase">MAX</span></span>';
+              pfClass = 'text-emerald-400';
+            } else {
+              pfDisplay = '0.00';
+              pfClass = 'text-slate-500';
+            }
+          }
           const pnl = Math.round(item.netPnL);
 
           if (item.count > 0 && pnl > maxDayPnL) {
@@ -9615,13 +9632,18 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             worstDay = day;
           }
 
+          const pnlDisplay = item.count > 0 
+            ? (pnl >= 0 ? `+₹${pnl.toLocaleString('en-IN')}` : `-₹${Math.abs(pnl).toLocaleString('en-IN')}`)
+            : '₹0';
+          const pnlClass = item.count === 0 ? 'text-slate-500' : (pnl >= 0 ? 'text-emerald-400' : 'text-rose-400');
+
           return `
-            <tr class="border-b border-slate-800/40">
+            <tr class="border-b border-slate-800/40 hover:bg-slate-900/30 transition">
               <td class="py-2.5 px-3 font-semibold text-white font-sans">${day}</td>
               <td class="py-2.5 px-1 text-center font-mono ${item.count > 0 ? 'text-white' : 'text-slate-500'}">${item.count}</td>
               <td class="py-2.5 px-1 text-center font-bold font-mono ${item.count === 0 ? 'text-slate-500' : (wr >= 50 ? 'text-emerald-400' : 'text-amber-400')}">${item.count > 0 ? wr + '%' : '--'}</td>
-              <td class="py-2.5 px-1 text-center font-bold font-mono ${item.count === 0 ? 'text-slate-500' : 'text-blue-400'}">${pf}</td>
-              <td class="py-2.5 px-2.5 text-right font-bold font-mono ${item.count === 0 ? 'text-slate-500' : (pnl >= 0 ? 'text-emerald-400' : 'text-rose-400')}">${item.count > 0 ? (pnl >= 0 ? '+' : '') + '₹' + pnl.toLocaleString('en-IN') : '₹0'}</td>
+              <td class="py-2.5 px-1 text-center font-bold font-mono ${pfClass}">${pfDisplay}</td>
+              <td class="py-2.5 px-2.5 text-right font-bold font-mono ${pnlClass}">${pnlDisplay}</td>
             </tr>
           `;
         }).join('');
@@ -9629,7 +9651,12 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         const bestDayElem = document.getElementById('bestWeekdayText');
         if (bestDayElem) bestDayElem.textContent = bestDay !== 'None' ? `${bestDay} (+₹${Math.round(maxDayPnL).toLocaleString('en-IN')})` : 'None';
         const worstDayElem = document.getElementById('worstWeekdayText');
-        if (worstDayElem) worstDayElem.textContent = worstDay !== 'None' ? `${worstDay} (₹${Math.round(minDayPnL).toLocaleString('en-IN')})` : 'None';
+        if (worstDayElem) worstDayElem.textContent = worstDay !== 'None' ? `${worstDay} (-₹${Math.abs(Math.round(minDayPnL)).toLocaleString('en-IN')})` : 'None';
+      }
+
+      // Synchronize Setup Expectancy Matrix table
+      if (typeof renderSetupMatrix === 'function') {
+        try { renderSetupMatrix(trades); } catch (e) { console.warn('renderSetupMatrix error:', e); }
       }
 
       // Update Standard Metrics in DOM
@@ -9648,7 +9675,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       if (winLossElem) winLossElem.textContent = `${totalWins} Wins • ${totalLosses} Losses`;
 
       const pfElem = document.getElementById('statProfitFactor');
-      if (pfElem) pfElem.textContent = profitFactor.toFixed(2);
+      if (pfElem) pfElem.textContent = isInfinitePF ? '∞' : profitFactor.toFixed(2);
 
       const totalRElem = document.getElementById('statTotalRSub');
       if (totalRElem) totalRElem.textContent = `Total Net R: ${totalRealizedR >= 0 ? '+' : ''}${totalRealizedR.toFixed(2)}R`;
@@ -9699,14 +9726,14 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
         const kpiPF = document.getElementById('kpiProfitFactor');
         if (kpiPF) {
-          kpiPF.textContent = profitFactor.toFixed(2);
+          kpiPF.textContent = isInfinitePF ? '∞ MAX' : profitFactor.toFixed(2);
           const pfBadge = document.getElementById('kpiPFBadge');
           if (pfBadge) {
-            pfBadge.textContent = profitFactor >= 2.0 ? 'Tier 1 Edge' : (profitFactor >= 1.2 ? 'Moderate' : 'Low PF');
-            pfBadge.className = profitFactor >= 2.0 ? 'text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300' : 'text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300';
+            pfBadge.textContent = isInfinitePF ? 'Zero Losses' : (profitFactor >= 2.0 ? 'Tier 1 Edge' : (profitFactor >= 1.2 ? 'Moderate' : 'Low PF'));
+            pfBadge.className = (isInfinitePF || profitFactor >= 2.0) ? 'text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300' : 'text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300';
           }
           const pfSub = document.getElementById('kpiPFSub');
-          if (pfSub) pfSub.textContent = `Payoff: ${payoffB.toFixed(2)}x Asymmetry`;
+          if (pfSub) pfSub.textContent = isInfinitePF ? 'Perfect Run • 0 Gross Losses' : `Payoff: ${payoffB.toFixed(2)}x Asymmetry`;
         }
 
         // --- Average Expectancy Metric (Dashboard Card & Side Panel) ---
@@ -10217,7 +10244,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const calmar = Math.abs(maxDDPct) > 0.1 ? (annReturnPct / Math.abs(maxDDPct)) : (annReturnPct > 0 ? 10.0 : 0.0);
 
       // Gain-to-Pain Ratio (Schwager GPR)
-      const gpr = totalGrossLoss > 0 ? (totalGrossProfit / totalGrossLoss) : (totalGrossProfit > 0 ? 99.0 : 0.0);
+      const isInfiniteGPR = totalGrossLoss === 0 && totalGrossProfit > 0;
+      const gpr = totalGrossLoss > 0 ? (totalGrossProfit / totalGrossLoss) : (isInfiniteGPR ? Infinity : 0.0);
 
       // Render to UI elements
       const elSharpe = document.getElementById('statSharpeRatio');
@@ -10265,9 +10293,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const badgeGPR = document.getElementById('gprQualityBadge');
       const subMaxDD = document.getElementById('statMaxDDSub');
       if (elGPR && badgeGPR) {
-        elGPR.textContent = gpr >= 99 ? '>99.0x' : `${gpr.toFixed(2)}x`;
-        badgeGPR.textContent = gpr >= 2.0 ? 'High Asymmetry' : 'Symmetric';
-        badgeGPR.className = gpr >= 2.0
+        elGPR.textContent = isInfiniteGPR ? '∞ MAX' : (gpr >= 50 ? '>50.0x' : `${gpr.toFixed(2)}x`);
+        badgeGPR.textContent = isInfiniteGPR ? 'Zero Pain (No Losses)' : (gpr >= 2.0 ? 'High Asymmetry' : 'Symmetric');
+        badgeGPR.className = (isInfiniteGPR || gpr >= 2.0)
           ? 'text-[9px] font-bold px-2 py-0.5 rounded bg-teal-500/20 text-teal-300'
           : 'text-[9px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400';
         if (subMaxDD) subMaxDD.textContent = `Max DD: ${maxDDPct.toFixed(2)}% &bull; Peak Defended`;
@@ -10992,11 +11020,15 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
     function renderSetupMatrix(trades) {
       const setups = {};
-      trades.forEach(t => {
-        const s = t.setup_name || '1m Pullback to 9EMA';
+      (trades || []).forEach(t => {
+        const s = (t.setup_name || '1m Pullback to 9EMA').trim();
         if (!setups[s]) setups[s] = { count: 0, wins: 0, grossWin: 0, grossLoss: 0, totalR: 0, netPnL: 0 };
         const net = parseFloat(t.net_pnl) || 0;
-        const r = parseFloat(t.r_multiple) || 0;
+        let r = parseFloat(t.r_multiple);
+        if (isNaN(r) || r === 0) {
+          const riskAmt = parseFloat(t.risk_amount) || 5000;
+          r = riskAmt > 0 ? (net / riskAmt) : (net > 0 ? 2.0 : -1.0);
+        }
         setups[s].count += 1;
         setups[s].netPnL += net;
         setups[s].totalR += r;
@@ -11011,25 +11043,81 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const tbody = document.getElementById('setupMatrixBody');
       if (!tbody) return;
       if (Object.keys(setups).length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-slate-500">No setup data logged.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-slate-500 font-sans">No setup data logged.</td></tr>`;
+        const bestElem = document.getElementById('bestSetupText');
+        if (bestElem) bestElem.textContent = '--';
+        const worstElem = document.getElementById('worstSetupText');
+        if (worstElem) worstElem.textContent = 'None';
         return;
       }
 
-      tbody.innerHTML = Object.entries(setups).map(([name, stat]) => {
-        const wr = stat.count > 0 ? (stat.wins / stat.count) * 100 : 0;
-        const pf = stat.grossLoss > 0 ? (stat.grossWin / stat.grossLoss).toFixed(2) : (stat.grossWin > 0 ? '99.0' : '0.00');
+      // Sort by Net P&L descending so top edges appear first
+      const sortedSetups = Object.entries(setups).sort((a, b) => b[1].netPnL - a[1].netPnL);
+
+      let bestSetupName = 'None';
+      let worstSetupName = 'None';
+      let maxSetupPnL = -Infinity;
+      let minSetupPnL = 0;
+
+      tbody.innerHTML = sortedSetups.map(([name, stat]) => {
+        const wr = stat.count > 0 ? Math.round((stat.wins / stat.count) * 100) : 0;
+        let pfDisplay = '--';
+        let pfClass = 'text-slate-500';
+        if (stat.count > 0) {
+          if (stat.grossLoss > 0) {
+            const ratio = stat.grossWin / stat.grossLoss;
+            pfDisplay = ratio.toFixed(2);
+            pfClass = ratio >= 1.5 ? 'text-emerald-400' : (ratio >= 1.0 ? 'text-blue-400' : 'text-rose-400');
+          } else if (stat.grossWin > 0) {
+            pfDisplay = '<span class="text-emerald-400 font-black text-sm" title="Zero Losses • 100% Win Rate">∞ <span class="text-[9px] font-sans font-bold text-emerald-400/80 uppercase">MAX</span></span>';
+            pfClass = 'text-emerald-400';
+          } else {
+            pfDisplay = '0.00';
+            pfClass = 'text-slate-500';
+          }
+        }
+
         const pnl = Math.round(stat.netPnL);
+        const expR = stat.count > 0 ? (stat.totalR / stat.count) : 0;
+        const expRDisplay = `${expR >= 0 ? '+' : ''}${expR.toFixed(2)}R`;
+        const expRClass = expR > 0 ? 'text-emerald-400 font-bold' : (expR < 0 ? 'text-rose-400 font-bold' : 'text-slate-400 font-bold');
+
+        if (stat.count > 0 && pnl > maxSetupPnL) {
+          maxSetupPnL = pnl;
+          bestSetupName = name;
+        }
+        if (stat.count > 0 && pnl < minSetupPnL) {
+          minSetupPnL = pnl;
+          worstSetupName = name;
+        }
+
+        const pnlDisplay = pnl >= 0 ? `+₹${pnl.toLocaleString('en-IN')}` : `-₹${Math.abs(pnl).toLocaleString('en-IN')}`;
+        const pnlClass = pnl >= 0 ? 'text-emerald-400' : 'text-rose-400';
 
         return `
-          <tr class="border-b border-slate-800/40">
-            <td class="py-2.5 px-2 font-semibold text-white font-sans">${name}</td>
-            <td class="py-2.5 px-1 text-center text-slate-300">${stat.count}</td>
-            <td class="py-2.5 px-1 text-center font-bold ${wr >= 50 ? 'text-emerald-400' : 'text-amber-400'}">${wr.toFixed(0)}%</td>
-            <td class="py-2.5 px-1 text-center text-blue-400 font-bold">${pf}</td>
-            <td class="py-2.5 px-2 text-right font-bold ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}">₹${pnl.toLocaleString('en-IN')}</td>
+          <tr class="border-b border-slate-800/40 hover:bg-slate-900/30 transition">
+            <td class="py-2.5 px-3 font-semibold text-white font-sans text-xs">${name}</td>
+            <td class="py-2.5 px-1 text-center font-mono text-slate-300 text-xs">${stat.count}</td>
+            <td class="py-2.5 px-1 text-center font-bold font-mono text-xs ${wr >= 50 ? 'text-emerald-400' : 'text-amber-400'}">${wr}%</td>
+            <td class="py-2.5 px-1.5 text-center font-bold font-mono text-xs ${expRClass}">${expRDisplay}</td>
+            <td class="py-2.5 px-1 text-center font-bold font-mono text-xs ${pfClass}">${pfDisplay}</td>
+            <td class="py-2.5 px-3 text-right font-bold font-mono text-xs ${pnlClass}">${pnlDisplay}</td>
           </tr>
         `;
       }).join('');
+
+      const bestSetupElem = document.getElementById('bestSetupText');
+      if (bestSetupElem) {
+        bestSetupElem.textContent = bestSetupName !== 'None' 
+          ? `${bestSetupName} (+₹${Math.round(maxSetupPnL).toLocaleString('en-IN')})` 
+          : 'None';
+      }
+      const worstSetupElem = document.getElementById('worstSetupText');
+      if (worstSetupElem) {
+        worstSetupElem.textContent = worstSetupName !== 'None' 
+          ? `${worstSetupName} (-₹${Math.abs(Math.round(minSetupPnL)).toLocaleString('en-IN')})` 
+          : 'None (Zero Leaks)';
+      }
     }
 
     function runMonteCarloSimulation() {
@@ -12238,8 +12326,23 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
       tbody.innerHTML = Object.entries(strategies).map(([name, data]) => {
         const wr = data.count > 0 ? (data.wins / data.count) * 100 : 0;
-        const pf = data.grossLoss > 0 ? (data.grossWin / data.grossLoss).toFixed(2) : (data.grossWin > 0 ? "99.0" : "0.00");
+        let pfDisplay = '--';
+        let pfClass = 'text-slate-500';
+        if (data.count > 0) {
+          if (data.grossLoss > 0) {
+            const ratio = data.grossWin / data.grossLoss;
+            pfDisplay = ratio.toFixed(2);
+            pfClass = ratio >= 1.5 ? 'text-emerald-400' : (ratio >= 1.0 ? 'text-blue-400' : 'text-rose-400');
+          } else if (data.grossWin > 0) {
+            pfDisplay = '<span class="text-emerald-400 font-black text-sm" title="Zero Losses • 100% Win Rate">∞ <span class="text-[9px] font-sans font-bold text-emerald-400/80 uppercase">MAX</span></span>';
+            pfClass = 'text-emerald-400';
+          } else {
+            pfDisplay = '0.00';
+            pfClass = 'text-slate-500';
+          }
+        }
         const pnl = Math.round(data.netPnL);
+        const pnlDisplay = pnl >= 0 ? `+₹${pnl.toLocaleString('en-IN')}` : `-₹${Math.abs(pnl).toLocaleString('en-IN')}`;
         const r = data.totalR;
 
         if (r > bestNetR && data.count >= 1) {
@@ -12263,8 +12366,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             <td class="py-2.5 px-2 text-center text-slate-300">${data.count}</td>
             <td class="py-2.5 px-2 text-center font-bold ${wr >= 50 ? 'text-emerald-400' : 'text-amber-400'}">${wr.toFixed(0)}%</td>
             <td class="py-2.5 px-2 text-center font-bold ${r >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${r >= 0 ? '+' : ''}${r.toFixed(2)}R</td>
-            <td class="py-2.5 px-2 text-center text-blue-400 font-bold">${pf}</td>
-            <td class="py-2.5 px-2 text-right font-bold ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}">₹${pnl.toLocaleString('en-IN')}</td>
+            <td class="py-2.5 px-2 text-center font-bold ${pfClass}">${pfDisplay}</td>
+            <td class="py-2.5 px-2 text-right font-bold ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${pnlDisplay}</td>
             <td class="py-2.5 px-3 text-center">
               <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${gradeClass}">${grade}</span>
             </td>
@@ -13659,7 +13762,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
       const totalTrades = trades.length;
       const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : '0.0';
-      const profitFactor = sumLossR > 0 ? (sumWinR / sumLossR).toFixed(2) : (sumWinR > 0 ? '99.0' : '0.00');
+      const isDossierInf = sumLossR === 0 && sumWinR > 0;
+      const profitFactor = sumLossR > 0 ? (sumWinR / sumLossR).toFixed(2) : (isDossierInf ? '∞ MAX' : '0.00');
       const adherencePct = totalTrades > 0 ? (((totalTrades - breaches) / totalTrades) * 100).toFixed(1) : '100.0';
 
       // Dossier Grade calculation
