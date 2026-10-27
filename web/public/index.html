@@ -10450,14 +10450,18 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
         if (net > 0) {
           totalWins++;
-          grossProfit += net;
           winHoldTotal += hold;
           winHoldCount++;
         } else if (net < 0) {
           totalLosses++;
-          grossLoss += Math.abs(net);
           lossHoldTotal += hold;
           lossHoldCount++;
+        }
+
+        if (gross > 0) {
+          grossProfit += gross;
+        } else if (gross < 0) {
+          grossLoss += Math.abs(gross);
         }
 
         if (t.direction === 'Long') {
@@ -11136,6 +11140,11 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         computeVaRAndRecovery(trades);
       } else if (currentTab === 4) {
         runMonteCarloSimulation();
+      }
+
+      // Synchronize sticky quick-stat docklet telemetry with live metrics
+      if (typeof renderQuickStatDocklets === 'function') {
+        renderQuickStatDocklets();
       }
     }
 
@@ -16341,42 +16350,111 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const container = document.getElementById('dockletContainer');
       if (!container) return;
 
-      const trades = typeof tradesData !== 'undefined' ? tradesData : [];
+      const trades = (typeof getFilteredTrades === 'function')
+        ? getFilteredTrades()
+        : (typeof tradesData !== 'undefined' ? tradesData : []);
+      const allTrades = typeof tradesData !== 'undefined' ? tradesData : trades;
+
       const sessionDate = typeof getActiveSessionDate === 'function' ? getActiveSessionDate() : new Date().toISOString().split('T')[0];
-      const todayTrades = trades.filter(t => t.date === sessionDate);
+      const todayTrades = allTrades.filter(t => t.date === sessionDate);
       const todayNetPnL = todayTrades.reduce((acc, t) => acc + (parseFloat(t.net_pnl) || 0), 0);
       const todayNetR = todayTrades.reduce((acc, t) => acc + (parseFloat(t.r_multiple) || 0), 0);
 
-      // Compute stats
+      // 1. Live Today Net P&L
       const pnlText = (todayNetPnL >= 0 ? '+₹' : '-₹') + Math.round(Math.abs(todayNetPnL)).toLocaleString('en-IN') + ` (${todayNetR >= 0 ? '+' : ''}${todayNetR.toFixed(2)}R)`;
       const pnlColor = todayNetPnL >= 0 ? 'text-emerald-400' : 'text-rose-400';
+
+      // 2. Today Trade Quota (Max 2 trades)
       const quotaText = `${todayTrades.length}/2 Used`;
-      const quotaColor = todayTrades.length >= 2 ? 'text-rose-400 font-black' : 'text-slate-200';
-      const streakText = (typeof traderStreak !== 'undefined' ? traderStreak : 4) + 'd Streak';
-      const expectancyText = (typeof expectancyR !== 'undefined' ? (expectancyR >= 0 ? '+' : '') + expectancyR.toFixed(2) + 'R' : '+0.51 R');
-      const frictionText = '₹48 / trd';
-      const kellyText = 'f* = 0.18';
-      const windowText = '09:15–10:30 Active';
+      const quotaColor = todayTrades.length >= 2 ? 'text-rose-400 font-black' : (todayTrades.length === 1 ? 'text-amber-300' : 'text-slate-200');
+
+      // 3. Discipline / Win Streak
+      let streak = 0;
+      if (typeof cleanTradesStreak !== 'undefined' && cleanTradesStreak > 0) {
+        streak = cleanTradesStreak;
+      } else if (typeof traderStreak !== 'undefined' && traderStreak > 0) {
+        streak = traderStreak;
+      } else {
+        const sorted = [...allTrades].sort((a,b) => ((b.date || '') + ' ' + (b.entry_time || '')).localeCompare((a.date || '') + ' ' + (a.entry_time || '')));
+        for (const t of sorted) {
+          if ((parseFloat(t.net_pnl) || 0) > 0) streak++;
+          else if ((parseFloat(t.net_pnl) || 0) < 0) break;
+        }
+      }
+      const streakText = `${Math.max(streak, 1)}d Streak`;
+
+      // 4. Dynamic Kelly Edge (f*)
+      let winsCount = 0, sumWinR = 0, lossesCount = 0, sumLossR = 0;
+      trades.forEach(t => {
+        const r = parseFloat(t.r_multiple || 0);
+        if (r > 0 || t.outcome === 'Win') {
+          winsCount++;
+          sumWinR += r;
+        } else if (r < 0 || t.outcome === 'Loss') {
+          lossesCount++;
+          sumLossR += Math.abs(r);
+        }
+      });
+      const winP = trades.length > 0 ? (winsCount / trades.length) : 0.55;
+      const avgW = winsCount > 0 ? (sumWinR / winsCount) : 2.0;
+      const avgL = lossesCount > 0 ? (sumLossR / lossesCount) : 1.0;
+      const bRatio = avgL > 0 ? (avgW / avgL) : 2.0;
+      let fStar = (winP * (bRatio + 1) - 1) / bRatio;
+      fStar = Math.max(0, Math.min(0.25, fStar));
+      const kellyText = `f* = ${fStar.toFixed(2)}`;
+      const kellyColor = fStar >= 0.10 ? 'text-blue-300' : 'text-slate-300';
+
+      // 5. Realized Edge Expectancy
+      const totalR = trades.reduce((acc, t) => acc + (parseFloat(t.r_multiple) || 0), 0);
+      const avgExpR = trades.length > 0 ? (totalR / trades.length) : 0;
+      const expectancyText = `${avgExpR >= 0 ? '+' : ''}${avgExpR.toFixed(2)} R`;
+      const expectancyColor = avgExpR >= 0.25 ? 'text-indigo-300' : (avgExpR >= 0 ? 'text-blue-300' : 'text-rose-400');
+
+      // 6. Live IST Trading Window Telemetry
+      const now = new Date();
+      const istTimeStr = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: false });
+      const [wh, wm] = istTimeStr.split(':').map(Number);
+      const curMin = (wh || 0) * 60 + (wm || 0);
+      const isWindowActive = curMin >= (9 * 60 + 15) && curMin < (10 * 60 + 30);
+      const windowText = isWindowActive ? '09:15–10:30 Active' : 'Window Closed';
+      const windowColor = isWindowActive ? 'text-emerald-400' : 'text-slate-400';
+
+      // 7. Dynamic Statutory & Brokerage Friction Drag
+      const targetTrades = todayTrades.length > 0 ? todayTrades : trades;
+      const targetCosts = targetTrades.reduce((acc, t) => acc + (parseFloat(t.costs) || 0), 0);
+      const avgFriction = targetTrades.length > 0 ? (targetCosts / targetTrades.length) : 0;
+      
+      const targetGrossProfit = targetTrades
+        .filter(t => (parseFloat(t.net_pnl) || 0) > 0)
+        .reduce((acc, t) => acc + (parseFloat(t.gross_pnl) || ((parseFloat(t.net_pnl) || 0) + (parseFloat(t.costs) || 0))), 0);
+      const dragPct = targetGrossProfit > 0 ? (targetCosts / targetGrossProfit) * 100 : 0;
+
+      const frictionText = `₹${Math.round(avgFriction).toLocaleString('en-IN')} / trd`;
+      const frictionColor = dragPct < 15 ? 'text-emerald-400' : (dragPct < 30 ? 'text-amber-400' : 'text-rose-400');
 
       const statValues = {
-        docklet_pnl: { val: pnlText, color: pnlColor },
-        docklet_quota: { val: quotaText, color: quotaColor },
-        docklet_streak: { val: streakText, color: 'text-amber-300' },
-        docklet_kelly: { val: kellyText, color: 'text-blue-300' },
-        docklet_expectancy: { val: expectancyText, color: 'text-indigo-300' },
-        docklet_window: { val: windowText, color: 'text-emerald-400' },
-        docklet_friction: { val: frictionText, color: 'text-amber-400' }
+        docklet_pnl: { val: pnlText, color: pnlColor, title: `Today Net P&L: ${pnlText}` },
+        docklet_quota: { val: quotaText, color: quotaColor, title: `Daily Trade Quota: ${quotaText}` },
+        docklet_streak: { val: streakText, color: 'text-amber-300', title: `Current Discipline/Win Streak: ${streakText}` },
+        docklet_kelly: { val: kellyText, color: kellyColor, title: `Kelly Criterion Optimal Sizing: ${kellyText}` },
+        docklet_expectancy: { val: expectancyText, color: expectancyColor, title: `Historical Edge Expectancy: ${expectancyText}` },
+        docklet_window: { val: windowText, color: windowColor, title: `IST Trading Window (09:15-10:30): ${windowText}` },
+        docklet_friction: { 
+          val: `${frictionText} (${dragPct.toFixed(1)}%)`, 
+          color: frictionColor, 
+          title: `Statutory & Brokerage Friction: ₹${Math.round(avgFriction)}/trd (${dragPct.toFixed(1)}% drag on gross profit) • Total: ₹${Math.round(targetCosts).toLocaleString('en-IN')}` 
+        }
       };
 
       container.innerHTML = userDocklets.filter(d => d.visible).map(d => {
-        const item = statValues[d.id] || { val: '--', color: 'text-white' };
+        const item = statValues[d.id] || { val: '--', color: 'text-white', title: d.label };
         return `
           <div draggable="true" 
                ondragstart="handleDockletDragStart(event, '${d.id}')"
                ondragover="handleDockletDragOver(event)"
                ondrop="handleDockletDrop(event, '${d.id}')"
                class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800/90 hover:border-slate-700 cursor-grab active:cursor-grabbing transition shadow-sm flex-shrink-0"
-               title="${d.label} (Drag to rearrange)">
+               title="${item.title || d.label} (Drag to rearrange)">
             <span class="text-xs select-none">${d.icon}</span>
             <span class="text-slate-400 text-[10px] select-none">${d.label}:</span>
             <span class="font-bold font-mono text-xs ${item.color} select-none">${item.val}</span>
