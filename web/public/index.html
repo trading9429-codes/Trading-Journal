@@ -3821,9 +3821,14 @@
         <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-sans">Trader Lesson &amp; Post-Trade Notes</span>
-            <button onclick="speakCurrentTradeLesson()" class="text-[10px] font-semibold text-teal-300 hover:text-white flex items-center gap-1 transition" title="Listen to lesson notes via Speech Synthesizer">
-              <span>🔊</span> Listen
-            </button>
+            <div class="flex items-center gap-2">
+              <button onclick="quickEditCurrentLesson()" class="text-[10px] font-semibold text-blue-300 hover:text-white flex items-center gap-1 transition cursor-pointer" title="Quick edit reflection note">
+                <span>✏️</span> Edit Note
+              </button>
+              <button onclick="speakCurrentTradeLesson()" class="text-[10px] font-semibold text-teal-300 hover:text-white flex items-center gap-1 transition cursor-pointer" title="Listen to lesson notes via Speech Synthesizer">
+                <span>🔊</span> Listen
+              </button>
+            </div>
           </div>
           <p id="inspectLessonText" class="text-xs text-slate-300 font-mono italic leading-relaxed">
             "No lesson notes logged."
@@ -3934,19 +3939,19 @@
             <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1 font-sans">
               Entry Price (₹) <span class="text-rose-400">*</span>
             </label>
-            <input type="number" step="0.05" id="editTrade_entry" required oninput="calcEditTradePreview()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-white font-bold focus:outline-none focus:border-blue-500 text-xs">
+            <input type="number" step="any" id="editTrade_entry" required oninput="calcEditTradePreview()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-white font-bold focus:outline-none focus:border-blue-500 text-xs">
           </div>
           <div>
             <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1 font-sans">
               Stop Loss (₹) <span class="text-rose-400">*</span>
             </label>
-            <input type="number" step="0.05" id="editTrade_stop" required oninput="calcEditTradePreview()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-rose-300 font-bold focus:outline-none focus:border-rose-500 text-xs">
+            <input type="number" step="any" id="editTrade_stop" required oninput="calcEditTradePreview()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-rose-300 font-bold focus:outline-none focus:border-rose-500 text-xs">
           </div>
           <div>
             <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1 font-sans">
               Exit Price (₹) <span class="text-rose-400">*</span>
             </label>
-            <input type="number" step="0.05" id="editTrade_exit" required oninput="calcEditTradePreview()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-emerald-300 font-bold focus:outline-none focus:border-emerald-500 text-xs">
+            <input type="number" step="any" id="editTrade_exit" required oninput="calcEditTradePreview()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-emerald-300 font-bold focus:outline-none focus:border-emerald-500 text-xs">
           </div>
           <div>
             <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1 font-sans">
@@ -4026,7 +4031,7 @@
             <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">
               Post-Exit 15m Price (₹ Optional)
             </label>
-            <input type="number" step="0.05" id="editTrade_post_exit_price" placeholder="Price reached after exit" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-white font-mono text-xs focus:outline-none focus:border-blue-500">
+            <input type="number" step="any" id="editTrade_post_exit_price" placeholder="Price reached after exit" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-white font-mono text-xs focus:outline-none focus:border-blue-500">
           </div>
         </div>
 
@@ -9258,114 +9263,129 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       if (e && e.preventDefault) e.preventDefault();
       if (!activeEditTradeId) return;
 
-      const trade = tradesData.find(t => t.id === activeEditTradeId);
-      if (!trade) {
-        alert("Trade not found.");
-        return;
-      }
+      try {
+        const trade = tradesData.find(t => t.id === activeEditTradeId);
+        if (!trade) {
+          alert("Trade not found.");
+          return;
+        }
 
-      const date = document.getElementById('editTrade_date').value;
-      const time = document.getElementById('editTrade_time').value;
-      const exitTime = document.getElementById('editTrade_exit_time').value;
-      const symbol = (document.getElementById('editTrade_symbol').value || '').toUpperCase().trim();
-      const direction = document.getElementById('editTrade_direction').value;
-      const setupName = document.getElementById('editTrade_setup').value;
-      const entry = parseFloat(document.getElementById('editTrade_entry').value);
-      const stop = parseFloat(document.getElementById('editTrade_stop').value);
-      const exit = parseFloat(document.getElementById('editTrade_exit').value);
-      const qty = parseInt(document.getElementById('editTrade_qty').value);
-      const checklistScore = parseInt(document.getElementById('editTrade_checklist').value) || 5;
-      const mentalState = document.getElementById('editTrade_mental_state').value;
-      const lesson = (document.getElementById('editTrade_lesson').value || '').trim();
+        const date = document.getElementById('editTrade_date').value;
+        const time = document.getElementById('editTrade_time').value;
+        const exitTime = document.getElementById('editTrade_exit_time').value;
+        const symbol = (document.getElementById('editTrade_symbol').value || '').toUpperCase().trim();
+        const direction = document.getElementById('editTrade_direction').value;
+        const setupName = document.getElementById('editTrade_setup').value;
+        const entry = parseFloat(document.getElementById('editTrade_entry').value);
+        const stop = parseFloat(document.getElementById('editTrade_stop').value);
+        const exit = parseFloat(document.getElementById('editTrade_exit').value);
+        const qty = parseInt(document.getElementById('editTrade_qty').value);
+        const checklistScore = parseInt(document.getElementById('editTrade_checklist').value) || 5;
+        const mentalState = document.getElementById('editTrade_mental_state').value;
+        const lesson = (document.getElementById('editTrade_lesson').value || '').trim();
 
-      if (!date || !symbol || isNaN(entry) || isNaN(stop) || isNaN(exit) || isNaN(qty) || qty <= 0) {
-        alert("Please ensure all required fields (Date, Symbol, Entry, Stop, Exit, Quantity) have valid numbers.");
-        return;
-      }
+        if (!date || !symbol || isNaN(entry) || isNaN(stop) || isNaN(exit) || isNaN(qty) || qty <= 0) {
+          alert("Please ensure all required fields (Date, Symbol, Entry, Stop, Exit, Quantity) have valid numbers.");
+          return;
+        }
 
-      const riskPerShare = Math.abs(entry - stop);
-      if (riskPerShare <= 0) {
-        alert("Stop loss cannot equal Entry price.");
-        return;
-      }
+        const riskPerShare = Math.abs(entry - stop);
+        if (riskPerShare <= 0) {
+          alert("Stop loss cannot equal Entry price.");
+          return;
+        }
 
-      const buyTurnover = direction === 'Long' ? (entry * qty) : (exit * qty);
-      const sellTurnover = direction === 'Long' ? (exit * qty) : (entry * qty);
-      const fyers = typeof computeFyersCharges === 'function' ? computeFyersCharges(buyTurnover, sellTurnover) : { totalCosts: 40 };
+        const buyTurnover = direction === 'Long' ? (entry * qty) : (exit * qty);
+        const sellTurnover = direction === 'Long' ? (exit * qty) : (entry * qty);
+        const fyers = typeof computeFyersCharges === 'function' ? computeFyersCharges(buyTurnover, sellTurnover) : { totalCosts: 40 };
 
-      const grossPnL = direction === 'Long' ? (exit - entry) * qty : (entry - exit) * qty;
-      const netPnL = grossPnL - fyers.totalCosts;
-      const totalRisk = riskPerShare * qty;
-      const realizedR = totalRisk > 0 ? (netPnL / totalRisk) : 0;
-      const plannedRR = Math.abs(exit - entry) / riskPerShare;
+        const grossPnL = direction === 'Long' ? (exit - entry) * qty : (entry - exit) * qty;
+        const netPnL = grossPnL - fyers.totalCosts;
+        const totalRisk = riskPerShare * qty;
+        const realizedR = totalRisk > 0 ? (netPnL / totalRisk) : 0;
+        const plannedRR = Math.abs(exit - entry) / riskPerShare;
 
-      let outcome = 'Break-Even';
-      if (netPnL > 10) outcome = 'Win';
-      else if (netPnL < -10) outcome = 'Loss';
+        let outcome = 'Break-Even';
+        if (netPnL > 10) outcome = 'Win';
+        else if (netPnL < -10) outcome = 'Loss';
 
-      let holdDuration = 6;
-      if (exitTime && time) {
-        const [h1, m1] = time.split(':').map(Number);
-        const [h2, m2] = exitTime.split(':').map(Number);
-        const diff = (h2 * 60 + m2) - (h1 * 60 + m1);
-        if (diff > 0) holdDuration = diff;
-      }
+        let holdDuration = 6;
+        if (exitTime && time) {
+          const [h1, m1] = time.split(':').map(Number);
+          const [h2, m2] = exitTime.split(':').map(Number);
+          const diff = (h2 * 60 + m2) - (h1 * 60 + m1);
+          if (diff > 0) holdDuration = diff;
+        }
 
-      // Update trade in place
-      trade.date = date;
-      trade.day = typeof getTradeWeekday === 'function' ? getTradeWeekday(date) : (trade.day || 'Mon');
-      trade.time = time;
-      trade.exit_time = exitTime || time;
-      trade.hold_duration = holdDuration;
-      trade.symbol = symbol;
-      trade.direction = direction;
-      trade.setup_name = setupName;
-      trade.entry_price = entry;
-      trade.stop_price = stop;
-      trade.exit_price = exit;
-      trade.qty = qty;
-      trade.target_price = parseFloat((direction === 'Long' ? entry + 2.2 * riskPerShare : entry - 2.2 * riskPerShare).toFixed(2));
-      trade.rr_planned = parseFloat(plannedRR.toFixed(2));
-      trade.risk_amount = totalRisk;
-      trade.risk_percent = parseFloat((totalRisk / startingCapital).toFixed(4));
-      trade.gross_pnl = parseFloat(grossPnL.toFixed(2));
-      trade.costs = parseFloat(fyers.totalCosts.toFixed(2));
-      trade.net_pnl = parseFloat(netPnL.toFixed(2));
-      trade.r_multiple = parseFloat(realizedR.toFixed(2));
-      trade.outcome = outcome;
-      trade.checklist_score = checklistScore;
-      trade.rule_violation = checklistScore < 5 ? 'Y' : 'N';
-      trade.mental_state = mentalState;
-      const postExitEl = document.getElementById('editTrade_post_exit_behavior');
-      if (postExitEl) trade.post_exit_behavior = postExitEl.value;
-      const postExitPriceEl = document.getElementById('editTrade_post_exit_price');
-      if (postExitPriceEl && postExitPriceEl.value) trade.post_exit_price = parseFloat(postExitPriceEl.value);
-      trade.lesson = lesson;
+        // Update trade in place
+        trade.date = date;
+        trade.day = typeof getTradeWeekday === 'function' ? getTradeWeekday(date) : (trade.day || 'Mon');
+        trade.time = time;
+        trade.exit_time = exitTime || time;
+        trade.hold_duration = holdDuration;
+        trade.symbol = symbol;
+        trade.direction = direction;
+        trade.setup_name = setupName;
+        trade.entry_price = entry;
+        trade.stop_price = stop;
+        trade.exit_price = exit;
+        trade.qty = qty;
+        trade.target_price = parseFloat((direction === 'Long' ? entry + 2.2 * riskPerShare : entry - 2.2 * riskPerShare).toFixed(2));
+        trade.rr_planned = parseFloat(plannedRR.toFixed(2));
+        trade.risk_amount = totalRisk;
+        trade.risk_percent = parseFloat((totalRisk / startingCapital).toFixed(4));
+        trade.gross_pnl = parseFloat(grossPnL.toFixed(2));
+        trade.costs = parseFloat(fyers.totalCosts.toFixed(2));
+        trade.net_pnl = parseFloat(netPnL.toFixed(2));
+        trade.r_multiple = parseFloat(realizedR.toFixed(2));
+        trade.outcome = outcome;
+        trade.checklist_score = checklistScore;
+        trade.rule_violation = checklistScore < 5 ? 'Y' : 'N';
+        trade.mental_state = mentalState;
+        const postExitEl = document.getElementById('editTrade_post_exit_behavior');
+        if (postExitEl) trade.post_exit_behavior = postExitEl.value;
+        const postExitPriceEl = document.getElementById('editTrade_post_exit_price');
+        if (postExitPriceEl && postExitPriceEl.value) trade.post_exit_price = parseFloat(postExitPriceEl.value);
+        trade.lesson = lesson;
 
-      saveTradesLocally();
-      await syncTradesWithBackend();
+        saveTradesLocally();
+        await syncTradesWithBackend();
 
-      if (typeof speakTradeConfirmation === 'function') {
-        speakTradeConfirmation(trade, true);
-      }
+        if (typeof speakTradeConfirmation === 'function') {
+          speakTradeConfirmation(trade, true);
+        }
 
-      closeEditTradeModal();
-      if (typeof activeModalTradeId !== 'undefined' && activeModalTradeId === activeEditTradeId && typeof openTradeModal === 'function') {
-        openTradeModal(activeModalTradeId);
-      }
+        const savedTradeId = activeEditTradeId;
+        closeEditTradeModal();
 
-      renderTradesTable();
-      renderTopCapitalHeader();
-      checkDailyCircuitBreaker();
-      renderAllChartsAndMetrics();
-      if (typeof renderDailyLockboxHUD === 'function') renderDailyLockboxHUD();
-      if (typeof renderTab1MiniCalendar === 'function') renderTab1MiniCalendar();
-      if (typeof renderQuickStatDocklets === 'function') renderQuickStatDocklets();
+        if (typeof lastInspectedTradeId !== 'undefined' && lastInspectedTradeId === savedTradeId) {
+          if (typeof openTradeInspectDrawer === 'function') {
+            openTradeInspectDrawer(savedTradeId);
+          }
+        } else if (typeof activeModalTradeId !== 'undefined' && activeModalTradeId === savedTradeId && typeof openTradeModal === 'function') {
+          openTradeModal(savedTradeId);
+        }
 
-      if (typeof showSystemToast === 'function') {
-        showSystemToast(`✅ <strong>Trade ${trade.id} Updated:</strong> Date (${date}), prices &amp; P&amp;L synchronized to Excel!`, 'success');
-      } else {
-        alert(`✅ Trade ${trade.id} updated successfully!`);
+        renderTradesTable();
+        renderTopCapitalHeader();
+        checkDailyCircuitBreaker();
+        renderAllChartsAndMetrics();
+        if (typeof renderDailyLockboxHUD === 'function') renderDailyLockboxHUD();
+        if (typeof renderTab1MiniCalendar === 'function') renderTab1MiniCalendar();
+        if (typeof renderQuickStatDocklets === 'function') renderQuickStatDocklets();
+
+        if (typeof showSystemToast === 'function') {
+          showSystemToast(`✅ <strong>Trade ${trade.id} Updated:</strong> Date (${date}), prices, lesson &amp; P&amp;L synchronized!`, 'success');
+        } else {
+          alert(`✅ Trade ${trade.id} updated successfully!`);
+        }
+      } catch (err) {
+        console.error("Error saving edited trade:", err);
+        if (typeof showSystemToast === 'function') {
+          showSystemToast(`⚠️ <strong>Save Error:</strong> ${err.message}`, 'error');
+        } else {
+          alert(`Error saving trade: ${err.message}`);
+        }
       }
     }
 
@@ -9739,11 +9759,14 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     // C2: SLIDE-OVER TRADE INSPECTION DRAWER & B3 FOMO AUDIT
     // ==========================================
     let activeInspectTradeId = null;
+    let lastInspectedTradeId = null;
 
     function openTradeInspectDrawer(tradeId) {
       const trade = tradesData.find(t => t.id === tradeId);
       if (!trade) return;
       activeInspectTradeId = tradeId;
+      lastInspectedTradeId = tradeId;
+      activeModalTradeId = tradeId;
 
       const isWin = trade.outcome === 'Win' || (parseFloat(trade.net_pnl) || 0) > 0;
       const isLoss = trade.outcome === 'Loss' || (parseFloat(trade.net_pnl) || 0) < 0;
@@ -9884,8 +9907,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     }
 
     function speakCurrentTradeLesson() {
-      if (!activeInspectTradeId) return;
-      const trade = tradesData.find(t => t.id === activeInspectTradeId);
+      const id = activeInspectTradeId || lastInspectedTradeId;
+      if (!id) return;
+      const trade = tradesData.find(t => t.id === id);
       if (!trade || !trade.lesson) {
         speakVoiceNotification("No lesson notes recorded for this trade.");
         return;
@@ -9893,9 +9917,32 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       speakVoiceNotification(`Trade ${trade.symbol} lesson: ${trade.lesson}`);
     }
 
+    function quickEditCurrentLesson() {
+      const id = activeInspectTradeId || lastInspectedTradeId;
+      if (!id) return;
+      const trade = tradesData.find(t => t.id === id);
+      if (!trade) return;
+      const existing = trade.lesson || '';
+      const updated = prompt(`Edit Lesson / Reflection for ${trade.symbol} (${trade.id}):`, existing);
+      if (updated !== null) {
+        trade.lesson = updated.trim();
+        saveTradesLocally();
+        syncTradesWithBackend();
+        renderTradesTable();
+        const lessonEl = document.getElementById('inspectLessonText');
+        if (lessonEl) {
+          lessonEl.textContent = trade.lesson ? `"${trade.lesson}"` : '"No lesson notes logged for this trade."';
+        }
+        if (typeof showSystemToast === 'function') {
+          showSystemToast(`📝 <strong>Lesson Updated:</strong> Note saved for ${trade.symbol}.`, 'success');
+        }
+      }
+    }
+
     function openEditFromInspector() {
-      if (!activeInspectTradeId) return;
-      const id = activeInspectTradeId;
+      if (!activeInspectTradeId && !lastInspectedTradeId) return;
+      const id = activeInspectTradeId || lastInspectedTradeId;
+      lastInspectedTradeId = id;
       closeTradeInspectDrawer();
       openEditTradeModal(id);
     }
@@ -9961,11 +10008,18 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
     async function syncTradesWithBackend() {
       try {
-        await fetch('/api/trades/bulk', {
+        const resp = await fetch('/api/trades/bulk', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(tradesData)
         });
+        if (!resp.ok) {
+          const errData = await resp.json().catch(() => ({}));
+          console.warn("Backend bulk sync returned error status:", resp.status, errData);
+          if (typeof showSystemToast === 'function') {
+            showSystemToast(`⚠️ <strong>Server Sync Warning:</strong> ${errData.error || 'Changes saved in browser memory.'}`, 'warning');
+          }
+        }
       } catch (e) {
         console.warn("Backend bulk sync skipped/offline", e);
       }
