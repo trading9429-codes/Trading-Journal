@@ -101,8 +101,12 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
             self._send_json({"trade": new_trade, "stats": stats, "message": "Trade logged and Excel spreadsheet synchronized!"})
         elif path == "/api/trades/bulk":
             if isinstance(payload, list):
-                result = manager.set_trades(payload)
-                self._send_json(result)
+                try:
+                    result = manager.set_trades(payload)
+                    self._send_json(result)
+                except Exception as e:
+                    print(f"[Bulk Sync Error] {e}")
+                    self._send_json({"status": "partial", "error": str(e), "message": "Saved locally in browser"}, status=200)
             else:
                 self._send_json({"error": "Payload must be a list of trades"}, status=400)
         elif path == "/api/reset":

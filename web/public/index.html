@@ -3927,8 +3927,13 @@
               <option value="1m Pullback to 9EMA">1m Pullback to 9EMA</option>
               <option value="1m Breakout + VWAP Cross">1m Breakout + VWAP Cross</option>
               <option value="Opening Range Breakout (ORB)">Opening Range Breakout (ORB)</option>
+              <option value="1m VWAP Bounce">1m VWAP Bounce</option>
+              <option value="Support / Resistance Bounce">Support / Resistance Bounce</option>
               <option value="Liquidity Sweep Reversal">Liquidity Sweep Reversal</option>
               <option value="Counter-Trend Exhaustion">Counter-Trend Exhaustion</option>
+              <option value="Counter-trend Reversal">Counter-trend Reversal</option>
+              <option value="1m Breakout &amp; Re-test">1m Breakout &amp; Re-test</option>
+              <option value="Off-Plan / Discretionary">Off-Plan / Discretionary</option>
             </select>
           </div>
         </div>
@@ -3999,6 +4004,7 @@
               <option value="3">3 / 5 &bull; Partial Deviation</option>
               <option value="2">2 / 5 &bull; Serious Rule Breach</option>
               <option value="1">1 / 5 &bull; Complete Impulsive Gamble</option>
+              <option value="0">0 / 5 &bull; Pure Impulse (Complete Breach)</option>
             </select>
           </div>
           <div>
@@ -7618,7 +7624,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       return getISTDateString();
     }
 
-    function checkDailyCircuitBreaker() {
+    function checkDailyCircuitBreaker(allowModalTrigger = true) {
       const sessionDate = getISTDateString();
       const todayTrades = (typeof tradesData !== 'undefined' && Array.isArray(tradesData))
         ? tradesData.filter(t => t.date === sessionDate)
@@ -7637,7 +7643,10 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         if (cbBanner) cbBanner.classList.remove('hidden');
         const reasonStr = todayLosses.length >= 2 ? "2 Losses Daily Limit Hit" : "2 Trades Daily Limit Hit";
         dispatchAccountabilityAlert("KILL_SWITCH", { reason: reasonStr });
-        triggerTiltBreakerLockout(reasonStr, sessionDate);
+        const isDismissed = (typeof tiltLockDismissed !== 'undefined' && tiltLockDismissed) || (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('tilt_lock_dismissed') === 'true');
+        if (allowModalTrigger && !isDismissed) {
+          triggerTiltBreakerLockout(reasonStr, sessionDate);
+        }
         if (cbReasonEl) {
           cbReasonEl.textContent = todayLosses.length >= 2 ? "2 Losses Max Hit for the Day (Mandatory Hard Quit)" : "2 Trades Max Hit for the Day (Execution Window Closed)";
         }
@@ -9185,12 +9194,37 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       document.getElementById('editTrade_exit_time').value = trade.exit_time || trade.time || '09:30';
       document.getElementById('editTrade_symbol').value = trade.symbol || '';
       document.getElementById('editTrade_direction').value = trade.direction || 'Long';
-      document.getElementById('editTrade_setup').value = trade.setup_name || '1m Pullback to 9EMA';
-      document.getElementById('editTrade_entry').value = trade.entry_price || 0;
-      document.getElementById('editTrade_stop').value = trade.stop_price || 0;
-      document.getElementById('editTrade_exit').value = trade.exit_price || 0;
-      document.getElementById('editTrade_qty').value = trade.qty || 1;
-      document.getElementById('editTrade_checklist').value = String(trade.checklist_score || 5);
+
+      const setupSelect = document.getElementById('editTrade_setup');
+      const targetSetup = trade.setup_name || '1m Pullback to 9EMA';
+      if (setupSelect) {
+        let optionExists = false;
+        for (let i = 0; i < setupSelect.options.length; i++) {
+          if (setupSelect.options[i].value === targetSetup) {
+            optionExists = true;
+            break;
+          }
+        }
+        if (!optionExists && targetSetup) {
+          const opt = document.createElement('option');
+          opt.value = targetSetup;
+          opt.textContent = targetSetup;
+          setupSelect.appendChild(opt);
+        }
+        setupSelect.value = targetSetup;
+      }
+
+      document.getElementById('editTrade_entry').value = trade.entry_price !== undefined ? trade.entry_price : 0;
+      document.getElementById('editTrade_stop').value = trade.stop_price !== undefined ? trade.stop_price : 0;
+      document.getElementById('editTrade_exit').value = trade.exit_price !== undefined ? trade.exit_price : 0;
+      document.getElementById('editTrade_qty').value = trade.qty !== undefined ? trade.qty : 1;
+
+      const chkSelect = document.getElementById('editTrade_checklist');
+      if (chkSelect) {
+        const chkVal = (trade.checklist_score !== undefined && trade.checklist_score !== null) ? String(trade.checklist_score) : '5';
+        chkSelect.value = chkVal;
+      }
+
       document.getElementById('editTrade_mental_state').value = trade.mental_state || 'Calm & Patient';
       const postExitEl = document.getElementById('editTrade_post_exit_behavior');
       if (postExitEl) postExitEl.value = trade.post_exit_behavior || 'Reversed / Fell Back';
@@ -9270,19 +9304,34 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           return;
         }
 
-        const date = document.getElementById('editTrade_date').value;
-        const time = document.getElementById('editTrade_time').value;
-        const exitTime = document.getElementById('editTrade_exit_time').value;
-        const symbol = (document.getElementById('editTrade_symbol').value || '').toUpperCase().trim();
-        const direction = document.getElementById('editTrade_direction').value;
-        const setupName = document.getElementById('editTrade_setup').value;
-        const entry = parseFloat(document.getElementById('editTrade_entry').value);
-        const stop = parseFloat(document.getElementById('editTrade_stop').value);
-        const exit = parseFloat(document.getElementById('editTrade_exit').value);
-        const qty = parseInt(document.getElementById('editTrade_qty').value);
-        const checklistScore = parseInt(document.getElementById('editTrade_checklist').value) || 5;
-        const mentalState = document.getElementById('editTrade_mental_state').value;
-        const lesson = (document.getElementById('editTrade_lesson').value || '').trim();
+        const dateEl = document.getElementById('editTrade_date');
+        const timeEl = document.getElementById('editTrade_time');
+        const exitTimeEl = document.getElementById('editTrade_exit_time');
+        const symbolEl = document.getElementById('editTrade_symbol');
+        const dirEl = document.getElementById('editTrade_direction');
+        const setupEl = document.getElementById('editTrade_setup');
+        const entryEl = document.getElementById('editTrade_entry');
+        const stopEl = document.getElementById('editTrade_stop');
+        const exitEl = document.getElementById('editTrade_exit');
+        const qtyEl = document.getElementById('editTrade_qty');
+        const chkEl = document.getElementById('editTrade_checklist');
+        const mentalEl = document.getElementById('editTrade_mental_state');
+        const lessonEl = document.getElementById('editTrade_lesson');
+
+        const date = dateEl ? dateEl.value : trade.date;
+        const time = timeEl ? timeEl.value : trade.time;
+        const exitTime = exitTimeEl ? exitTimeEl.value : (trade.exit_time || time);
+        const symbol = (symbolEl ? symbolEl.value : trade.symbol || '').toUpperCase().trim();
+        const direction = dirEl ? dirEl.value : (trade.direction || 'Long');
+        const setupName = setupEl ? setupEl.value : (trade.setup_name || '1m Pullback to 9EMA');
+        const entry = parseFloat(entryEl ? entryEl.value : trade.entry_price);
+        const stop = parseFloat(stopEl ? stopEl.value : trade.stop_price);
+        const exit = parseFloat(exitEl ? exitEl.value : trade.exit_price);
+        const qty = parseInt(qtyEl ? qtyEl.value : trade.qty);
+        const checklistVal = chkEl ? chkEl.value : '5';
+        const checklistScore = checklistVal !== '' && !isNaN(parseInt(checklistVal)) ? parseInt(checklistVal) : 5;
+        const mentalState = mentalEl ? mentalEl.value : (trade.mental_state || 'Calm & Patient');
+        const lesson = lessonEl ? (lessonEl.value || '').trim() : (trade.lesson || '');
 
         if (!date || !symbol || isNaN(entry) || isNaN(stop) || isNaN(exit) || isNaN(qty) || qty <= 0) {
           alert("Please ensure all required fields (Date, Symbol, Entry, Stop, Exit, Quantity) have valid numbers.");
@@ -9309,12 +9358,14 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         if (netPnL > 10) outcome = 'Win';
         else if (netPnL < -10) outcome = 'Loss';
 
-        let holdDuration = 6;
+        let holdDuration = trade.hold_duration || 6;
         if (exitTime && time) {
           const [h1, m1] = time.split(':').map(Number);
           const [h2, m2] = exitTime.split(':').map(Number);
-          const diff = (h2 * 60 + m2) - (h1 * 60 + m1);
-          if (diff > 0) holdDuration = diff;
+          if (!isNaN(h1) && !isNaN(m1) && !isNaN(h2) && !isNaN(m2)) {
+            const diff = (h2 * 60 + m2) - (h1 * 60 + m1);
+            if (diff > 0) holdDuration = diff;
+          }
         }
 
         // Update trade in place
@@ -9333,7 +9384,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         trade.target_price = parseFloat((direction === 'Long' ? entry + 2.2 * riskPerShare : entry - 2.2 * riskPerShare).toFixed(2));
         trade.rr_planned = parseFloat(plannedRR.toFixed(2));
         trade.risk_amount = totalRisk;
-        trade.risk_percent = parseFloat((totalRisk / startingCapital).toFixed(4));
+        trade.risk_percent = parseFloat((totalRisk / (startingCapital || 200000)).toFixed(4));
         trade.gross_pnl = parseFloat(grossPnL.toFixed(2));
         trade.costs = parseFloat(fyers.totalCosts.toFixed(2));
         trade.net_pnl = parseFloat(netPnL.toFixed(2));
@@ -9348,31 +9399,43 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         if (postExitPriceEl && postExitPriceEl.value) trade.post_exit_price = parseFloat(postExitPriceEl.value);
         trade.lesson = lesson;
 
+        // Persist locally first
         saveTradesLocally();
-        await syncTradesWithBackend();
 
-        if (typeof speakTradeConfirmation === 'function') {
-          speakTradeConfirmation(trade, true);
-        }
-
+        // Close modal
         const savedTradeId = activeEditTradeId;
         closeEditTradeModal();
 
-        if (typeof lastInspectedTradeId !== 'undefined' && lastInspectedTradeId === savedTradeId) {
-          if (typeof openTradeInspectDrawer === 'function') {
-            openTradeInspectDrawer(savedTradeId);
-          }
-        } else if (typeof activeModalTradeId !== 'undefined' && activeModalTradeId === savedTradeId && typeof openTradeModal === 'function') {
-          openTradeModal(savedTradeId);
+        // Safely sync with backend
+        try {
+          await syncTradesWithBackend();
+        } catch(syncErr) {
+          console.warn("Backend sync warning:", syncErr);
         }
 
-        renderTradesTable();
-        renderTopCapitalHeader();
-        checkDailyCircuitBreaker();
-        renderAllChartsAndMetrics();
-        if (typeof renderDailyLockboxHUD === 'function') renderDailyLockboxHUD();
-        if (typeof renderTab1MiniCalendar === 'function') renderTab1MiniCalendar();
-        if (typeof renderQuickStatDocklets === 'function') renderQuickStatDocklets();
+        if (typeof speakTradeConfirmation === 'function') {
+          try { speakTradeConfirmation(trade, true); } catch(e) {}
+        }
+
+        // Refresh Drawer if inspecting this trade
+        try {
+          if (typeof lastInspectedTradeId !== 'undefined' && lastInspectedTradeId === savedTradeId) {
+            if (typeof openTradeInspectDrawer === 'function') {
+              openTradeInspectDrawer(savedTradeId);
+            }
+          }
+        } catch(drawerErr) {
+          console.warn("Drawer refresh error:", drawerErr);
+        }
+
+        // Refresh all UI elements safely (disallowing modal lockout during edits)
+        try { renderTradesTable(); } catch(e) { console.warn("renderTradesTable error:", e); }
+        try { renderTopCapitalHeader(); } catch(e) { console.warn("renderTopCapitalHeader error:", e); }
+        try { checkDailyCircuitBreaker(false); } catch(e) { console.warn("checkDailyCircuitBreaker error:", e); }
+        try { renderAllChartsAndMetrics(); } catch(e) { console.warn("renderAllChartsAndMetrics error:", e); }
+        try { if (typeof renderDailyLockboxHUD === 'function') renderDailyLockboxHUD(); } catch(e) {}
+        try { if (typeof renderTab1MiniCalendar === 'function') renderTab1MiniCalendar(); } catch(e) {}
+        try { if (typeof renderQuickStatDocklets === 'function') renderQuickStatDocklets(); } catch(e) {}
 
         if (typeof showSystemToast === 'function') {
           showSystemToast(`✅ <strong>Trade ${trade.id} Updated:</strong> Date (${date}), prices, lesson &amp; P&amp;L synchronized!`, 'success');
@@ -12702,10 +12765,12 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
     // --- 2. Full-Screen Tilt-Breaker Terminal Lockout ---
     let tiltCountdownInterval = null;
-    let tiltLockDismissed = false;
+    let tiltLockDismissed = (function() {
+      try { return sessionStorage.getItem('tilt_lock_dismissed') === 'true'; } catch(e) { return false; }
+    })();
 
     function triggerTiltBreakerLockout(reason, forceSessionDate = null) {
-      if (tiltLockDismissed) return;
+      if (tiltLockDismissed || (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('tilt_lock_dismissed') === 'true')) return;
       const modal = document.getElementById('tiltBreakerModal');
       if (!modal) return;
 
@@ -12783,6 +12848,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const modal = document.getElementById('tiltBreakerModal');
       if (modal) modal.classList.add('hidden');
       tiltLockDismissed = true;
+      try { sessionStorage.setItem('tilt_lock_dismissed', 'true'); } catch(e) {}
       if (tiltCountdownInterval) {
         clearInterval(tiltCountdownInterval);
         tiltCountdownInterval = null;
