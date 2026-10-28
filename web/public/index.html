@@ -4934,6 +4934,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
   <!-- ========================================== -->
   <div id="tiltBreakerModal" class="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-2xl hidden flex items-center justify-center p-4 overflow-y-auto">
     <div class="glass-card rounded-3xl p-8 max-w-xl w-full border border-rose-500/40 bg-gradient-to-b from-slate-900/95 via-slate-950 to-slate-950 shadow-2xl relative text-center">
+      <!-- Close Button -->
+      <button onclick="dismissTiltBreakerToReadOnly()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition cursor-pointer text-sm font-bold" title="Close Modal">✕</button>
+
       <div class="w-20 h-20 mx-auto rounded-3xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 text-4xl shadow-xl shadow-rose-950/50 animate-pulse mb-4">
         🛡️
       </div>
@@ -7596,35 +7599,32 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       }
     }
 
-    function getActiveSessionDate() {
+    function getISTDateString() {
       const now = new Date();
-      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-      if (typeof tradesData === 'undefined' || !tradesData || tradesData.length === 0) return todayStr;
-      
-      const todayTrades = tradesData.filter(t => t.date === todayStr);
-      if (todayTrades.length > 0) return todayStr;
-      
-      // If today has 0 trades, check latest recorded session date
-      const latestTrade = tradesData[tradesData.length - 1];
-      if (latestTrade && latestTrade.date) {
-        const curMinutes = now.getHours() * 60 + now.getMinutes();
-        // If before 09:15 AM IST market open or no trades logged today, bind to latest session
-        if (curMinutes < (9 * 60 + 15) || todayTrades.length === 0) {
-          return latestTrade.date;
-        }
-      }
-      return todayStr;
+      return new Intl.DateTimeFormat('en-CA', { 
+        timeZone: 'Asia/Kolkata', 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit' 
+      }).format(now);
+    }
+
+    function getActiveSessionDate() {
+      return getISTDateString();
     }
 
     function checkDailyCircuitBreaker() {
-      const sessionDate = typeof getActiveSessionDate === 'function' ? getActiveSessionDate() : new Date().toISOString().split('T')[0];
-      const todayTrades = tradesData.filter(t => t.date === sessionDate);
-      const todayLosses = todayTrades.filter(t => t.outcome === 'Loss');
+      const sessionDate = getISTDateString();
+      const todayTrades = (typeof tradesData !== 'undefined' && Array.isArray(tradesData))
+        ? tradesData.filter(t => t.date === sessionDate)
+        : [];
+      const todayLosses = todayTrades.filter(t => t.outcome === 'Loss' || (parseFloat(t.net_pnl || 0) < 0));
       
       const headerStatus = document.getElementById('headerDailyStatusText');
       const headerBadge = document.getElementById('headerKillSwitchBadge');
       const cbBanner = document.getElementById('circuitBreakerBanner');
       const cbReasonEl = document.getElementById('circuitReasonText');
+      const modal = document.getElementById('tiltBreakerModal');
 
       if (headerStatus) headerStatus.textContent = `Today: ${todayTrades.length}/2 Trades (${todayLosses.length} Loss)`;
 
@@ -7632,13 +7632,18 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         if (cbBanner) cbBanner.classList.remove('hidden');
         const reasonStr = todayLosses.length >= 2 ? "2 Losses Daily Limit Hit" : "2 Trades Daily Limit Hit";
         dispatchAccountabilityAlert("KILL_SWITCH", { reason: reasonStr });
-        triggerTiltBreakerLockout(reasonStr);
+        triggerTiltBreakerLockout(reasonStr, sessionDate);
         if (cbReasonEl) {
           cbReasonEl.textContent = todayLosses.length >= 2 ? "2 Losses Max Hit for the Day (Mandatory Hard Quit)" : "2 Trades Max Hit for the Day (Execution Window Closed)";
         }
         if (headerBadge) headerBadge.className = 'px-2.5 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 font-bold flex items-center gap-1.5 animate-pulse';
       } else {
         if (cbBanner) cbBanner.classList.add('hidden');
+        if (modal) modal.classList.add('hidden');
+        if (tiltCountdownInterval) {
+          clearInterval(tiltCountdownInterval);
+          tiltCountdownInterval = null;
+        }
         if (headerBadge) headerBadge.className = 'px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-medium flex items-center gap-1.5';
       }
     }
@@ -12650,11 +12655,21 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const modal = document.getElementById('tiltBreakerModal');
       if (!modal) return;
 
-      const sessionDate = forceSessionDate || (typeof getActiveSessionDate === 'function' ? getActiveSessionDate() : new Date().toISOString().split('T')[0]);
+      const sessionDate = forceSessionDate || (typeof getISTDateString === 'function' ? getISTDateString() : (typeof getActiveSessionDate === 'function' ? getActiveSessionDate() : new Date().toISOString().split('T')[0]));
+      const sessionTrades = (typeof tradesData !== 'undefined' && Array.isArray(tradesData))
+        ? tradesData.filter(t => t.date === sessionDate)
+        : [];
+      const sessionLosses = sessionTrades.filter(t => t.outcome === 'Loss' || (parseFloat(t.net_pnl || 0) < 0));
+
+      // Guard: strictly require 2 trades or 2 losses on the session date to trigger
+      if (sessionTrades.length < 2 && sessionLosses.length < 2) {
+        modal.classList.add('hidden');
+        return;
+      }
+
       const reasonEl = document.getElementById('tiltLockReasonText');
       if (reasonEl) reasonEl.textContent = reason || 'Daily Quota Reached';
       
-      const sessionTrades = tradesData.filter(t => t.date === sessionDate);
       const sessionNetPnL = sessionTrades.reduce((acc, t) => acc + (parseFloat(t.net_pnl) || 0), 0);
       
       const countEl = document.getElementById('tiltTodayTradesCount');
