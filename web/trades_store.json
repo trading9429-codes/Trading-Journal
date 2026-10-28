@@ -350,7 +350,8 @@
     "trade_valid": "Y",
     "lesson": "Moved my SL like stupid and took such a big loss, widened the SL and converted small loss to big loss",
     "screenshot_link": "https://www.tradingview.com/chart/?symbol=NSE:ONESOURCE",
-    "post_exit_behavior": "Reversed / Fell Back"
+    "post_exit_behavior": "Reversed / Fell Back",
+    "execution_grade": "A"
   },
   {
     "id": "T-010",
