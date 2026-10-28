@@ -320,7 +320,7 @@
     "hold_duration": 6,
     "symbol": "ONESOURCE",
     "direction": "Long",
-    "setup_name": "",
+    "setup_name": "1m Pullback to 9EMA",
     "scanner_alert_time": "11:04",
     "htf_ok": "Y",
     "no_chase": "Y",
