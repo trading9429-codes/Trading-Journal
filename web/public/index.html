@@ -878,7 +878,7 @@
         <!-- 100 Clean Trades Challenge Pill -->
         <button onclick="openCleanTradesChallengeModal()" id="cleanTradesChallengePill" class="hidden sm:flex items-center gap-1.5 px-2.5 h-8 rounded-xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 hover:from-emerald-500/20 hover:to-cyan-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-mono font-bold shadow-sm transition cursor-pointer whitespace-nowrap flex-shrink-0" title="100 Clean Trades Challenge: View Consecutive Rule-Adherent Streak &amp; Desk Tiers">
           <span>🏆</span>
-          <span id="headerCleanStreakText" class="whitespace-nowrap">6/100 Clean</span>
+          <span id="headerCleanStreakText" class="whitespace-nowrap">0/100 Clean</span>
         </button>
 
         <!-- Quick-Stat Docklets Toggle Pill -->
@@ -3545,12 +3545,12 @@
       <div class="grid grid-cols-3 gap-3 my-5 text-center font-mono">
         <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
           <span class="text-[10px] uppercase font-bold text-slate-400 font-sans block">Current Streak</span>
-          <span id="challengeCurrentStreak" class="text-2xl font-black text-emerald-400 mt-1 block">6</span>
+          <span id="challengeCurrentStreak" class="text-2xl font-black text-emerald-400 mt-1 block">0</span>
           <span class="text-[10px] text-slate-500">Consecutive Clean</span>
         </div>
         <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
           <span class="text-[10px] uppercase font-bold text-slate-400 font-sans block">Best Streak</span>
-          <span id="challengeBestStreak" class="text-2xl font-black text-blue-400 mt-1 block">6</span>
+          <span id="challengeBestStreak" class="text-2xl font-black text-blue-400 mt-1 block">0</span>
           <span class="text-[10px] text-slate-500">Desk Record</span>
         </div>
         <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
@@ -9461,10 +9461,15 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       let totalClean = 0;
       let tempStreak = 0;
 
-      const sortedTrades = [...tradesData].sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+      const sortedTrades = [...tradesData].sort((a, b) => {
+        const tA = ((a.date || '') + ' ' + (a.time || a.entry_time || '')).trim();
+        const tB = ((b.date || '') + ' ' + (b.time || b.entry_time || '')).trim();
+        return tA.localeCompare(tB);
+      });
 
       sortedTrades.forEach(t => {
-        const isClean = t.rule_violation !== 'Y' && (parseInt(t.checklist_score) || 5) >= 5;
+        const chkScore = (t.checklist_score !== undefined && t.checklist_score !== null && t.checklist_score !== '') ? parseInt(t.checklist_score, 10) : 5;
+        const isClean = t.rule_violation !== 'Y' && chkScore >= 5;
         if (isClean) {
           tempStreak++;
           totalClean++;
@@ -9478,7 +9483,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       let activeRun = 0;
       for (let i = sortedTrades.length - 1; i >= 0; i--) {
         const t = sortedTrades[i];
-        const isClean = t.rule_violation !== 'Y' && (parseInt(t.checklist_score) || 5) >= 5;
+        const chkScore = (t.checklist_score !== undefined && t.checklist_score !== null && t.checklist_score !== '') ? parseInt(t.checklist_score, 10) : 5;
+        const isClean = t.rule_violation !== 'Y' && chkScore >= 5;
         if (isClean) activeRun++;
         else break;
       }
@@ -10742,7 +10748,14 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       }
 
       // Streak Tracker
+      const chronTrades = [...trades].sort((a, b) => {
+        const tA = ((a.date || '') + ' ' + (a.time || a.entry_time || '')).trim();
+        const tB = ((b.date || '') + ' ' + (b.time || b.entry_time || '')).trim();
+        return tA.localeCompare(tB);
+      });
+
       let curStreak = 0;
+      let curStreakType = 'neutral';
       let maxWinStreak = 0;
       let maxLossStreak = 0;
       let tempWin = 0;
@@ -10750,8 +10763,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       let postLossRecoveryWins = 0;
       let postLossRecoveryTotal = 0;
 
-      for (let i = 0; i < trades.length; i++) {
-        const net = parseFloat(trades[i].net_pnl) || 0;
+      for (let i = 0; i < chronTrades.length; i++) {
+        const net = parseFloat(chronTrades[i].net_pnl) || 0;
         if (net > 0) {
           tempWin++;
           tempLoss = 0;
@@ -10760,42 +10773,55 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           tempLoss++;
           tempWin = 0;
           if (tempLoss > maxLossStreak) maxLossStreak = tempLoss;
+        } else {
+          tempWin = 0;
+          tempLoss = 0;
         }
 
-        if (i > 0 && (parseFloat(trades[i-1].net_pnl) || 0) < 0) {
+        if (i > 0 && (parseFloat(chronTrades[i-1].net_pnl) || 0) < 0) {
           postLossRecoveryTotal++;
           if (net > 0) postLossRecoveryWins++;
         }
       }
 
-      if (trades.length > 0) {
-        const lastNet = parseFloat(trades[trades.length - 1].net_pnl) || 0;
-        let count = 0;
-        const isWinLast = lastNet > 0;
-        for (let i = trades.length - 1; i >= 0; i--) {
-          const n = parseFloat(trades[i].net_pnl) || 0;
-          if ((n > 0 && isWinLast) || (n < 0 && !isWinLast)) count++;
-          else break;
+      if (chronTrades.length > 0) {
+        const lastNet = parseFloat(chronTrades[chronTrades.length - 1].net_pnl) || 0;
+        if (lastNet > 0) {
+          curStreakType = 'win';
+          for (let i = chronTrades.length - 1; i >= 0; i--) {
+            if ((parseFloat(chronTrades[i].net_pnl) || 0) > 0) curStreak++;
+            else break;
+          }
+        } else if (lastNet < 0) {
+          curStreakType = 'loss';
+          for (let i = chronTrades.length - 1; i >= 0; i--) {
+            if ((parseFloat(chronTrades[i].net_pnl) || 0) < 0) curStreak++;
+            else break;
+          }
         }
-        curStreak = isWinLast ? count : -count;
       }
 
       const maxWinElem = document.getElementById('statMaxWinStreak');
       if (maxWinElem) {
-        maxWinElem.textContent = `${maxWinStreak} trades`;
-        document.getElementById('statMaxLossStreak').textContent = `${maxLossStreak} trades`;
+        maxWinElem.textContent = `${maxWinStreak} trade${maxWinStreak === 1 ? '' : 's'}`;
+        const maxLossElem = document.getElementById('statMaxLossStreak');
+        if (maxLossElem) maxLossElem.textContent = `${maxLossStreak} trade${maxLossStreak === 1 ? '' : 's'}`;
         const curStreakElem = document.getElementById('currentStreakBadge');
         if (curStreakElem) {
-          if (curStreak >= 0) {
-            curStreakElem.textContent = `Streak: +${curStreak} Wins`;
+          if (curStreakType === 'win' && curStreak > 0) {
+            curStreakElem.textContent = `🔥 Streak: +${curStreak} Win${curStreak > 1 ? 's' : ''}`;
             curStreakElem.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
-          } else {
-            curStreakElem.textContent = `Streak: ${curStreak} Loss`;
+          } else if (curStreakType === 'loss' && curStreak > 0) {
+            curStreakElem.textContent = `🛡️ Streak: ${curStreak} Loss${curStreak > 1 ? 'es' : ''}`;
             curStreakElem.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20';
+          } else {
+            curStreakElem.textContent = `Streak: 0 Trades`;
+            curStreakElem.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-slate-500/10 text-slate-400 border border-slate-500/20';
           }
         }
         const postLossWR = postLossRecoveryTotal > 0 ? Math.round((postLossRecoveryWins / postLossRecoveryTotal) * 100) : 100;
-        document.getElementById('statPostCooldownWR').textContent = `${postLossWR}% (${postLossRecoveryWins}/${postLossRecoveryTotal})`;
+        const postLossElem = document.getElementById('statPostCooldownWR');
+        if (postLossElem) postLossElem.textContent = `${postLossWR}% (${postLossRecoveryWins}/${postLossRecoveryTotal})`;
       }
 
       // Tilt Correlation
@@ -15360,8 +15386,16 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const list = trades || (typeof tradesData !== 'undefined' ? tradesData : []);
       if (!list || list.length < 3) return;
 
-      const recent = list.slice(-3);
-      const isStreak = recent.every(t => (t.rule_violation !== 'Y' && (t.checklist_score || 5) >= 4));
+      const sorted = [...list].sort((a, b) => {
+        const tA = ((a.date || '') + ' ' + (a.time || a.entry_time || '')).trim();
+        const tB = ((b.date || '') + ' ' + (b.time || b.entry_time || '')).trim();
+        return tA.localeCompare(tB);
+      });
+      const recent = sorted.slice(-3);
+      const isStreak = recent.every(t => {
+        const chk = (t.checklist_score !== undefined && t.checklist_score !== null && t.checklist_score !== '') ? parseInt(t.checklist_score, 10) : 5;
+        return t.rule_violation !== 'Y' && chk >= 4;
+      });
 
       const brandHeader = document.querySelector('header .max-w-7xl > div');
       if (brandHeader) {
@@ -16503,20 +16537,59 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const quotaText = `${todayTrades.length}/2 Used`;
       const quotaColor = todayTrades.length >= 2 ? 'text-rose-400 font-black' : (todayTrades.length === 1 ? 'text-amber-300' : 'text-slate-200');
 
-      // 3. Discipline / Win Streak
-      let streak = 0;
-      if (typeof cleanTradesStreak !== 'undefined' && cleanTradesStreak > 0) {
-        streak = cleanTradesStreak;
-      } else if (typeof traderStreak !== 'undefined' && traderStreak > 0) {
-        streak = traderStreak;
-      } else {
-        const sorted = [...allTrades].sort((a,b) => ((b.date || '') + ' ' + (b.entry_time || '')).localeCompare((a.date || '') + ' ' + (a.entry_time || '')));
-        for (const t of sorted) {
-          if ((parseFloat(t.net_pnl) || 0) > 0) streak++;
-          else if ((parseFloat(t.net_pnl) || 0) < 0) break;
+      // 3. Trade Win Streak & Historical Record
+      const chronAll = [...allTrades].sort((a, b) => {
+        const tA = ((a.date || '') + ' ' + (a.time || a.entry_time || '')).trim();
+        const tB = ((b.date || '') + ' ' + (b.time || b.entry_time || '')).trim();
+        return tA.localeCompare(tB);
+      });
+
+      let maxWinRun = 0;
+      let tempWinRun = 0;
+      for (let i = 0; i < chronAll.length; i++) {
+        const net = parseFloat(chronAll[i].net_pnl) || 0;
+        if (net > 0) {
+          tempWinRun++;
+          if (tempWinRun > maxWinRun) maxWinRun = tempWinRun;
+        } else {
+          tempWinRun = 0;
         }
       }
-      const streakText = `${Math.max(streak, 1)}d Streak`;
+
+      let activeWinRun = 0;
+      let activeLossRun = 0;
+      if (chronAll.length > 0) {
+        const lastTradeNet = parseFloat(chronAll[chronAll.length - 1].net_pnl) || 0;
+        if (lastTradeNet > 0) {
+          for (let i = chronAll.length - 1; i >= 0; i--) {
+            if ((parseFloat(chronAll[i].net_pnl) || 0) > 0) activeWinRun++;
+            else break;
+          }
+        } else if (lastTradeNet < 0) {
+          for (let i = chronAll.length - 1; i >= 0; i--) {
+            if ((parseFloat(chronAll[i].net_pnl) || 0) < 0) activeLossRun++;
+            else break;
+          }
+        }
+      }
+
+      let streakVal = '0W';
+      let streakColor = 'text-slate-400';
+      let streakTitle = `Win Streak: No active trades | Max Historical: ${maxWinRun}W`;
+
+      if (activeWinRun > 0) {
+        streakVal = `+${activeWinRun} Win${activeWinRun > 1 ? 's' : ''}`;
+        streakColor = 'text-emerald-400 font-bold';
+        streakTitle = `Active Win Streak: +${activeWinRun} trade${activeWinRun > 1 ? 's' : ''} | Max Historical: ${maxWinRun}W`;
+      } else if (activeLossRun > 0) {
+        streakVal = `${activeLossRun}L (Max: ${maxWinRun}W)`;
+        streakColor = 'text-rose-400 font-semibold';
+        streakTitle = `Active Streak: ${activeLossRun} consecutive loss${activeLossRun > 1 ? 'es' : ''} | Max Historical: ${maxWinRun}W`;
+      } else {
+        streakVal = `0W (Max: ${maxWinRun}W)`;
+        streakColor = 'text-slate-400';
+        streakTitle = `Active Streak: Flat / Neutral | Max Historical: ${maxWinRun}W`;
+      }
 
       // 4. Dynamic Kelly Edge (f*)
       let winsCount = 0, sumWinR = 0, lossesCount = 0, sumLossR = 0;
@@ -16570,7 +16643,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const statValues = {
         docklet_pnl: { val: pnlText, color: pnlColor, title: `Today Net P&L: ${pnlText}` },
         docklet_quota: { val: quotaText, color: quotaColor, title: `Daily Trade Quota: ${quotaText}` },
-        docklet_streak: { val: streakText, color: 'text-amber-300', title: `Current Discipline/Win Streak: ${streakText}` },
+        docklet_streak: { val: streakVal, color: streakColor, title: streakTitle },
         docklet_kelly: { val: kellyText, color: kellyColor, title: `Kelly Criterion Optimal Sizing: ${kellyText}` },
         docklet_expectancy: { val: expectancyText, color: expectancyColor, title: `Historical Edge Expectancy: ${expectancyText}` },
         docklet_window: { val: windowText, color: windowColor, title: `IST Trading Window (09:15-10:30): ${windowText}` },
@@ -16925,13 +16998,67 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
     // --- 2. PROCESS GAMIFICATION & DISCIPLINE BADGES ENGINE ---
     let traderXP = 850;
-    let traderStreak = 4;
+    let traderStreak = 0;
+    let bestDisciplineStreak = 0;
+
+    function calculateDisciplineStreak(trades) {
+      const list = trades || (typeof tradesData !== 'undefined' ? tradesData : []);
+      if (!list || list.length === 0) return { activeStreak: 0, bestStreak: 0 };
+
+      // Group trades by date
+      const dayMap = {};
+      list.forEach(t => {
+        if (!t.date) return;
+        if (!dayMap[t.date]) dayMap[t.date] = [];
+        dayMap[t.date].push(t);
+      });
+
+      const sortedDates = Object.keys(dayMap).sort();
+      if (sortedDates.length === 0) return { activeStreak: 0, bestStreak: 0 };
+
+      let bestStreak = 0;
+      let tempStreak = 0;
+      const dayCompliance = {};
+
+      sortedDates.forEach(date => {
+        const dayTrades = dayMap[date];
+        // Compliant day rules:
+        // 1. Max 2 trades per day (quota adherence)
+        // 2. 0 rule violations (rule_violation !== 'Y')
+        // 3. Checklist score >= 5 (or no unrated/subpar checklist)
+        let compliant = dayTrades.length <= 2;
+        for (const t of dayTrades) {
+          const chkScore = (t.checklist_score !== undefined && t.checklist_score !== null && t.checklist_score !== '') ? parseInt(t.checklist_score, 10) : 5;
+          if (t.rule_violation === 'Y' || chkScore < 5) {
+            compliant = false;
+            break;
+          }
+        }
+        dayCompliance[date] = compliant;
+        if (compliant) {
+          tempStreak++;
+          if (tempStreak > bestStreak) bestStreak = tempStreak;
+        } else {
+          tempStreak = 0;
+        }
+      });
+
+      // Active streak backwards from latest trading date
+      let activeStreak = 0;
+      for (let i = sortedDates.length - 1; i >= 0; i--) {
+        if (dayCompliance[sortedDates[i]]) {
+          activeStreak++;
+        } else {
+          break;
+        }
+      }
+
+      return { activeStreak, bestStreak };
+    }
 
     function initDisciplineGamification() {
       const savedXP = localStorage.getItem('trader_discipline_xp');
       if (savedXP !== null) traderXP = parseInt(savedXP, 10);
-      const savedStreak = localStorage.getItem('trader_discipline_streak');
-      if (savedStreak !== null) traderStreak = parseInt(savedStreak, 10);
       renderDisciplineStats();
     }
 
@@ -16956,13 +17083,17 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     }
 
     function renderDisciplineStats() {
+      const streakStats = calculateDisciplineStreak();
+      traderStreak = streakStats.activeStreak;
+      bestDisciplineStreak = streakStats.bestStreak;
+
       const rank = getDisciplineRank(traderXP);
 
       const headerStreak = document.getElementById('headerStreakText');
       const headerLevel = document.getElementById('headerLevelText');
       const headerXp = document.getElementById('headerXpText');
 
-      if (headerStreak) headerStreak.textContent = `🔥 ${traderStreak}d Streak`;
+      if (headerStreak) headerStreak.textContent = traderStreak > 0 ? `🔥 ${traderStreak}d Streak` : `🛡️ 0d Streak`;
       if (headerLevel) headerLevel.textContent = `⭐ Lvl ${rank.level}`;
       if (headerXp) headerXp.textContent = `(${traderXP} XP)`;
 
@@ -16975,7 +17106,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       if (rankTitle) rankTitle.textContent = `${rank.badge} ${rank.title}`;
       if (progressText) progressText.textContent = `${traderXP} / ${rank.maxXP} XP`;
       if (toNextText) toNextText.textContent = `${Math.max(0, rank.maxXP - traderXP)} XP to next tier`;
-      if (streakDays) streakDays.textContent = `🔥 ${traderStreak} Days`;
+      if (streakDays) streakDays.textContent = traderStreak > 0 ? `🔥 ${traderStreak} Days` : `🛡️ 0 Days`;
 
       if (xpBar) {
         const range = rank.maxXP - rank.minXP;
@@ -16992,8 +17123,8 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       if (!container) return;
 
       const badges = [
-        { id: 'iron_will', title: 'Iron Will', desc: 'Resisted 3+ boredom impulses', icon: '⚡', unlocked: impulsesData.length >= 3 },
-        { id: 'clean_streak', title: 'Clean Execution', desc: 'Maintained 3+ days compliant', icon: '🛡️', unlocked: traderStreak >= 3 },
+        { id: 'iron_will', title: 'Iron Will', desc: 'Resisted 3+ boredom impulses', icon: '⚡', unlocked: (typeof impulsesData !== 'undefined' ? impulsesData.length : 0) >= 3 },
+        { id: 'clean_streak', title: 'Clean Execution', desc: 'Maintained 3+ days compliant', icon: '🛡️', unlocked: bestDisciplineStreak >= 3 || traderStreak >= 3 },
         { id: 'sniper', title: 'Precision Sniper', desc: 'Avg planned RR >= 2.2R', icon: '🎯', unlocked: true },
         { id: 'capital_protector', title: 'Capital Protector', desc: '100% stop losses honored', icon: '💎', unlocked: true },
         { id: 'window_master', title: 'Window Master', desc: '0 trades taken post 10:30 AM', icon: '⏱️', unlocked: true },
