@@ -563,7 +563,7 @@
     "hold_duration": 51,
     "symbol": "AEROFLEX",
     "direction": "Long",
-    "setup_name": "Opening Range Breakout (ORB)",
+    "setup_name": "1m VWAP Bounce",
     "scanner_alert_time": "09:55",
     "htf_ok": "Y",
     "no_chase": "Y",
