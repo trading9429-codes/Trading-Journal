@@ -563,7 +563,7 @@
     "hold_duration": 51,
     "symbol": "AEROFLEX",
     "direction": "Long",
-    "setup_name": "1m Pullback to 9EMA",
+    "setup_name": "Opening Range Breakout (ORB)",
     "scanner_alert_time": "09:55",
     "htf_ok": "Y",
     "no_chase": "Y",
