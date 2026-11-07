@@ -13,6 +13,8 @@
   <!-- Tailwind CSS & Chart.js -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- TradingView Official Script Embed -->
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -3462,21 +3464,26 @@
         <!-- RIGHT COLUMN: INTERACTIVE 1-MIN CANDLESTICK CHART & FAST EXECUTION (5 COLS ON XL) -->
         <div class="xl:col-span-5 space-y-4">
           <section class="glass-card rounded-2xl p-5 shadow-2xl border border-slate-800 flex flex-col h-full">
-            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800 flex-wrap gap-2">
               <div class="flex items-center gap-2">
                 <span class="text-sm font-black text-white font-mono flex items-center gap-1.5" id="tab5ChartSymbolTitle">
                   <span class="text-emerald-400">📈</span> NSE:RELIANCE
                 </span>
                 <span class="text-[10px] font-mono bg-blue-500/10 text-blue-300 px-2 py-0.5 rounded border border-blue-500/20 font-bold">1m TF</span>
               </div>
-              <button onclick="openSelectedStockInTradingView()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 transition">
-                <span>TradingView ↗</span>
-              </button>
+              <div class="flex items-center gap-1.5">
+                <button onclick="openSelectedStockInTradingView()" class="px-2 py-1 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-xs font-semibold flex items-center gap-1 transition" title="Open full chart on TradingView">
+                  <span>TradingView ↗</span>
+                </button>
+                <button onclick="openSelectedStockInFyers()" class="px-2 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-semibold flex items-center gap-1 transition" title="Open in FYERS Web terminal">
+                  <span>FYERS ↗</span>
+                </button>
+              </div>
             </div>
 
-            <!-- Embedded TradingView 1-Minute Candlestick Chart -->
-            <div class="w-full rounded-xl overflow-hidden border border-slate-800 bg-slate-950 min-h-[420px] relative">
-              <iframe id="tab5TradingViewFrame" src="https://s.tradingview.com/widgetembed/?symbol=NSE%3ARELIANCE&interval=1&theme=dark&style=1&timezone=Asia%2FKolkata" class="w-full h-[420px] border-0" allowtransparency="true" scrolling="no"></iframe>
+            <!-- Embedded TradingView 1-Minute Candlestick Chart (Official tv.js Widget Container) -->
+            <div class="w-full rounded-xl overflow-hidden border border-slate-800 bg-slate-950 min-h-[440px] relative">
+              <div id="tab5TradingViewContainer" class="w-full h-[440px]"></div>
             </div>
 
             <!-- Fast Execution Strip Right Under Chart -->
@@ -7498,8 +7505,11 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         }
       }
 
-      if (tabNum === 5 && typeof fetchScannerAlerts === 'function') {
-        fetchScannerAlerts();
+      if (tabNum === 5) {
+        if (typeof fetchScannerAlerts === 'function') fetchScannerAlerts();
+        if (typeof renderTradingViewChartWidget === 'function') {
+          setTimeout(() => renderTradingViewChartWidget(activeRadarSymbol), 60);
+        }
       }
 
       // Render charts AFTER DOM paint so canvas elements have non-zero dimensions
@@ -8489,6 +8499,46 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       }
     }
 
+    let activeTradingViewWidget = null;
+
+    function renderTradingViewChartWidget(symbol) {
+      const container = document.getElementById('tab5TradingViewContainer');
+      if (!container) return;
+
+      const cleanSymbol = symbol ? symbol.replace(/^NSE:/i, '').trim().toUpperCase() : 'RELIANCE';
+
+      // Clear previous widget instance
+      container.innerHTML = '';
+
+      if (typeof TradingView !== 'undefined' && TradingView.widget) {
+        try {
+          activeTradingViewWidget = new TradingView.widget({
+            "autosize": true,
+            "symbol": `NSE:${cleanSymbol}`,
+            "interval": "1",
+            "timezone": "Asia/Kolkata",
+            "theme": "dark",
+            "style": "1",
+            "locale": "en",
+            "toolbar_bg": "#0b1120",
+            "enable_publishing": false,
+            "hide_side_toolbar": false,
+            "allow_symbol_change": true,
+            "save_image": false,
+            "container_id": "tab5TradingViewContainer"
+          });
+          return;
+        } catch (e) {
+          console.warn('tv.js widget initialize fallback:', e);
+        }
+      }
+
+      // Defensive fallback if tv.js script is blocked or delayed
+      container.innerHTML = `
+        <iframe src="https://s.tradingview.com/widgetembed/?symbol=NSE%3A${encodeURIComponent(cleanSymbol)}&interval=1&theme=dark&style=1&timezone=Asia%2FKolkata" class="w-full h-full border-0" allowtransparency="true" scrolling="no"></iframe>
+      `;
+    }
+
     function selectStockForChart(symbol, price) {
       activeRadarSymbol = symbol.toUpperCase().trim();
       activeRadarPrice = price || 0;
@@ -8496,19 +8546,21 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const titleEl = document.getElementById('tab5ChartSymbolTitle');
       const textSym = document.getElementById('tab5ChartSelectedSymbolText');
       const textPx = document.getElementById('tab5ChartSelectedPriceText');
-      const frame = document.getElementById('tab5TradingViewFrame');
 
       if (titleEl) titleEl.innerHTML = `<span class="text-emerald-400">📈</span> NSE:${escapeHtml(activeRadarSymbol)}`;
       if (textSym) textSym.textContent = activeRadarSymbol;
       if (textPx) textPx.textContent = activeRadarPrice > 0 ? `₹${parseFloat(activeRadarPrice).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'Mkt Price';
 
-      if (frame) {
-        frame.src = `https://s.tradingview.com/widgetembed/?symbol=NSE%3A${encodeURIComponent(activeRadarSymbol)}&interval=1&theme=dark&style=1&timezone=Asia%2FKolkata`;
-      }
+      renderTradingViewChartWidget(activeRadarSymbol);
     }
 
     function openSelectedStockInTradingView() {
       openTradingViewChart(activeRadarSymbol);
+    }
+
+    function openSelectedStockInFyers() {
+      const clean = (activeRadarSymbol || 'RELIANCE').replace(/^NSE:/i, '').trim().toUpperCase();
+      window.open(`https://trade.fyers.in/`, '_blank');
     }
 
     function executeFromRadar(direction) {
