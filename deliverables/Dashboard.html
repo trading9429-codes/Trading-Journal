@@ -3466,56 +3466,95 @@
           </section>
         </div>
 
-        <!-- RIGHT COLUMN: INTERACTIVE 1-MIN CANDLESTICK CHART & FAST EXECUTION (5 COLS ON XL) -->
+        <!-- RIGHT COLUMN: RADAR INTELLIGENCE & FAST EXECUTION COCKPIT (5 COLS ON XL) -->
         <div class="xl:col-span-5 space-y-4">
           <section class="glass-card rounded-2xl p-5 shadow-2xl border border-slate-800 flex flex-col h-full">
             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800 flex-wrap gap-2">
               <div class="flex items-center gap-2">
-                <span class="text-sm font-black text-white font-mono flex items-center gap-1.5" id="tab5ChartSymbolTitle">
+                <span class="text-base font-black text-white font-mono flex items-center gap-1.5" id="tab5ChartSymbolTitle">
                   <span class="text-emerald-400">📈</span> NSE:RELIANCE
                 </span>
-                <span class="text-[10px] font-mono bg-blue-500/10 text-blue-300 px-2 py-0.5 rounded border border-blue-500/20 font-bold" id="radarTimeframeBadge">1m TF</span>
+                <span class="text-[10px] font-mono bg-amber-500/10 text-amber-300 px-2 py-0.5 rounded border border-amber-500/20 font-bold" id="radarSelectedTag">1m Setup</span>
               </div>
-              <div class="flex items-center gap-1.5">
-                <div class="inline-flex rounded-lg border border-slate-800 bg-slate-900 p-0.5 text-xs font-mono">
-                  <button type="button" onclick="setRadarChartTimeframe('1')" id="radarTF_1" class="px-2 py-0.5 rounded font-bold bg-blue-600 text-white transition cursor-pointer">1m</button>
-                  <button type="button" onclick="setRadarChartTimeframe('5')" id="radarTF_5" class="px-2 py-0.5 rounded font-bold text-slate-400 hover:text-white transition cursor-pointer">5m</button>
-                </div>
-                <button onclick="openSelectedStockInTradingView()" class="px-2 py-1 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-xs font-semibold flex items-center gap-1 transition" title="Open full chart on TradingView">
-                  <span>TradingView ↗</span>
+              <div class="flex items-center gap-2">
+                <button onclick="openSelectedStockInTradingView()" class="px-3 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 text-xs font-bold flex items-center gap-1.5 transition shadow-sm" title="Open in new TradingView browser tab">
+                  <span>📈 TradingView</span>
+                  <span>↗</span>
                 </button>
-                <button onclick="openSelectedStockInFyers()" class="px-2 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-semibold flex items-center gap-1 transition" title="Open in FYERS Web terminal">
-                  <span>FYERS ↗</span>
+                <button onclick="openSelectedStockInFyers()" class="px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 text-xs font-bold flex items-center gap-1.5 transition shadow-sm" title="Open FYERS Web terminal">
+                  <span>⚡ FYERS</span>
+                  <span>↗</span>
                 </button>
               </div>
             </div>
 
-            <!-- Embedded TradingView 1-Minute Candlestick Chart (Official tv.js Widget Container) -->
-            <div class="w-full rounded-xl overflow-hidden border border-slate-800 bg-slate-950 min-h-[440px] relative">
-              <div id="tab5TradingViewContainer" class="w-full h-[440px]"></div>
-            </div>
-
-            <!-- Fast Execution Strip Right Under Chart -->
-            <div class="mt-4 p-4 rounded-xl bg-slate-950/90 border border-slate-800 space-y-3">
-              <div class="flex items-center justify-between text-xs">
+            <!-- Focused Stock Blueprint & Metric Card (Replaces Iframe) -->
+            <div class="w-full rounded-xl border border-slate-800 bg-slate-950/90 p-5 space-y-4">
+              <div class="flex items-start justify-between">
                 <div>
-                  <span class="text-[10px] uppercase font-bold text-slate-500 block">Active Selected Stock</span>
-                  <span id="tab5ChartSelectedSymbolText" class="font-mono font-black text-white text-base">RELIANCE</span>
+                  <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider block">Selected Stock</span>
+                  <div class="flex items-baseline gap-2 mt-0.5">
+                    <span id="tab5ChartSelectedSymbolText" class="font-mono font-black text-white text-2xl tracking-wide">RELIANCE</span>
+                    <span class="text-xs font-mono text-slate-400">EQ (NSE)</span>
+                  </div>
                 </div>
                 <div class="text-right">
-                  <span class="text-[10px] uppercase font-bold text-slate-500 block">Trigger Price</span>
-                  <span id="tab5ChartSelectedPriceText" class="font-mono font-bold text-emerald-400 text-base">₹2,500.00</span>
+                  <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider block">Scanner Trigger Price</span>
+                  <span id="tab5ChartSelectedPriceText" class="font-mono font-black text-emerald-400 text-2xl mt-0.5 block">₹2,500.00</span>
                 </div>
               </div>
 
-              <div class="grid grid-cols-2 gap-2">
-                <button onclick="executeFromRadar('Long')" class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 transition shadow-lg shadow-emerald-950/50">
+              <!-- Instant Pre-Calculated Risk & Target Planner -->
+              <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2.5">
+                <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-800">
+                  <span class="font-bold text-slate-300 flex items-center gap-1.5">
+                    <span>🎯</span> Fast Risk Blueprint (₹500 Risk / 0.25% Cap)
+                  </span>
+                  <span id="radarSizedQtyBadge" class="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Auto Sized</span>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-2 text-center font-mono">
+                  <div class="p-2 rounded-lg bg-slate-950/80 border border-slate-800">
+                    <span class="text-[9px] uppercase font-bold text-rose-400 block">Est. Stop Loss</span>
+                    <span id="radarEstSL" class="text-xs font-black text-white mt-0.5 block">₹2,485.00</span>
+                    <span class="text-[9px] text-slate-500">(-0.6%)</span>
+                  </div>
+                  <div class="p-2 rounded-lg bg-slate-950/80 border border-slate-800">
+                    <span class="text-[9px] uppercase font-bold text-blue-400 block">Planned Risk</span>
+                    <span class="text-xs font-black text-white mt-0.5 block">₹500.00</span>
+                    <span class="text-[9px] text-slate-500">(1.0R Max)</span>
+                  </div>
+                  <div class="p-2 rounded-lg bg-slate-950/80 border border-slate-800">
+                    <span class="text-[9px] uppercase font-bold text-emerald-400 block">Target (2.2R)</span>
+                    <span id="radarEstTarget" class="text-xs font-black text-emerald-400 mt-0.5 block">₹2,533.00</span>
+                    <span class="text-[9px] text-slate-500">(+1.32%)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Verification Protocol -->
+              <div class="p-3.5 rounded-xl bg-amber-500/5 border border-amber-500/20 text-xs space-y-1.5">
+                <div class="flex items-center gap-1.5 text-amber-300 font-bold text-[11px]">
+                  <span>🛡️</span> 3-Point Pre-Flight Verification Before Order Fill:
+                </div>
+                <ul class="text-[11px] text-slate-300 space-y-1 pl-4 list-disc font-sans">
+                  <li>Open <strong>TradingView ↗</strong> and verify 5m candle is above VWAP.</li>
+                  <li>Ensure distance to nearest resistance gives $\ge 2.2R$.</li>
+                  <li>Check Daily Quota: Maximum 2 trades/day hard cap.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Fast Execution Strip Right Under Blueprint -->
+            <div class="mt-4 p-4 rounded-xl bg-slate-950/90 border border-slate-800 space-y-3">
+              <div class="grid grid-cols-2 gap-2.5">
+                <button onclick="executeFromRadar('Long')" class="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center gap-1.5 transition shadow-lg shadow-emerald-950/50 cursor-pointer">
                   <span>⚡</span>
-                  <span>Pre-fill LONG</span>
+                  <span>Pre-fill LONG Order</span>
                 </button>
-                <button onclick="executeFromRadar('Short')" class="py-2.5 px-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 transition shadow-lg shadow-rose-950/50">
+                <button onclick="executeFromRadar('Short')" class="py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs flex items-center justify-center gap-1.5 transition shadow-lg shadow-rose-950/50 cursor-pointer">
                   <span>⚡</span>
-                  <span>Pre-fill SHORT</span>
+                  <span>Pre-fill SHORT Order</span>
                 </button>
               </div>
             </div>
@@ -7516,9 +7555,6 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
       if (tabNum === 5) {
         if (typeof fetchScannerAlerts === 'function') fetchScannerAlerts();
-        if (typeof renderTradingViewChartWidget === 'function') {
-          setTimeout(() => renderTradingViewChartWidget(activeRadarSymbol), 60);
-        }
       }
 
       // Render charts AFTER DOM paint so canvas elements have non-zero dimensions
@@ -8544,60 +8580,6 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       }
     }
 
-    let activeTradingViewWidget = null;
-    let activeRadarTimeframe = '1';
-
-    function setRadarChartTimeframe(tf) {
-      activeRadarTimeframe = tf;
-      const b1 = document.getElementById('radarTF_1');
-      const b5 = document.getElementById('radarTF_5');
-      const badge = document.getElementById('radarTimeframeBadge');
-
-      if (b1) b1.className = tf === '1' ? 'px-2 py-0.5 rounded font-bold bg-blue-600 text-white transition cursor-pointer' : 'px-2 py-0.5 rounded font-bold text-slate-400 hover:text-white transition cursor-pointer';
-      if (b5) b5.className = tf === '5' ? 'px-2 py-0.5 rounded font-bold bg-blue-600 text-white transition cursor-pointer' : 'px-2 py-0.5 rounded font-bold text-slate-400 hover:text-white transition cursor-pointer';
-      if (badge) badge.textContent = `${tf}m TF`;
-
-      renderTradingViewChartWidget(activeRadarSymbol);
-    }
-
-    function renderTradingViewChartWidget(symbol) {
-      const container = document.getElementById('tab5TradingViewContainer');
-      if (!container) return;
-
-      const cleanSymbol = symbol ? symbol.replace(/^NSE:/i, '').trim().toUpperCase() : 'RELIANCE';
-
-      // Clear previous widget instance
-      container.innerHTML = '';
-
-      if (typeof TradingView !== 'undefined' && TradingView.widget) {
-        try {
-          activeTradingViewWidget = new TradingView.widget({
-            "autosize": true,
-            "symbol": `NSE:${cleanSymbol}`,
-            "interval": activeRadarTimeframe,
-            "timezone": "Asia/Kolkata",
-            "theme": "dark",
-            "style": "1",
-            "locale": "en",
-            "toolbar_bg": "#0b1120",
-            "enable_publishing": false,
-            "hide_side_toolbar": false,
-            "allow_symbol_change": true,
-            "save_image": false,
-            "container_id": "tab5TradingViewContainer"
-          });
-          return;
-        } catch (e) {
-          console.warn('tv.js widget initialize fallback:', e);
-        }
-      }
-
-      // Defensive fallback if tv.js script is blocked or delayed
-      container.innerHTML = `
-        <iframe src="https://s.tradingview.com/widgetembed/?symbol=NSE%3A${encodeURIComponent(cleanSymbol)}&interval=${activeRadarTimeframe}&theme=dark&style=1&timezone=Asia%2FKolkata" class="w-full h-full border-0" allowtransparency="true" scrolling="no"></iframe>
-      `;
-    }
-
     function selectStockForChart(symbol, price) {
       activeRadarSymbol = symbol.toUpperCase().trim();
       activeRadarPrice = price || 0;
@@ -8605,12 +8587,25 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       const titleEl = document.getElementById('tab5ChartSymbolTitle');
       const textSym = document.getElementById('tab5ChartSelectedSymbolText');
       const textPx = document.getElementById('tab5ChartSelectedPriceText');
+      const slEl = document.getElementById('radarEstSL');
+      const tgtEl = document.getElementById('radarEstTarget');
+      const qtyBadge = document.getElementById('radarSizedQtyBadge');
 
       if (titleEl) titleEl.innerHTML = `<span class="text-emerald-400">📈</span> NSE:${escapeHtml(activeRadarSymbol)}`;
       if (textSym) textSym.textContent = activeRadarSymbol;
       if (textPx) textPx.textContent = activeRadarPrice > 0 ? `₹${parseFloat(activeRadarPrice).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'Mkt Price';
 
-      renderTradingViewChartWidget(activeRadarSymbol);
+      // Pre-calculate Blueprint Risk & Sizing for ₹500 risk (0.25% of ₹2L)
+      if (activeRadarPrice > 0) {
+        const estSL = activeRadarPrice * 0.994; // 0.6% stop
+        const estTgt = activeRadarPrice * 1.0132; // 1.32% target (2.2R)
+        const riskPerShare = Math.max(0.5, activeRadarPrice - estSL);
+        const sizedShares = Math.max(1, Math.floor(500 / riskPerShare));
+
+        if (slEl) slEl.textContent = `₹${estSL.toFixed(2)}`;
+        if (tgtEl) tgtEl.textContent = `₹${estTgt.toFixed(2)}`;
+        if (qtyBadge) qtyBadge.textContent = `${sizedShares} shs (~₹500 Risk)`;
+      }
     }
 
     function openSelectedStockInTradingView() {
