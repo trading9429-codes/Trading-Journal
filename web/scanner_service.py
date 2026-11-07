@@ -82,6 +82,14 @@ class ChartinkScannerManager:
                 is_1m_scan = "1 min" in scan_lower or "1m" in scan_lower or "1-min" in scan_lower
                 is_5m_scan = "5 min" in scan_lower or "5m" in scan_lower or "5-min" in scan_lower
 
+                # Trigger timestamps tracking for velocity calculation (alerts in last 3 minutes)
+                now_epoch = datetime.now().timestamp()
+                recent_triggers = [now_epoch] if is_new else [
+                    t for t in self.stock_stats[sym].get("trigger_times", []) if now_epoch - t <= 180
+                ] + [now_epoch]
+                velocity_3m = len(recent_triggers)
+                is_high_velocity = velocity_3m >= 2
+
                 # Update or initialize stock_stats frequency counter
                 if is_new:
                     self.stock_stats[sym] = {
@@ -95,6 +103,9 @@ class ChartinkScannerManager:
                         "has_5m": is_5m_scan,
                         "golden_confluence": is_1m_scan and is_5m_scan,
                         "confluence_count": 1,
+                        "trigger_times": recent_triggers,
+                        "velocity_3m": velocity_3m,
+                        "is_high_velocity": is_high_velocity,
                         "is_new": True
                     }
                 else:
@@ -114,6 +125,9 @@ class ChartinkScannerManager:
                     has_both_tf = self.stock_stats[sym].get("has_1m", False) and self.stock_stats[sym].get("has_5m", False)
                     self.stock_stats[sym]["golden_confluence"] = has_both_tf
                     self.stock_stats[sym]["confluence_count"] = len(self.stock_stats[sym]["scans"])
+                    self.stock_stats[sym]["trigger_times"] = recent_triggers
+                    self.stock_stats[sym]["velocity_3m"] = velocity_3m
+                    self.stock_stats[sym]["is_high_velocity"] = is_high_velocity
                     self.stock_stats[sym]["is_new"] = False
 
                 matched_items.append({
@@ -125,6 +139,8 @@ class ChartinkScannerManager:
                     "has_1m": self.stock_stats[sym].get("has_1m", False),
                     "has_5m": self.stock_stats[sym].get("has_5m", False),
                     "golden_confluence": self.stock_stats[sym].get("golden_confluence", False),
+                    "velocity_3m": velocity_3m,
+                    "is_high_velocity": is_high_velocity,
                     "scans": list(self.stock_stats[sym]["scans"])
                 })
 
@@ -152,11 +168,12 @@ class ChartinkScannerManager:
             }
 
     def get_top_stocks(self, limit=12):
-        """Returns stocks sorted descending by golden confluence (5m+1m), multi-confluence, and alert frequency."""
+        """Returns stocks sorted descending by golden confluence (5m+1m), velocity, multi-confluence, and alert frequency."""
         sorted_stocks = sorted(
             self.stock_stats.values(),
             key=lambda x: (
                 x.get("golden_confluence", False),
+                x.get("is_high_velocity", False),
                 x.get("confluence_count", 1) >= 2,
                 x["count"]
             ),

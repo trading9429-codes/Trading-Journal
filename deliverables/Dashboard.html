@@ -3547,12 +3547,20 @@
 
             <!-- Fast Execution Strip Right Under Blueprint -->
             <div class="mt-4 p-4 rounded-xl bg-slate-950/90 border border-slate-800 space-y-3">
-              <div class="grid grid-cols-2 gap-2.5">
-                <button onclick="executeFromRadar('Long')" class="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center gap-1.5 transition shadow-lg shadow-emerald-950/50 cursor-pointer">
+              <div id="radarLockoutBanner" class="hidden p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-semibold flex items-center gap-2">
+                <span class="text-base select-none">🔒</span>
+                <div>
+                  <div class="font-bold text-rose-400">Trading Desk Locked (Daily Quota Reached)</div>
+                  <div class="text-[11px] text-rose-400/80 font-normal">Execution buttons are disabled to protect capital and prevent impulsive overtrading.</div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2.5" id="radarActionButtonsGrid">
+                <button type="button" id="radarPreFillLongBtn" onclick="requestRadarTradeFill('Long')" class="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center gap-1.5 transition shadow-lg shadow-emerald-950/50 cursor-pointer">
                   <span>⚡</span>
                   <span>Pre-fill LONG Order</span>
                 </button>
-                <button onclick="executeFromRadar('Short')" class="py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs flex items-center justify-center gap-1.5 transition shadow-lg shadow-rose-950/50 cursor-pointer">
+                <button type="button" id="radarPreFillShortBtn" onclick="requestRadarTradeFill('Short')" class="py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs flex items-center justify-center gap-1.5 transition shadow-lg shadow-rose-950/50 cursor-pointer">
                   <span>⚡</span>
                   <span>Pre-fill SHORT Order</span>
                 </button>
@@ -6100,6 +6108,74 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
   </div>
 
   <!-- ========================================== -->
+  <!-- MODAL: PRE-FLIGHT CHECKLIST GUARD (ANTI-IMPULSE) -->
+  <!-- ========================================== -->
+  <div id="radarPreFlightModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div class="glass-card rounded-2xl max-w-md w-full p-6 border border-emerald-500/40 shadow-2xl relative space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🛡️</span>
+          <div>
+            <h3 class="text-sm font-bold text-white">Pre-Flight Verification Guard</h3>
+            <p class="text-[11px] text-slate-400">3-second cognitive pause to defeat impulsive clicking</p>
+          </div>
+        </div>
+        <button onclick="closeRadarPreFlightModal()" class="text-slate-400 hover:text-white text-xl leading-none">&times;</button>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] uppercase font-bold text-slate-500 block">Candidate Stock</span>
+          <span id="preFlightSymbolDisp" class="font-mono font-black text-white text-base">RELIANCE</span>
+        </div>
+        <div>
+          <span class="text-[10px] uppercase font-bold text-slate-500 block">Planned Direction</span>
+          <span id="preFlightDirectionDisp" class="font-mono font-bold text-emerald-400 text-base">LONG (BUY)</span>
+        </div>
+        <div class="text-right">
+          <span class="text-[10px] uppercase font-bold text-slate-500 block">Trigger Price</span>
+          <span id="preFlightPriceDisp" class="font-mono font-black text-emerald-400 text-base">₹2,500.00</span>
+        </div>
+      </div>
+
+      <div class="space-y-3 pt-1">
+        <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition select-none">
+          <input type="checkbox" id="preFlightCheck_5m" class="mt-1 w-4 h-4 rounded text-emerald-500 focus:ring-emerald-500 bg-slate-950 border-slate-700">
+          <div class="text-xs">
+            <strong class="text-white block font-semibold">1. Higher-Timeframe (5m) Confirmation</strong>
+            <span class="text-slate-400 text-[11px]">I verified the 5m chart is green, trading cleanly above VWAP with healthy volume.</span>
+          </div>
+        </label>
+
+        <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition select-none">
+          <input type="checkbox" id="preFlightCheck_rr" class="mt-1 w-4 h-4 rounded text-emerald-500 focus:ring-emerald-500 bg-slate-950 border-slate-700">
+          <div class="text-xs">
+            <strong class="text-white block font-semibold">2. Minimum 2.2R Clearance</strong>
+            <span class="text-slate-400 text-[11px]">Distance to nearest resistance provides $\ge 2.2R$ reward with a hard stop loss.</span>
+          </div>
+        </label>
+
+        <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition select-none">
+          <input type="checkbox" id="preFlightCheck_quota" class="mt-1 w-4 h-4 rounded text-emerald-500 focus:ring-emerald-500 bg-slate-950 border-slate-700">
+          <div class="text-xs">
+            <strong class="text-white block font-semibold">3. Daily Quota Honor (&le;2 Trades)</strong>
+            <span class="text-slate-400 text-[11px]">I accept the outcome 100% and will stop immediately if my daily quota is filled.</span>
+          </div>
+        </label>
+      </div>
+
+      <div class="pt-2 flex items-center justify-end gap-2.5">
+        <button type="button" onclick="closeRadarPreFlightModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+          Cancel (Step Back)
+        </button>
+        <button type="button" onclick="confirmPreFlightFill()" id="preFlightConfirmBtn" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow">
+          <span>⚡ Proceed to Order Form</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
   <!-- MODAL: CHARTINK 1-MINUTE WEBHOOK CONFIGURATION -->
   <!-- ========================================== -->
   <div id="webhookConfigModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
@@ -7694,6 +7770,10 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
       if (headerStatus) headerStatus.textContent = `Today: ${todayTrades.length}/2 Trades (${todayLosses.length} Loss)`;
 
+      if (typeof updateRadarLockoutUI === 'function') {
+        updateRadarLockoutUI();
+      }
+
       if (todayTrades.length >= 2 || todayLosses.length >= 2) {
         if (cbBanner) cbBanner.classList.remove('hidden');
         const reasonStr = todayLosses.length >= 2 ? "2 Losses Daily Limit Hit" : "2 Trades Daily Limit Hit";
@@ -8617,7 +8697,106 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       window.open(`https://trade.fyers.in/`, '_blank');
     }
 
+    let pendingRadarDirection = 'Long';
+
+    function isDailyQuotaLocked() {
+      const sessionDate = getISTDateString();
+      const todayTrades = (typeof tradesData !== 'undefined' && Array.isArray(tradesData))
+        ? tradesData.filter(t => t.date === sessionDate)
+        : [];
+      const todayLosses = todayTrades.filter(t => t.outcome === 'Loss' || (parseFloat(t.net_pnl || 0) < 0));
+      return todayTrades.length >= 2 || todayLosses.length >= 2;
+    }
+
+    function updateRadarLockoutUI() {
+      const isLocked = isDailyQuotaLocked();
+      const banner = document.getElementById('radarLockoutBanner');
+      const btnLong = document.getElementById('radarPreFillLongBtn');
+      const btnShort = document.getElementById('radarPreFillShortBtn');
+
+      if (banner) {
+        if (isLocked) banner.classList.remove('hidden');
+        else banner.classList.add('hidden');
+      }
+
+      if (btnLong && btnShort) {
+        if (isLocked) {
+          btnLong.disabled = true;
+          btnLong.className = 'py-3 px-4 rounded-xl bg-slate-800 text-slate-500 font-bold text-xs flex items-center justify-center gap-1.5 cursor-not-allowed opacity-60';
+          btnLong.innerHTML = '<span>🔒</span><span>Desk Locked (2/2 Done)</span>';
+
+          btnShort.disabled = true;
+          btnShort.className = 'py-3 px-4 rounded-xl bg-slate-800 text-slate-500 font-bold text-xs flex items-center justify-center gap-1.5 cursor-not-allowed opacity-60';
+          btnShort.innerHTML = '<span>🔒</span><span>Desk Locked (2/2 Done)</span>';
+        } else {
+          btnLong.disabled = false;
+          btnLong.className = 'py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center gap-1.5 transition shadow-lg shadow-emerald-950/50 cursor-pointer';
+          btnLong.innerHTML = '<span>⚡</span><span>Pre-fill LONG Order</span>';
+
+          btnShort.disabled = false;
+          btnShort.className = 'py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs flex items-center justify-center gap-1.5 transition shadow-lg shadow-rose-950/50 cursor-pointer';
+          btnShort.innerHTML = '<span>⚡</span><span>Pre-fill SHORT Order</span>';
+        }
+      }
+    }
+
+    function requestRadarTradeFill(direction) {
+      if (isDailyQuotaLocked()) {
+        alert("🔒 DESK LOCKED: Daily limit reached (2 trades or 2 losses). Capital protection protocol active!");
+        return;
+      }
+
+      pendingRadarDirection = direction;
+
+      // Populate pre-flight modal
+      const symEl = document.getElementById('preFlightSymbolDisp');
+      const dirEl = document.getElementById('preFlightDirectionDisp');
+      const pxEl = document.getElementById('preFlightPriceDisp');
+
+      if (symEl) symEl.textContent = activeRadarSymbol;
+      if (dirEl) {
+        dirEl.textContent = `${direction.toUpperCase()} (${direction === 'Long' ? 'BUY' : 'SELL'})`;
+        dirEl.className = direction === 'Long' ? 'font-mono font-bold text-emerald-400 text-base' : 'font-mono font-bold text-rose-400 text-base';
+      }
+      if (pxEl) pxEl.textContent = activeRadarPrice > 0 ? `₹${parseFloat(activeRadarPrice).toFixed(2)}` : 'Mkt Price';
+
+      // Reset checkboxes
+      const c1 = document.getElementById('preFlightCheck_5m');
+      const c2 = document.getElementById('preFlightCheck_rr');
+      const c3 = document.getElementById('preFlightCheck_quota');
+      if (c1) c1.checked = false;
+      if (c2) c2.checked = false;
+      if (c3) c3.checked = false;
+
+      const modal = document.getElementById('radarPreFlightModal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeRadarPreFlightModal() {
+      const modal = document.getElementById('radarPreFlightModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function confirmPreFlightFill() {
+      const c1 = document.getElementById('preFlightCheck_5m');
+      const c2 = document.getElementById('preFlightCheck_rr');
+      const c3 = document.getElementById('preFlightCheck_quota');
+
+      if (!c1?.checked || !c2?.checked || !c3?.checked) {
+        alert("⚠️ All 3 Pre-Flight Verification checks must be completed before filling your order. Honor the process!");
+        return;
+      }
+
+      closeRadarPreFlightModal();
+      executeFromRadar(pendingRadarDirection);
+    }
+
     function executeFromRadar(direction) {
+      if (isDailyQuotaLocked()) {
+        alert("🔒 DESK LOCKED: Daily limit reached. Capital protection active!");
+        return;
+      }
+
       switchTab(1);
       const formEl = document.getElementById('executionFormCard');
       if (formEl) formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -8654,7 +8833,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       }
 
       if (typeof speakCoach === 'function' && scannerVoiceAlerts) {
-        speakCoach(`Loaded ${activeRadarSymbol} ${direction}. Enter stop loss.`);
+        speakCoach(`Verified ${activeRadarSymbol} ${direction}. Enter stop loss.`);
       }
     }
 
@@ -8705,6 +8884,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       container.innerHTML = list.map((s, idx) => {
         const medal = medals[idx] || `#${idx + 1}`;
         const isGold = s.golden_confluence;
+        const isHighVel = s.is_high_velocity || (s.velocity_3m && s.velocity_3m >= 2);
         const isConf = (s.confluence_count || 1) >= 2;
         const isNewStock = s.is_new || s.count === 1;
 
@@ -8714,6 +8894,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         if (isGold) {
           borderStyle = 'border-amber-400 bg-gradient-to-b from-amber-950/60 via-slate-900/90 to-slate-950 shadow-2xl shadow-amber-950/60 ring-2 ring-amber-400/80';
           badgeHtml = `<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-black bg-amber-500/30 text-amber-300 border border-amber-400 animate-pulse tracking-wide">⭐ GOLDEN 5m+1m</span>`;
+        } else if (isHighVel) {
+          borderStyle = 'border-rose-500/80 bg-gradient-to-b from-rose-950/40 via-slate-900/90 to-slate-950 shadow-xl shadow-rose-950/40 ring-1 ring-rose-500/60';
+          badgeHtml = `<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-black bg-rose-500/25 text-rose-300 border border-rose-500/50 animate-pulse">🔥 VELOCITY SURGE (${s.velocity_3m || s.count}x/3m)</span>`;
         } else if (isConf) {
           borderStyle = 'border-purple-500/70 bg-gradient-to-b from-purple-950/40 via-slate-900/90 to-slate-950 shadow-xl shadow-purple-950/40 ring-1 ring-purple-500/50';
           badgeHtml = `<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-black bg-purple-500/25 text-purple-300 border border-purple-500/50 animate-pulse">⚡ ${s.confluence_count}x CONFLUENCE</span>`;
@@ -8861,49 +9044,13 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     }
 
     function prefillTradeFromScanner(symbol, triggerPrice, scanName) {
-      switchTab(1);
-      const formEl = document.getElementById('executionFormCard');
-      if (formEl) formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-      // Pre-fill Symbol
-      const symInput = document.getElementById('symbol');
-      if (symInput) symInput.value = symbol.toUpperCase().trim();
-
-      // Pre-fill Entry Price if available
-      const entryInput = document.getElementById('entry_price');
-      if (entryInput && triggerPrice > 0) {
-        entryInput.value = triggerPrice;
+      if (isDailyQuotaLocked()) {
+        alert("🔒 DESK LOCKED: Daily trade quota reached (2 trades or 2 losses). Capital protection active!");
+        return;
       }
-
-      // Map Scan Name to Strategy Dropdown
-      const setupSelect = document.getElementById('setup_name');
-      if (setupSelect && scanName) {
-        const sLower = scanName.toLowerCase();
-        if (sLower.includes('vwap')) {
-          setupSelect.value = '1m VWAP Bounce';
-        } else if (sLower.includes('9ema') || sLower.includes('pullback')) {
-          setupSelect.value = '1m Pullback to 9EMA';
-        } else if (sLower.includes('orb') || sLower.includes('breakout') || sLower.includes('bo')) {
-          setupSelect.value = 'Opening Range Breakout (ORB)';
-        } else if (sLower.includes('s/r') || sLower.includes('reversal')) {
-          setupSelect.value = 'Support / Resistance Bounce';
-        }
-      }
-
-      // Re-calculate quantities and planned risk
-      recalculateCalculators();
-
-      // Highlight Stop Loss input for the trader
-      const slInput = document.getElementById('stop_price');
-      if (slInput) {
-        slInput.focus();
-        slInput.classList.add('ring-2', 'ring-amber-400');
-        setTimeout(() => slInput.classList.remove('ring-2', 'ring-amber-400'), 2500);
-      }
-
-      if (typeof speakCoach === 'function' && scannerVoiceAlerts) {
-        speakCoach(`Pre-filled ${symbol}. Set your stop loss.`);
-      }
+      activeRadarSymbol = symbol.toUpperCase().trim();
+      activeRadarPrice = triggerPrice || 0;
+      requestRadarTradeFill('Long');
     }
 
     function openTradingViewChart(symbol) {
