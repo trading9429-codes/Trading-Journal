@@ -77,6 +77,11 @@ class ChartinkScannerManager:
                 px = price_list[i] if i < len(price_list) else 0.0
                 is_new = sym not in self.stock_stats
 
+                # Check timeframe presence in scan_name (1m vs 5m)
+                scan_lower = scan_name.lower()
+                is_1m_scan = "1 min" in scan_lower or "1m" in scan_lower or "1-min" in scan_lower
+                is_5m_scan = "5 min" in scan_lower or "5m" in scan_lower or "5-min" in scan_lower
+
                 # Update or initialize stock_stats frequency counter
                 if is_new:
                     self.stock_stats[sym] = {
@@ -86,6 +91,9 @@ class ChartinkScannerManager:
                         "first_seen": now_ist,
                         "last_seen": now_ist,
                         "scans": [scan_name],
+                        "has_1m": is_1m_scan,
+                        "has_5m": is_5m_scan,
+                        "golden_confluence": is_1m_scan and is_5m_scan,
                         "confluence_count": 1,
                         "is_new": True
                     }
@@ -96,6 +104,15 @@ class ChartinkScannerManager:
                     self.stock_stats[sym]["last_seen"] = now_ist
                     if scan_name not in self.stock_stats[sym]["scans"]:
                         self.stock_stats[sym]["scans"].append(scan_name)
+                    
+                    if is_1m_scan:
+                        self.stock_stats[sym]["has_1m"] = True
+                    if is_5m_scan:
+                        self.stock_stats[sym]["has_5m"] = True
+
+                    # Golden confluence: Triggered in BOTH 1m and 5m scanners!
+                    has_both_tf = self.stock_stats[sym].get("has_1m", False) and self.stock_stats[sym].get("has_5m", False)
+                    self.stock_stats[sym]["golden_confluence"] = has_both_tf
                     self.stock_stats[sym]["confluence_count"] = len(self.stock_stats[sym]["scans"])
                     self.stock_stats[sym]["is_new"] = False
 
@@ -105,6 +122,9 @@ class ChartinkScannerManager:
                     "count": self.stock_stats[sym]["count"],
                     "is_new": is_new,
                     "confluence_count": self.stock_stats[sym]["confluence_count"],
+                    "has_1m": self.stock_stats[sym].get("has_1m", False),
+                    "has_5m": self.stock_stats[sym].get("has_5m", False),
+                    "golden_confluence": self.stock_stats[sym].get("golden_confluence", False),
                     "scans": list(self.stock_stats[sym]["scans"])
                 })
 
@@ -118,7 +138,8 @@ class ChartinkScannerManager:
                 "stocks": matched_items,
                 "stocks_count": len(matched_items),
                 "has_new_stocks": any(item["is_new"] for item in matched_items),
-                "has_confluence": any(item["confluence_count"] >= 2 for item in matched_items)
+                "has_confluence": any(item["confluence_count"] >= 2 for item in matched_items),
+                "has_golden_confluence": any(item.get("golden_confluence", False) for item in matched_items)
             }
 
             self.alerts.insert(0, alert_entry)  # Newest first
@@ -131,19 +152,29 @@ class ChartinkScannerManager:
             }
 
     def get_top_stocks(self, limit=12):
-        """Returns stocks sorted descending by alert frequency count."""
-        sorted_stocks = sorted(self.stock_stats.values(), key=lambda x: (x.get("confluence_count", 1) >= 2, x["count"]), reverse=True)
+        """Returns stocks sorted descending by golden confluence (5m+1m), multi-confluence, and alert frequency."""
+        sorted_stocks = sorted(
+            self.stock_stats.values(),
+            key=lambda x: (
+                x.get("golden_confluence", False),
+                x.get("confluence_count", 1) >= 2,
+                x["count"]
+            ),
+            reverse=True
+        )
         return sorted_stocks[:limit]
 
     def get_scanner_data(self):
         with self._lock:
             all_scans = list({s for item in self.stock_stats.values() for s in item.get("scans", [])})
+            golden_count = sum(1 for item in self.stock_stats.values() if item.get("golden_confluence", False))
             confluence_count = sum(1 for item in self.stock_stats.values() if item.get("confluence_count", 1) >= 2)
             new_count = sum(1 for item in self.stock_stats.values() if item.get("count", 1) == 1)
 
             return {
                 "total_alerts": len(self.alerts),
                 "unique_stocks_count": len(self.stock_stats),
+                "golden_confluence_stocks_count": golden_count,
                 "confluence_stocks_count": confluence_count,
                 "new_stocks_count": new_count,
                 "all_scans": all_scans,
