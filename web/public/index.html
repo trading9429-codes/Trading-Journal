@@ -649,7 +649,7 @@
 
   <!-- Hidden File Inputs -->
   <input type="file" id="csvFileInput" accept=".csv,.json,text/csv,application/json" class="hidden" onchange="handleFileImport(event)">
-  <input type="file" id="fyersFileInput" accept=".csv,text/csv" class="hidden" onchange="handleFyersFileImport(event)">
+  <input type="file" id="fyersFileInput" accept=".csv,.xlsx,.xls,.tsv,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="hidden" onchange="handleFyersFileImport(event)">
   <input type="file" id="vaultFileInput" accept=".json,application/json" class="hidden" onchange="handleVaultRestore(event)">
 
 
@@ -1956,6 +1956,7 @@
             <input type="text" id="tradeTableSearch" placeholder="Search symbol, setup..." oninput="renderTradesTable()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
             <select id="strategyFilter" onchange="renderTradesTable()" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500">
               <option value="ALL">All Strategies</option>
+              <option value="Default Setup">Default Setup</option>
               <option value="1m Pullback to 9EMA">9EMA Pullback</option>
               <option value="Opening Range Breakout (ORB)">ORB</option>
               <option value="1m VWAP Bounce">VWAP Bounce</option>
@@ -1978,6 +1979,9 @@
                 <span>🃏</span><span class="hidden sm:inline">Visual Cards</span>
               </button>
             </div>
+            <button onclick="openFyersIngestModal()" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs shadow-md shadow-orange-600/30 flex items-center gap-1.5 transition cursor-pointer" title="Upload FYERS Trades (0.8% Planned SL &bull; 2.0% Target &bull; Sync to Excel)">
+              <span>⚡ Upload FYERS Trades</span>
+            </button>
             <button onclick="copyAllExcelTSV()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700 transition" title="Copy all visible trades in Excel TSV format">
               <span>📋 Copy All</span>
             </button>
@@ -3987,6 +3991,7 @@
               Setup Name
             </label>
             <select id="editTrade_setup" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-white text-xs focus:outline-none focus:border-blue-500">
+              <option value="Default Setup">Default Setup</option>
               <option value="1m Pullback to 9EMA">1m Pullback to 9EMA</option>
               <option value="1m Breakout + VWAP Cross">1m Breakout + VWAP Cross</option>
               <option value="Opening Range Breakout (ORB)">Opening Range Breakout (ORB)</option>
@@ -4232,50 +4237,83 @@
   <!-- MODAL 2: FYERS TRADEBOOK PARSER PREVIEW -->
   <!-- ========================================== -->
   <div id="fyersModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-    <div class="glass-card bg-slate-900 rounded-2xl max-w-3xl w-full border border-slate-700 shadow-2xl p-6 relative">
-      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+    <div class="glass-card bg-slate-900 rounded-2xl max-w-4xl w-full border border-orange-500/40 shadow-2xl p-6 relative max-h-[92vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold">⚡</div>
+          <div class="w-9 h-9 rounded-xl bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center font-bold text-lg">⚡</div>
           <div>
-            <h3 class="text-base font-bold text-white">FYERS Tradebook CSV Parser</h3>
-            <p class="text-xs text-slate-400">Auto-pairing BUY &amp; SELL executions via FIFO matching</p>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              FYERS Trade Ingestion Preview
+              <span id="fyersPreviewCountBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                0 Trades Matched
+              </span>
+            </h3>
+            <p class="text-xs text-slate-400">Planned SL: 0.8% &bull; Planned Target: 2.0% &bull; Planned RR: 2.50R &bull; Direct Excel Sync</p>
           </div>
         </div>
         <button onclick="closeFyersModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">✕</button>
       </div>
 
-      <div class="mt-4 space-y-4">
-        <p class="text-xs text-slate-300">
-          The parser detected and consolidated the following round-trip intraday trades from your FYERS tradebook:
-        </p>
+      <div class="mt-3.5 space-y-3.5 flex-1 overflow-y-auto pr-1">
+        <!-- Rule Baseline HUD & Batch Setup Alteration Strip -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-slate-950/80 p-3 rounded-xl border border-slate-800 gap-2.5 text-xs">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-slate-400 text-[11px] font-semibold uppercase">Rule Baseline:</span>
+            <span class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-300 font-mono font-bold border border-rose-500/20">SL: -0.8%</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 font-mono font-bold border border-emerald-500/20">Target: +2.0%</span>
+            <span class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-300 font-mono font-bold border border-blue-500/20">RR: 2.50R</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <label for="fyersBatchSetupSelect" class="text-slate-400 text-[11px] font-medium whitespace-nowrap">Apply Setup to All:</label>
+            <select id="fyersBatchSetupSelect" onchange="applyFyersBatchSetup(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-white text-xs font-sans focus:border-orange-500 focus:outline-none cursor-pointer">
+              <option value="Default Setup">Default Setup (Default)</option>
+              <option value="1m VWAP Bounce">1m VWAP Bounce</option>
+              <option value="1m Pullback to 9EMA">1m Pullback to 9EMA</option>
+              <option value="Opening Range Breakout (ORB)">Opening Range Breakout (ORB)</option>
+              <option value="1m Breakout &amp; Re-test">1m Breakout &amp; Re-test</option>
+              <option value="Support / Resistance Bounce">Support / Resistance Bounce</option>
+              <option value="5m Fakeout / Trapped Volume">5m Fakeout / Trapped Volume</option>
+            </select>
+          </div>
+        </div>
 
-        <div class="max-h-64 overflow-y-auto rounded-xl border border-slate-800">
+        <div class="max-h-80 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/40">
           <table class="w-full text-left text-xs">
             <thead>
-              <tr class="bg-slate-950 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+              <tr class="bg-slate-950 text-slate-400 uppercase text-[10px] font-bold border-b border-slate-800 sticky top-0 z-10 select-none">
                 <th class="py-2.5 px-3">Symbol</th>
                 <th class="py-2.5 px-2">Side</th>
                 <th class="py-2.5 px-2 text-right">Entry</th>
-                <th class="py-2.5 px-2 text-right">Exit</th>
+                <th class="py-2.5 px-2 text-right text-rose-400">SL (0.8%)</th>
+                <th class="py-2.5 px-2 text-right text-emerald-400">Target (2%)</th>
+                <th class="py-2.5 px-2 text-center text-blue-300">RR</th>
+                <th class="py-2.5 px-3">Setup Tag (Alterable)</th>
                 <th class="py-2.5 px-2 text-right">Qty</th>
                 <th class="py-2.5 px-2 text-right">Net P&amp;L</th>
                 <th class="py-2.5 px-3 text-center">Outcome</th>
               </tr>
             </thead>
-            <tbody id="fyersPreviewTableBody" class="divide-y divide-slate-800/60 font-mono">
+            <tbody id="fyersPreviewTableBody" class="divide-y divide-slate-800/60 font-mono text-xs">
               <!-- Populated via parser -->
             </tbody>
           </table>
         </div>
 
-        <div class="flex items-center justify-between pt-3 border-t border-slate-800">
-          <button onclick="closeFyersModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">
-            Cancel
-          </button>
-          <button onclick="commitFyersParsedTrades()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-bold shadow-lg shadow-orange-600/30">
-            Confirm &amp; Import Matched Trades
-          </button>
+        <div class="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-300 text-[11px] flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span>💡</span>
+            <span>All trades will be logged to your journal and synced to <strong>D3_Tracking_Spreadsheet.xlsx</strong>. Setups can also be altered at any time later in the trade ledger.</span>
+          </div>
         </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-3.5 border-t border-slate-800 mt-3">
+        <button onclick="closeFyersModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer transition">
+          Cancel
+        </button>
+        <button onclick="commitFyersParsedTrades()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-orange-600 via-amber-600 to-emerald-600 hover:from-orange-500 hover:to-emerald-500 text-white text-xs font-bold shadow-lg shadow-orange-600/30 flex items-center gap-1.5 cursor-pointer transition">
+          <span>⚡ Confirm &amp; Sync to Excel</span>
+        </button>
       </div>
     </div>
   </div>
@@ -4396,7 +4434,7 @@
   <!-- MODAL: SIMPLE & FAST FYERS TRADE INGESTION -->
   <!-- ========================================== -->
   <div id="fyersIngestModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl w-full max-w-xl border border-orange-500/30 shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto">
+    <div class="glass-card rounded-2xl w-full max-w-xl border border-orange-500/30 shadow-2xl p-6 relative max-h-[92vh] overflow-y-auto">
       
       <div class="flex items-center justify-between pb-4 border-b border-slate-800">
         <div class="flex items-center gap-2.5">
@@ -4405,40 +4443,84 @@
           </div>
           <div>
             <h3 class="text-base font-extrabold text-white flex items-center gap-2">
-              Import FYERS Trades
+              Upload FYERS Trades
               <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                Zero Setup &bull; Offline
+                Auto 0.8% SL &bull; 2.0% Target
               </span>
             </h3>
-            <p class="text-xs text-slate-400">Copy-paste from FYERS Web or upload your tradebook export</p>
+            <p class="text-xs text-slate-400">Import tradebook / orderbook file (CSV/XLSX) or paste execution rows</p>
           </div>
         </div>
-        <button onclick="closeFyersIngestModal()" class="text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+        <button onclick="closeFyersIngestModal()" class="text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
       </div>
 
-      <div class="space-y-4 mt-5 text-xs">
-        <!-- OPTION 1: INSTANT WEB COPY-PASTE -->
+      <div class="space-y-4 mt-4 text-xs">
+        <!-- Automated Rules Banner -->
+        <div class="bg-gradient-to-r from-orange-950/40 via-amber-950/30 to-slate-900 border border-orange-500/30 rounded-xl p-3 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-200 font-bold flex items-center gap-1.5">
+              <span>🎯</span>
+              <span>Automated Risk &amp; Excel Baseline</span>
+            </span>
+            <span class="text-[10px] font-mono text-orange-300 font-bold">Planned RR: 2.50R</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-center pt-1 font-mono">
+            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800">
+              <span class="text-[10px] text-slate-400 block">Planned SL</span>
+              <span class="text-rose-400 font-bold">0.8%</span>
+            </div>
+            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800">
+              <span class="text-[10px] text-slate-400 block">Planned Target</span>
+              <span class="text-emerald-400 font-bold">2.0%</span>
+            </div>
+            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800">
+              <span class="text-[10px] text-slate-400 block">Default Setup</span>
+              <span class="text-blue-300 font-bold">Default Setup</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Setup Selector (Default setup, alterable later) -->
+        <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <label for="fyersDefaultSetupSelect" class="font-bold text-slate-200 flex items-center gap-1.5">
+              <span>🏷️</span>
+              <span>Strategy Setup Tag</span>
+            </label>
+            <span class="text-[10px] text-slate-400 font-mono">Alterable later in Journal</span>
+          </div>
+          <select id="fyersDefaultSetupSelect" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white font-sans text-xs focus:outline-none focus:border-orange-500 cursor-pointer">
+            <option value="Default Setup" selected>Default Setup (Recommended default)</option>
+            <option value="1m VWAP Bounce">1m VWAP Bounce</option>
+            <option value="1m Pullback to 9EMA">1m Pullback to 9EMA</option>
+            <option value="Opening Range Breakout (ORB)">Opening Range Breakout (ORB)</option>
+            <option value="1m Breakout &amp; Re-test">1m Breakout &amp; Re-test</option>
+            <option value="Support / Resistance Bounce">Support / Resistance Bounce</option>
+            <option value="5m Fakeout / Trapped Volume">5m Fakeout / Trapped Volume</option>
+          </select>
+          <p class="text-[11px] text-slate-400">
+            Assigned to all imported trades by default. You can alter/update it anytime by clicking the setup badge in the table or editing the trade.
+          </p>
+        </div>
+
+        <!-- OPTION 1: DRAG & DROP FILE UPLOAD (CSV or XLSX) -->
         <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2.5">
           <div class="flex items-center justify-between">
             <span class="font-bold text-slate-200 flex items-center gap-1.5">
-              <span>📋</span>
-              <span>Option 1: Paste Rows from FYERS Web</span>
+              <span>📁</span>
+              <span>Option 1: Upload FYERS Tradebook File</span>
             </span>
-            <span class="text-[10px] text-orange-400 font-mono">Fastest (5 Seconds)</span>
+            <span class="text-[10px] text-emerald-400 font-mono">CSV / Excel .xlsx / TSV</span>
           </div>
-          
-          <p class="text-slate-400 text-[11px] leading-relaxed">
-            In FYERS Web, go to <strong>Tradebook</strong>, select your trade rows with <kbd class="px-1.5 py-0.5 bg-slate-800 rounded text-slate-300 border border-slate-700 font-mono">Ctrl + C</kbd>, and paste here:
-          </p>
-          
-          <textarea id="fyersPastedTextArea" rows="4" placeholder="Paste FYERS Tradebook rows here...
-Example:
-RELIANCE-EQ  BUY   100  2500.00  FILLED  09:21:34
-RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white font-mono text-xs placeholder-slate-600 focus:outline-none focus:border-orange-500"></textarea>
 
-          <button onclick="parseFyersWebPastedText()" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30">
-            <span>⚡ Parse &amp; Log Trades</span>
-          </button>
+          <div id="fyersDropZone" ondragover="handleFyersDragOver(event)" ondragleave="handleFyersDragLeave(event)" ondrop="handleFyersDrop(event)" onclick="triggerFyersImport()" class="border-2 border-dashed border-slate-700 hover:border-orange-500/80 rounded-xl p-5 text-center cursor-pointer transition bg-slate-950/50 hover:bg-orange-950/10 group">
+            <div class="text-3xl mb-1.5 group-hover:scale-110 transition-transform">📂</div>
+            <div class="font-bold text-slate-200 text-xs">Drag &amp; Drop FYERS Tradebook or Orderbook Here</div>
+            <div class="text-[11px] text-slate-400 mt-1">Supports FYERS Web / App trade exports (.csv, .xlsx, .tsv)</div>
+            <button type="button" class="mt-3 px-3.5 py-1.5 bg-slate-800 group-hover:bg-orange-600 text-orange-300 group-hover:text-white border border-slate-700 group-hover:border-orange-500 rounded-lg text-xs font-semibold transition cursor-pointer">
+              Browse Tradebook File
+            </button>
+          </div>
         </div>
 
         <div class="flex items-center gap-3">
@@ -4447,28 +4529,33 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           <div class="flex-1 h-px bg-slate-800"></div>
         </div>
 
-        <!-- OPTION 2: FILE UPLOAD -->
+        <!-- OPTION 2: INSTANT WEB COPY-PASTE -->
         <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2.5">
           <div class="flex items-center justify-between">
             <span class="font-bold text-slate-200 flex items-center gap-1.5">
-              <span>📁</span>
-              <span>Option 2: Select FYERS Tradebook File</span>
+              <span>📋</span>
+              <span>Option 2: Copy-Paste Rows from FYERS Web</span>
             </span>
-            <span class="text-[10px] text-slate-500 font-mono">CSV / XLSX</span>
+            <span class="text-[10px] text-orange-400 font-mono">5-Second Quick Paste</span>
           </div>
-
-          <p class="text-slate-400 text-[11px]">
-            Download your tradebook from FYERS Back-Office or Terminal and select it here:
+          
+          <p class="text-slate-400 text-[11px] leading-relaxed">
+            In FYERS Web, open <strong>Tradebook</strong>, select your executed rows (<kbd class="px-1.5 py-0.5 bg-slate-800 rounded text-slate-300 border border-slate-700 font-mono">Ctrl + C</kbd>), and paste below:
           </p>
+          
+          <textarea id="fyersPastedTextArea" rows="3" placeholder="Paste FYERS Tradebook rows here...
+Example:
+RELIANCE-EQ  BUY   100  2500.00  FILLED  09:21:34
+RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white font-mono text-xs placeholder-slate-600 focus:outline-none focus:border-orange-500"></textarea>
 
-          <button onclick="closeFyersIngestModal(); triggerFyersImport();" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-bold transition flex items-center justify-center gap-2">
-            <span>📂 Choose FYERS Tradebook File</span>
+          <button onclick="parseFyersWebPastedText()" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 cursor-pointer">
+            <span>⚡ Parse &amp; Preview Trades</span>
           </button>
         </div>
 
         <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 text-blue-300 text-[11px] flex items-center gap-2.5">
           <span class="text-lg">🔒</span>
-          <span>100% private and runs locally in your browser. Automatically calculates brokerage, STT, and 18% GST down to the paisa.</span>
+          <span>100% private. Calculates exact statutory taxes (STT, GST, Exchange, SEBI, Stamp) and synchronizes directly with <strong>D3_Tracking_Spreadsheet.xlsx</strong>.</span>
         </div>
       </div>
     </div>
@@ -9400,9 +9487,14 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
                 <span>${t.symbol}</span>
                 ${t.screenshot ? '<span class="text-[11px]" title="Chart attached">📷</span>' : ''}
               </div>
-              <button onclick="quickCycleTradeSetup('${t.id}', event)" class="mt-0.5 text-[9px] font-mono font-medium px-1.5 py-0.2 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition block text-left truncate max-w-[130px]" title="Click to quickly switch strategy setup">
-                ${escapeHtml(t.setup_name || '9EMA Pullback')} ▾
-              </button>
+              <div class="flex items-center gap-1 mt-0.5">
+                <button onclick="quickCycleTradeSetup('${t.id}', event)" class="text-[9px] font-mono font-medium px-1.5 py-0.2 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition block text-left truncate max-w-[115px]" title="1-Click: Click to cycle strategy setup">
+                  ${escapeHtml(t.setup_name || 'Default Setup')} ▾
+                </button>
+                <button onclick="promptEditTradeSetup('${t.id}', event)" class="text-[9px] px-1 py-0.2 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700/60 transition cursor-pointer" title="Custom edit setup name">
+                  ✏️
+                </button>
+              </div>
             </td>
             <td class="py-2.5 px-3">
               <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${t.direction === 'Long' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-rose-950 text-rose-400 border border-rose-800'}">
@@ -10600,32 +10692,99 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       applyImportedTrades(parsedTrades);
     }
 
-    // --- FYERS Tradebook Raw CSV Parser (FIFO Matching) ---
+    // --- FYERS Tradebook Raw CSV / XLSX / TSV Parser (FIFO Matching) ---
+    function handleFyersDragOver(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const zone = document.getElementById('fyersDropZone');
+      if (zone) zone.classList.add('border-orange-500', 'bg-orange-950/20');
+    }
+
+    function handleFyersDragLeave(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const zone = document.getElementById('fyersDropZone');
+      if (zone) zone.classList.remove('border-orange-500', 'bg-orange-950/20');
+    }
+
+    function handleFyersDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const zone = document.getElementById('fyersDropZone');
+      if (zone) zone.classList.remove('border-orange-500', 'bg-orange-950/20');
+
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        processFyersFile(e.dataTransfer.files[0]);
+      }
+    }
+
     function handleFyersFileImport(e) {
       const file = e.target.files[0];
       if (!file) return;
+      processFyersFile(file);
+      e.target.value = '';
+    }
 
+    async function processFyersFile(file) {
+      const defaultSetup = (document.getElementById('fyersDefaultSetupSelect') ? document.getElementById('fyersDefaultSetupSelect').value : 'Default Setup') || 'Default Setup';
+
+      // If .xlsx or OpenXML spreadsheet file
+      if (file.name.toLowerCase().endsWith('.xlsx') || (file.type && file.type.includes('spreadsheetml'))) {
+        const reader = new FileReader();
+        reader.onload = async function(evt) {
+          try {
+            const dataUrl = evt.target.result;
+            const base64Data = dataUrl.split(',')[1];
+            const res = await fetch('/api/fyers/upload', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                base64: base64Data,
+                file_name: file.name,
+                default_setup: defaultSetup,
+                auto_commit: false
+              })
+            });
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            if (!data.trades || data.trades.length === 0) {
+              alert("No matched round-trip BUY/SELL execution pairs found in this FYERS Excel file.");
+              return;
+            }
+            pendingFyersTrades = data.trades;
+            closeFyersIngestModal();
+            renderFyersPreviewModal();
+          } catch(err) {
+            console.error("FYERS Excel parser error:", err);
+            alert("Error parsing FYERS Excel file: " + err.message);
+          }
+        };
+        reader.readAsDataURL(file);
+        return;
+      }
+
+      // Plain text CSV / TSV file
       const reader = new FileReader();
       reader.onload = function(evt) {
         try {
-          parseRawFyersTradebook(evt.target.result);
+          parseRawFyersTradebook(evt.target.result, defaultSetup);
         } catch(err) {
           alert("Error parsing FYERS file: " + err.message);
-        } finally {
-          e.target.value = '';
         }
       };
       reader.readAsText(file);
     }
 
-    function parseRawFyersTradebook(csvContent) {
+    function parseRawFyersTradebook(csvContent, defaultSetup = 'Default Setup') {
+      if (!defaultSetup) defaultSetup = 'Default Setup';
       const lines = csvContent.split(/\r\n|\n/).filter(l => l.trim() !== '');
       if (lines.length < 2) {
-        alert("Invalid FYERS CSV: File is empty or lacks headers.");
+        alert("Invalid FYERS CSV: File is empty or lacks execution headers.");
         return;
       }
 
-      const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
+      const delimiter = lines[0].includes('\t') ? '\t' : ',';
+      const headers = lines[0].split(delimiter).map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
       const findCol = (...names) => {
         for (let name of names) {
           const idx = headers.findIndex(h => h.includes(name.toLowerCase()));
@@ -10634,44 +10793,64 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         return -1;
       };
 
-      const colSym = findCol('symbol', 'scrip');
-      const colSide = findCol('side', 'type', 'action', 'buy/sell', 'trade type');
-      const colPrice = findCol('price', 'trade price', 'avg price');
-      const colQty = findCol('qty', 'quantity', 'trade qty', 'shares');
-      const colTime = findCol('time', 'trade time', 'date');
+      const colSym = findCol('symbol', 'scrip', 'instrument', 'tradingsymbol');
+      const colSide = findCol('side', 'type', 'action', 'buy/sell', 'trade type', 'transtype');
+      const colPrice = findCol('price', 'trade price', 'avg price', 'rate', 'avg. price');
+      const colQty = findCol('qty', 'quantity', 'trade qty', 'shares', 'filled');
+      const colTime = findCol('time', 'trade time', 'order time');
+      const colDate = findCol('date', 'trade date', 'order date');
+      const colStatus = findCol('status', 'order status');
 
       if (colSym === -1 || colPrice === -1 || colQty === -1) {
-        alert("Could not identify FYERS columns (Symbol, Price, Qty).");
+        alert("Could not identify FYERS columns (Symbol, Price, Qty). Please ensure the tradebook has valid headers.");
         return;
       }
 
       const executionsBySymbol = {};
       for (let i = 1; i < lines.length; i++) {
-        const cells = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+        const cells = lines[i].split(delimiter).map(c => c.trim().replace(/^"|"$/g, ''));
         if (cells.length <= colSym) continue;
 
+        if (colStatus !== -1 && cells[colStatus]) {
+          const st = cells[colStatus].toUpperCase();
+          if (!['FILLED', 'EXECUTED', 'COMPLETE', 'TRADED', 'SUCCESS'].some(k => st.includes(k))) {
+            continue;
+          }
+        }
+
         let symbol = cells[colSym].replace('NSE:', '').replace('-EQ', '').trim().toUpperCase();
-        let side = (colSide !== -1 ? cells[colSide] : 'BUY').toUpperCase();
-        let price = parseFloat(cells[colPrice]);
-        let qty = parseInt(cells[colQty]);
-        let timeStr = (colTime !== -1 ? cells[colTime] : '09:30');
+        let sideRaw = (colSide !== -1 ? cells[colSide] : 'BUY').toUpperCase();
+        let side = (sideRaw.includes('BUY') || sideRaw === 'B' || sideRaw === '1') ? 'BUY' : 'SELL';
+        let price = parseFloat(cells[colPrice].replace(/[^0-9.]/g, ''));
+        let qty = parseInt(cells[colQty].replace(/[^0-9]/g, ''));
+        let timeStr = (colTime !== -1 && cells[colTime]) ? cells[colTime] : '09:20';
+        let dateStr = (colDate !== -1 && cells[colDate]) ? cells[colDate] : new Date().toISOString().split('T')[0];
 
         if (!symbol || isNaN(price) || isNaN(qty) || qty <= 0) continue;
 
         if (!executionsBySymbol[symbol]) executionsBySymbol[symbol] = [];
         executionsBySymbol[symbol].push({
           symbol,
-          side: side.includes('BUY') || side === 'B' ? 'BUY' : 'SELL',
+          side,
           price,
           qty,
-          time: timeStr
+          time: timeStr,
+          date: dateStr
         });
       }
 
       pendingFyersTrades = [];
-      const today = new Date().toISOString().split('T')[0];
+      const existingMaxId = tradesData.reduce((max, t) => {
+        const num = parseInt(String(t.id).replace(/[^\d]/g, '')) || 0;
+        return Math.max(max, num);
+      }, 0);
+
+      let currentIdCounter = existingMaxId;
 
       for (const [symbol, execs] of Object.entries(executionsBySymbol)) {
+        // Chronological order
+        execs.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+
         let buyQueue = [];
         let sellQueue = [];
 
@@ -10684,48 +10863,67 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           const buyEx = buyQueue[0];
           const sellEx = sellQueue[0];
           const matchedQty = Math.min(buyEx.qty, sellEx.qty);
+          if (matchedQty <= 0) break;
 
-          const isLong = true;
+          const isLong = (buyEx.time || '') <= (sellEx.time || '');
           const entryPrice = isLong ? buyEx.price : sellEx.price;
           const exitPrice = isLong ? sellEx.price : buyEx.price;
+          const entryTime = isLong ? buyEx.time : sellEx.time;
+          const exitTime = isLong ? sellEx.time : buyEx.time;
+          const tradeDate = buyEx.date || sellEx.date || new Date().toISOString().split('T')[0];
 
-          const buyTurnover = entryPrice * matchedQty;
-          const sellTurnover = exitPrice * matchedQty;
+          // -------------------------------------------------------------
+          // EXACT RULE BASELINE: 0.8% Planned SL, 2.0% Target, 2.50R
+          // -------------------------------------------------------------
+          const dirStr = isLong ? 'Long' : 'Short';
+          const stopPrice = isLong 
+            ? parseFloat((entryPrice * (1.0 - 0.008)).toFixed(2))
+            : parseFloat((entryPrice * (1.0 + 0.008)).toFixed(2));
+          
+          const targetPrice = isLong
+            ? parseFloat((entryPrice * (1.0 + 0.020)).toFixed(2))
+            : parseFloat((entryPrice * (1.0 - 0.020)).toFixed(2));
+
+          const riskPerShare = Math.abs(entryPrice - stopPrice);
+          const totalRisk = parseFloat((riskPerShare * matchedQty).toFixed(2));
+          const plannedRR = 2.50; // (2.0% / 0.8% = 2.50R)
+
+          const buyTurnover = (isLong ? entryPrice : exitPrice) * matchedQty;
+          const sellTurnover = (isLong ? exitPrice : entryPrice) * matchedQty;
           const fyers = computeFyersCharges(buyTurnover, sellTurnover);
 
-          const grossPnL = (exitPrice - entryPrice) * matchedQty;
+          const grossPnL = isLong ? (exitPrice - entryPrice) * matchedQty : (entryPrice - exitPrice) * matchedQty;
           const netPnL = grossPnL - fyers.totalCosts;
-
-          const riskPerShare = Math.max(entryPrice * 0.003, 1.0);
-          const stopPrice = isLong ? entryPrice - riskPerShare : entryPrice + riskPerShare;
-          const totalRisk = riskPerShare * matchedQty;
           const realizedR = totalRisk > 0 ? (netPnL / totalRisk) : 0;
 
           let outcome = 'Break-Even';
           if (netPnL > 10) outcome = 'Win';
           else if (netPnL < -10) outcome = 'Loss';
 
+          currentIdCounter++;
+          const tradeId = `T-${String(currentIdCounter).padStart(3, '0')}`;
+
           pendingFyersTrades.push({
-            id: `FYERS-${String(tradesData.length + pendingFyersTrades.length + 1).padStart(3, '0')}`,
-            date: today,
-            day: getTradeWeekday(today),
-            time: buyEx.time.length <= 8 ? buyEx.time : '09:30',
-            exit_time: sellEx.time.length <= 8 ? sellEx.time : '09:38',
+            id: tradeId,
+            date: tradeDate,
+            day: getTradeWeekday(tradeDate),
+            time: entryTime.length >= 5 ? entryTime.slice(0, 5) : '09:20',
+            exit_time: exitTime.length >= 5 ? exitTime.slice(0, 5) : '09:30',
             hold_duration: 8,
             symbol: symbol,
-            direction: isLong ? 'Long' : 'Short',
-            setup_name: 'FYERS Intraday Execution',
-            scanner_alert_time: buyEx.time,
+            direction: dirStr,
+            setup_name: defaultSetup,
+            scanner_alert_time: entryTime.length >= 5 ? entryTime.slice(0, 5) : '09:20',
             htf_ok: 'Y',
             no_chase: 'Y',
             stop_defined: 'Y',
-            target_price: parseFloat((entryPrice + 2.2 * riskPerShare).toFixed(2)),
-            rr_planned: 2.2,
-            risk_percent: 0.0025,
+            target_price: targetPrice,
+            rr_planned: plannedRR,
+            risk_percent: 0.008,
             risk_amount: totalRisk,
-            entry_price: entryPrice,
-            stop_price: parseFloat(stopPrice.toFixed(2)),
-            exit_price: exitPrice,
+            entry_price: parseFloat(entryPrice.toFixed(2)),
+            stop_price: stopPrice,
+            exit_price: parseFloat(exitPrice.toFixed(2)),
             qty: matchedQty,
             gross_pnl: parseFloat(grossPnL.toFixed(2)),
             costs: parseFloat(fyers.totalCosts.toFixed(2)),
@@ -10737,9 +10935,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             violation_type: 'None',
             emotion_before: 2,
             emotion_during: 2,
-            emotion_after: 2,
+            emotion_after: netPnL > 0 ? 2 : 3,
             trade_valid: 'Y',
-            lesson: 'Direct import from FYERS Tradebook CSV',
+            lesson: `Imported FYERS trade fill. Planned SL: 0.8% (₹${stopPrice}), Target: 2.0% (₹${targetPrice}), RR: 2.50R.`,
             screenshot_link: `https://www.tradingview.com/chart/?symbol=NSE:${symbol}`
           });
 
@@ -10755,26 +10953,77 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         return;
       }
 
+      closeFyersIngestModal();
       renderFyersPreviewModal();
     }
 
     function renderFyersPreviewModal() {
       const tbody = document.getElementById('fyersPreviewTableBody');
-      tbody.innerHTML = pendingFyersTrades.map(t => `
-        <tr class="border-b border-slate-800">
-          <td class="py-2 px-3 font-bold text-white">${t.symbol}</td>
-          <td class="py-2 px-2 text-emerald-400 font-bold">${t.direction}</td>
-          <td class="py-2 px-2 text-right">₹${t.entry_price.toFixed(2)}</td>
-          <td class="py-2 px-2 text-right">₹${t.exit_price.toFixed(2)}</td>
-          <td class="py-2 px-2 text-right text-slate-300">${t.qty}</td>
-          <td class="py-2 px-2 text-right font-bold ${t.net_pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}">₹${t.net_pnl.toFixed(2)}</td>
-          <td class="py-2 px-3 text-center">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-sans font-bold ${t.outcome === 'Win' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">${t.outcome}</span>
-          </td>
-        </tr>
-      `).join('');
+      const countBadge = document.getElementById('fyersPreviewCountBadge');
+      if (countBadge) countBadge.textContent = `${pendingFyersTrades.length} Trades Matched`;
+
+      const setupOptions = [
+        'Default Setup',
+        '1m VWAP Bounce',
+        '1m Pullback to 9EMA',
+        'Opening Range Breakout (ORB)',
+        '1m Breakout & Re-test',
+        'Support / Resistance Bounce',
+        '5m Fakeout / Trapped Volume'
+      ];
+
+      tbody.innerHTML = pendingFyersTrades.map((t, idx) => {
+        const isWin = t.outcome === 'Win';
+        const isLoss = t.outcome === 'Loss';
+        const pnlClass = isWin ? 'text-emerald-400 font-bold' : (isLoss ? 'text-rose-400 font-bold' : 'text-slate-300');
+        const badgeClass = isWin 
+          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+          : (isLoss ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-slate-700 text-slate-300');
+
+        const optionsHtml = setupOptions.map(opt => `
+          <option value="${escapeHtml(opt)}" ${t.setup_name === opt ? 'selected' : ''}>${escapeHtml(opt)}</option>
+        `).join('');
+
+        return `
+          <tr class="border-b border-slate-800/80 hover:bg-slate-800/30 transition">
+            <td class="py-2.5 px-3 font-bold text-white">${escapeHtml(t.symbol)}</td>
+            <td class="py-2.5 px-2">
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${t.direction === 'Long' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-rose-950 text-rose-400 border border-rose-800'}">
+                ${t.direction}
+              </span>
+            </td>
+            <td class="py-2.5 px-2 text-right text-slate-200">₹${t.entry_price.toFixed(2)}</td>
+            <td class="py-2.5 px-2 text-right text-rose-400 font-bold">₹${t.stop_price.toFixed(2)}</td>
+            <td class="py-2.5 px-2 text-right text-emerald-400 font-bold">₹${t.target_price.toFixed(2)}</td>
+            <td class="py-2.5 px-2 text-center text-blue-300 font-bold">${t.rr_planned.toFixed(2)}R</td>
+            <td class="py-2.5 px-3">
+              <select onchange="updatePendingTradeSetup(${idx}, this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-white text-xs font-sans focus:border-orange-500 focus:outline-none cursor-pointer max-w-[170px] truncate" title="Alter strategy setup for this trade">
+                ${optionsHtml}
+              </select>
+            </td>
+            <td class="py-2.5 px-2 text-right text-slate-400">${t.qty}</td>
+            <td class="py-2.5 px-2 text-right font-mono ${pnlClass}">₹${t.net_pnl.toFixed(2)}</td>
+            <td class="py-2.5 px-3 text-center">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-sans font-bold ${badgeClass}">${t.outcome}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
 
       document.getElementById('fyersModal').classList.remove('hidden');
+    }
+
+    function updatePendingTradeSetup(idx, newSetup) {
+      if (pendingFyersTrades[idx]) {
+        pendingFyersTrades[idx].setup_name = newSetup;
+      }
+    }
+
+    function applyFyersBatchSetup(setupVal) {
+      pendingFyersTrades.forEach(t => {
+        t.setup_name = setupVal;
+      });
+      renderFyersPreviewModal();
     }
 
     function closeFyersModal() {
@@ -10796,9 +11045,14 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       syncTradesWithBackend();
       renderTradesTable();
       renderTopCapitalHeader();
-      checkDailyCircuitBreaker();
+      checkDailyCircuitBreaker(false); // do not trigger false circuit breaker for imported trades
       renderAllChartsAndMetrics();
-      alert(`🎉 Successfully imported ${trades.length} trades!`);
+      
+      if (typeof showSystemToast === 'function') {
+        showSystemToast(`🎉 <strong>FYERS Upload Complete:</strong> ${trades.length} trades imported with 0.8% SL, 2.0% Target &amp; synced to Excel!`);
+      } else {
+        alert(`🎉 Successfully imported ${trades.length} trades with 0.8% planned SL, 2.0% Target, and synced to Excel!`);
+      }
     }
 
     // --- ADVANCED INSTITUTIONAL ANALYTICS & METRICS ---
@@ -13663,124 +13917,10 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         alert("Please paste rows copied from FYERS Web first.");
         return;
       }
+      const defaultSetup = (document.getElementById('fyersDefaultSetupSelect') ? document.getElementById('fyersDefaultSetupSelect').value : 'Default Setup') || 'Default Setup';
 
-      const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-      const parsedFills = [];
-
-      lines.forEach(line => {
-        const tokens = line.split(/[\t,\s]+/).filter(Boolean);
-        if (tokens.length >= 4) {
-          const symCandidate = tokens.find(t => t.includes("-EQ") || /^[A-Z]{3,12}$/.test(t));
-          const sideCandidate = tokens.find(t => /^BUY$/i.test(t) || /^SELL$/i.test(t) || /^B$/i.test(t) || /^S$/i.test(t));
-          const numbers = tokens.filter(t => /^\d+(\.\d+)?$/.test(t)).map(Number);
-
-          if (symCandidate && sideCandidate && numbers.length >= 2) {
-            const qty = numbers.find(n => Number.isInteger(n) && n > 0) || numbers[0];
-            const price = numbers.find(n => n !== qty && n > 1.0) || numbers[1];
-            const isBuy = /^BUY$/i.test(sideCandidate) || /^B$/i.test(sideCandidate);
-
-            parsedFills.push({
-              symbol: symCandidate.replace("-EQ", "").toUpperCase(),
-              transactionType: isBuy ? 1 : -1,
-              tradedQty: parseInt(qty),
-              tradePrice: parseFloat(price),
-              orderDateTime: new Date().toISOString().replace('T', ' ').slice(0, 19)
-            });
-          }
-        }
-      });
-
-      if (parsedFills.length === 0) {
-        alert("Could not detect trade format. Please ensure rows contain Symbol, Buy/Sell, Qty, and Price.");
-        return;
-      }
-
-      // Group and consolidate fills
-      const bySym = {};
-      parsedFills.forEach(f => {
-        if (!bySym[f.symbol]) bySym[f.symbol] = [];
-        bySym[f.symbol].push(f);
-      });
-
-      let added = 0;
-      Object.keys(bySym).forEach(sym => {
-        const group = bySym[sym];
-        const buys = group.filter(x => x.transactionType === 1);
-        const sells = group.filter(x => x.transactionType === -1);
-        const totalBuyQty = buys.reduce((a, b) => a + (b.tradedQty || 0), 0);
-        const totalSellQty = sells.reduce((a, b) => a + (b.tradedQty || 0), 0);
-        const matchedQty = Math.min(totalBuyQty, totalSellQty);
-        if (matchedQty <= 0) return;
-
-        const avgBuy = buys.reduce((a, b) => a + (b.tradePrice * b.tradedQty), 0) / totalBuyQty;
-        const avgSell = sells.reduce((a, b) => a + (b.tradePrice * b.tradedQty), 0) / totalSellQty;
-        const firstFill = group.sort((a, b) => (a.orderDateTime || "").localeCompare(b.orderDateTime || ""))[0];
-        const direction = firstFill.transactionType === 1 ? "Long" : "Short";
-        const entry = direction === "Long" ? avgBuy : avgSell;
-        const exit = direction === "Long" ? avgSell : avgBuy;
-
-        const buyTurnover = entry * matchedQty;
-        const sellTurnover = exit * matchedQty;
-        const fyersCosts = computeFyersCharges(buyTurnover, sellTurnover);
-        const grossPnL = direction === "Long" ? (exit - entry) * matchedQty : (entry - exit) * matchedQty;
-        const netPnL = grossPnL - fyersCosts.totalCosts;
-        const risk = entry * 0.003 * matchedQty;
-        const rMult = risk > 0 ? (netPnL / risk) : 0;
-
-        const fillDate = (firstFill.orderDateTime || new Date().toISOString()).split(" ")[0];
-        const tradeObj = {
-          id: `T-${String(tradesData.length + 1).padStart(3, '0')}`,
-          date: fillDate,
-          day: getTradeWeekday(fillDate),
-          time: (firstFill.orderDateTime || "").split(" ")[1] ? firstFill.orderDateTime.split(" ")[1].slice(0, 5) : "09:25",
-          exit_time: "10:15",
-          hold_duration: 8,
-          symbol: sym,
-          direction: direction,
-          setup_name: "FYERS Web Import",
-          scanner_alert_time: "09:20",
-          htf_ok: "Y",
-          no_chase: "Y",
-          stop_defined: "Y",
-          target_price: parseFloat((direction === "Long" ? entry + 2.2 * (entry*0.003) : entry - 2.2 * (entry*0.003)).toFixed(2)),
-          rr_planned: 2.2,
-          risk_percent: 0.0025,
-          risk_amount: risk,
-          entry_price: parseFloat(entry.toFixed(2)),
-          stop_price: parseFloat((direction === "Long" ? entry - entry*0.003 : entry + entry*0.003).toFixed(2)),
-          exit_price: parseFloat(exit.toFixed(2)),
-          qty: matchedQty,
-          gross_pnl: parseFloat(grossPnL.toFixed(2)),
-          costs: parseFloat(fyersCosts.totalCosts.toFixed(2)),
-          net_pnl: parseFloat(netPnL.toFixed(2)),
-          r_multiple: parseFloat(rMult.toFixed(2)),
-          outcome: netPnL > 10 ? "Win" : (netPnL < -10 ? "Loss" : "Break-Even"),
-          checklist_score: 5,
-          rule_violation: "N",
-          violation_type: "None",
-          emotion_before: 2,
-          emotion_during: 2,
-          emotion_after: netPnL > 0 ? 2 : 4,
-          trade_valid: "Y",
-          lesson: "Imported from FYERS Web Tradebook. Exact statutory friction calculated.",
-          screenshot_link: `https://www.tradingview.com/chart/?symbol=NSE:${sym}`
-        };
-        tradesData.unshift(tradeObj);
-        added++;
-      });
-
-      if (added > 0) {
-        saveTradesLocally();
-        renderTradesTable();
-        renderTopCapitalHeader();
-        renderAllChartsAndMetrics();
-        checkDailyCircuitBreaker();
-        document.getElementById('fyersPastedTextArea').value = "";
-        closeFyersIngestModal();
-        alert(`✅ Successfully parsed and logged ${added} trades from FYERS Web!`);
-      } else {
-        alert("No completed round-trip trades could be matched from the pasted text.");
-      }
+      // Unified parsing with 0.8% planned SL, 2.0% target, and 2.50R planned RR
+      parseRawFyersTradebook(text, defaultSetup);
     }
 
     // --- MAE / MFE Analytics Suite ---
@@ -18323,14 +18463,15 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       if (!trade) return;
 
       const setups = [
+        'Default Setup',
+        '1m VWAP Bounce',
         '1m Pullback to 9EMA',
         'Opening Range Breakout (ORB)',
-        '1m VWAP Bounce',
         '1m Breakout & Re-test',
         'Support / Resistance Bounce',
-        'Counter-trend Reversal'
+        '5m Fakeout / Trapped Volume'
       ];
-      const current = trade.setup_name || '1m Pullback to 9EMA';
+      const current = trade.setup_name || 'Default Setup';
       const idx = setups.indexOf(current);
       const nextSetup = setups[(idx + 1) % setups.length];
 
@@ -18339,8 +18480,26 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
       renderTradesTable();
       syncTradesWithBackend();
 
-      showSystemToast(`🎯 <strong>${trade.symbol} Setup Switched:</strong> Tagged as <em>${nextSetup}</em>.`, 'info');
+      showSystemToast(`🎯 <strong>${trade.symbol} Setup Switched:</strong> Tagged as <em>${escapeHtml(nextSetup)}</em> and synced to Excel.`, 'info');
       playFeedbackSound('click');
+    }
+
+    function promptEditTradeSetup(tradeId, event) {
+      if (event) event.stopPropagation();
+      const trade = tradesData.find(t => t.id === tradeId);
+      if (!trade) return;
+
+      const current = trade.setup_name || 'Default Setup';
+      const updated = prompt(`Update Strategy Setup for ${trade.symbol} (${trade.id}):\n(e.g., Default Setup, 1m VWAP Bounce, 1m Pullback to 9EMA, ORB, etc.)`, current);
+      if (updated !== null && updated.trim() !== '') {
+        trade.setup_name = updated.trim();
+        saveTradesLocally();
+        renderTradesTable();
+        syncTradesWithBackend();
+
+        showSystemToast(`🎯 <strong>${trade.symbol} Setup Updated:</strong> Tagged as <em>${escapeHtml(trade.setup_name)}</em> and synced to Excel!`, 'info');
+        playFeedbackSound('click');
+      }
     }
 
     function quickEditTradeLesson(tradeId, event) {

@@ -285,9 +285,10 @@ def sync_trades_to_system(token, cfg):
         charges = compute_fyers_charges(entry_px, exit_px, matched_qty)
         net_pnl = round(gross_pnl - charges["total_charges"], 2)
 
-        # Estimate stop price based on default 0.4% stop or 1:2.2 RR
-        est_risk = entry_px * 0.003
+        # Baseline planned parameters: 0.8% planned SL, 2.0% planned Target, 2.50R, Default Setup
+        est_risk = entry_px * 0.008
         stop_px = round(entry_px - est_risk if direction == "LONG" else entry_px + est_risk, 2)
+        target_px = round(entry_px + (entry_px * 0.02) if direction == "LONG" else entry_px - (entry_px * 0.02), 2)
         r_risk = abs(entry_px - stop_px) * matched_qty
         net_r = round(net_pnl / r_risk, 2) if r_risk > 0 else 0.0
 
@@ -295,26 +296,30 @@ def sync_trades_to_system(token, cfg):
         trade_time = first_fill.get("orderDateTime", datetime.now().strftime("%Y-%m-%d %H:%M:%S")).split(" ")[-1][:5]
 
         trade_obj = {
-            "id": len(existing) + len(new_trades) + 1,
+            "id": f"T-{(len(existing) + len(new_trades) + 1):03d}",
             "fyers_id": fill_id,
             "date": trade_date,
             "time": trade_time,
             "symbol": sym,
-            "direction": direction,
+            "direction": "Long" if direction == "LONG" else "Short",
             "entry_price": round(entry_px, 2),
             "exit_price": round(exit_px, 2),
             "stop_price": stop_px,
+            "target_price": target_px,
             "qty": matched_qty,
-            "planned_rr": 2.2,
+            "planned_rr": 2.5,
+            "risk_percent": 0.008,
+            "risk_amount": round(r_risk, 2),
             "urgency": 3,
-            "setup_name": "FYERS Live Orderbook Sync",
+            "setup_name": "Default Setup",
             "rule_adherence": True,
             "gross_pnl": round(gross_pnl, 2),
             "total_statutory": charges["total_charges"],
             "net_pnl": net_pnl,
-            "net_r": net_r,
+            "r_multiple": net_r,
+            "outcome": "Win" if net_pnl > 0 else ("Loss" if net_pnl < 0 else "Break-Even"),
             "status": "WIN" if net_pnl > 0 else ("LOSS" if net_pnl < 0 else "BE"),
-            "notes": f"Auto-synced from FYERS tradebook. Brokerage: ₹{charges['brokerage']}, STT: ₹{charges['stt']}, GST: ₹{charges['gst']}"
+            "notes": f"Auto-synced from FYERS tradebook (0.8% SL, 2.0% Target). Brokerage: ₹{charges['brokerage']}, STT: ₹{charges['stt']}, GST: ₹{charges['gst']}"
         }
         new_trades.append(trade_obj)
 

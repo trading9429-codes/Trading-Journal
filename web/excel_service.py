@@ -329,22 +329,26 @@ class ExcelTradeManager:
         exit_time_str = str(payload.get("exit_time") or time_str)
         day_str = get_weekday_from_date(date_str, payload.get("day"))
         
-        setup_name = str(payload.get("setup_name") or "1m Indicator Setup")
+        setup_name = str(payload.get("setup_name") or "Default Setup")
         scanner_time = str(payload.get("scanner_alert_time") or time_str)
         lesson = str(payload.get("lesson") or "Trade logged via Web Quick-Logger")
         screenshot = str(payload.get("screenshot_link") or payload.get("screenshot") or "")
         
+        # Stop Price: default to 0.8% planned SL if not defined
+        if stop <= 0 and entry > 0:
+            stop = round(entry * (1.0 - 0.008) if direction == "Long" else entry * (1.0 + 0.008), 2)
+
         # Calculations
         risk_per_share = abs(entry - stop)
         risk_amount = round(risk_per_share * qty, 2)
         reward_per_share = (exit_p - entry) if direction == "Long" else (entry - exit_p)
         
-        # Target Price
+        # Target Price: default to 2.0% planned Target if not defined
         target = float(payload.get("target_price") or payload.get("target") or 0.0)
-        if target <= 0:
-            target = round(entry + 2.2 * risk_per_share if direction == "Long" else entry - 2.2 * risk_per_share, 2)
+        if target <= 0 and entry > 0:
+            target = round(entry * (1.0 + 0.02) if direction == "Long" else entry * (1.0 - 0.02), 2)
 
-        rr_planned = float(payload.get("rr_planned") or (round(abs(target - entry) / risk_per_share, 2) if risk_per_share > 0 else 0.0))
+        rr_planned = float(payload.get("rr_planned") or (round(abs(target - entry) / risk_per_share, 2) if risk_per_share > 0 else 2.5))
         
         # Costs / FYERS Brokerage
         if payload.get("costs") is not None and float(payload.get("costs")) > 0:
@@ -601,7 +605,7 @@ class ExcelTradeManager:
             stop = float(t.get("stop_price") or 0)
             exit_px = float(t.get("exit_price") or 0)
             dir_val = t.get("direction") or "Long"
-            target_val = t.get("target_price") or (entry + 2.2*abs(entry-stop) if dir_val == "Long" else entry - 2.2*abs(entry-stop))
+            target_val = t.get("target_price") or (round(entry * 1.02, 2) if dir_val == "Long" else round(entry * 0.98, 2))
             quick_rows.append([
                 {"val": t.get("id", "T-001"), "s": 5},
                 {"val": t.get("date", ""), "s": 26},
@@ -613,7 +617,7 @@ class ExcelTradeManager:
                 {"val": round(target_val, 2), "s": 27},
                 {"val": exit_px, "s": 27},
                 {"val": int(t.get("qty") or 1), "s": 26},
-                {"val": float(t.get("rr_planned") or 2.2), "s": 6},
+                {"val": float(t.get("rr_planned") or 2.5), "s": 6},
                 {"val": float(t.get("costs") or 0), "s": 4},
                 {"val": float(t.get("net_pnl") or 0), "s": 4},
                 {"val": float(t.get("r_multiple") or 0), "s": 19},
@@ -641,14 +645,14 @@ class ExcelTradeManager:
                 {"val": t.get("time", "09:20"), "s": 5},
                 {"val": t.get("symbol", ""), "s": 5},
                 {"val": t.get("direction", "Long"), "s": 5},
-                {"val": t.get("setup_name", "1m Pullback to 9EMA"), "s": 0},
+                {"val": t.get("setup_name", "Default Setup"), "s": 0},
                 {"val": t.get("scanner_alert_time", t.get("time", "09:20")), "s": 5},
                 {"val": t.get("htf_ok", "Y"), "s": 5},
                 {"val": t.get("no_chase", "Y"), "s": 5},
                 {"val": t.get("stop_defined", "Y"), "s": 5},
-                {"val": float(t.get("rr_planned") or 2.2), "s": 6},
-                {"val": float(t.get("risk_percent") or 0.0025), "s": 3},
-                {"val": float(t.get("risk_amount") or 500), "s": 4},
+                {"val": float(t.get("rr_planned") or 2.5), "s": 6},
+                {"val": float(t.get("risk_percent") or 0.008), "s": 3},
+                {"val": float(t.get("risk_amount") or (round(float(t.get("entry_price") or 0) * 0.008 * int(t.get("qty") or 1), 2))), "s": 4},
                 {"val": float(t.get("entry_price") or 0), "s": 4},
                 {"val": float(t.get("stop_price") or 0), "s": 4},
                 {"val": float(t.get("exit_price") or 0), "s": 4},
@@ -729,7 +733,7 @@ class ExcelTradeManager:
                 {"val": t.get("date", ""), "s": 2},
                 {"val": t.get("id", ""), "s": 5},
                 {"val": t.get("symbol", ""), "s": 5},
-                {"val": t.get("setup_name", "1m Pullback to 9EMA"), "s": 0},
+                {"val": t.get("setup_name", "Default Setup"), "s": 0},
                 {"val": f"Higher timeframe alignment inside 09:15-10:30 window.", "s": 0},
                 {"val": f"Setup confirmed. Limit order filled at planned level.", "s": 0},
                 {"val": int(t.get("emotion_before") or 2), "s": 5},

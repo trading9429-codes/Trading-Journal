@@ -115,6 +115,48 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
         elif path == "/api/defaults":
             result = manager.reload_defaults()
             self._send_json(result)
+        elif path == "/api/fyers/upload":
+            try:
+                import base64
+                from fyers_parser import parse_fyers_payload
+                file_content = payload.get("file_content", "")
+                file_name = payload.get("file_name", "")
+                base64_data = payload.get("base64", "")
+                default_setup = payload.get("default_setup", "Default Setup")
+                auto_commit = payload.get("auto_commit", False)
+
+                existing_trades = manager.get_trades()
+                existing_count = len(existing_trades)
+
+                if base64_data:
+                    raw_bytes = base64.b64decode(base64_data)
+                    trades = parse_fyers_payload(raw_bytes, file_name=file_name, existing_count=existing_count, default_setup=default_setup)
+                else:
+                    trades = parse_fyers_payload(file_content, file_name=file_name, existing_count=existing_count, default_setup=default_setup)
+
+                if auto_commit and trades:
+                    combined = list(existing_trades) + list(trades)
+                    manager.set_trades(combined)
+                    stats = manager.get_stats()
+                    self._send_json({
+                        "status": "ok",
+                        "trades": combined,
+                        "new_trades": trades,
+                        "added_count": len(trades),
+                        "stats": stats,
+                        "message": f"Successfully imported and synced {len(trades)} trades to Excel spreadsheet with 0.8% planned SL, 2.0% planned Target, and default setup '{default_setup}'!"
+                    })
+                else:
+                    self._send_json({
+                        "status": "ok",
+                        "trades": trades,
+                        "count": len(trades),
+                        "message": f"Parsed {len(trades)} FYERS round-trip execution pairs."
+                    })
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                self._send_json({"error": str(e)}, status=500)
         elif path == "/api/fyers/sync":
             app_id = payload.get("app_id", "")
             access_token = payload.get("access_token", "")
