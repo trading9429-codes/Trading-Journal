@@ -11047,51 +11047,129 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
     async function processFyersFile(file) {
       const defaultSetup = (document.getElementById('fyersDefaultSetupSelect') ? document.getElementById('fyersDefaultSetupSelect').value : 'Default Setup') || 'Default Setup';
 
-      // If .xlsx or OpenXML spreadsheet file
-      if (file.name.toLowerCase().endsWith('.xlsx') || (file.type && file.type.includes('spreadsheetml'))) {
-        const reader = new FileReader();
-        reader.onload = async function(evt) {
-          try {
-            const dataUrl = evt.target.result;
-            const base64Data = dataUrl.split(',')[1];
-            const res = await fetch('/api/fyers/upload', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                base64: base64Data,
-                file_name: file.name,
-                default_setup: defaultSetup,
-                auto_commit: false
-              })
-            });
+      // Always try dispatching to the backend API first (works seamlessly for .csv, .tsv, .xlsx)
+      const reader = new FileReader();
+      reader.onload = async function(evt) {
+        try {
+          const dataUrl = evt.target.result;
+          const base64Data = dataUrl.split(',')[1];
+          const res = await fetch('/api/fyers/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              base64: base64Data,
+              file_name: file.name,
+              default_setup: defaultSetup,
+              auto_commit: false
+            })
+          });
+          if (res.ok) {
             const data = await res.json();
             if (data.error) throw new Error(data.error);
-            if (!data.trades || data.trades.length === 0) {
-              alert("No matched round-trip BUY/SELL execution pairs found in this FYERS Excel file.");
+            if (data.trades && data.trades.length > 0) {
+              pendingFyersTrades = data.trades;
+              closeFyersIngestModal();
+              renderFyersPreviewModal();
               return;
             }
-            pendingFyersTrades = data.trades;
-            closeFyersIngestModal();
-            renderFyersPreviewModal();
-          } catch(err) {
-            console.error("FYERS Excel parser error:", err);
-            alert("Error parsing FYERS Excel file: " + err.message);
           }
-        };
-        reader.readAsDataURL(file);
-        return;
-      }
-
-      // Plain text CSV / TSV file
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        try {
-          parseRawFyersTradebook(evt.target.result, defaultSetup);
-        } catch(err) {
-          alert("Error parsing FYERS file: " + err.message);
+          throw new Error('Server returned empty trades or error');
+        } catch (serverErr) {
+          console.warn("Backend /api/fyers/upload fallback to client parser:", serverErr);
+          // If CSV / text, fall back to offline client-side parser
+          if (!file.name.toLowerCase().endsWith('.xlsx')) {
+            const textReader = new FileReader();
+            textReader.onload = function(tEvt) {
+              try {
+                parseRawFyersTradebook(tEvt.target.result, defaultSetup);
+              } catch(parseErr) {
+                alert("Error parsing FYERS file: " + parseErr.message);
+              }
+            };
+            textReader.readAsText(file);
+          } else {
+            alert("Error parsing FYERS Excel file: " + serverErr.message);
+          }
         }
       };
-      reader.readAsText(file);
+      reader.readAsDataURL(file);
+    }
+
+    function splitFyersCsvLine(line, delimiter = ',') {
+      const result = [];
+      let cur = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+          if (inQuotes && line[i + 1] === '"') {
+            cur += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === delimiter && !inQuotes) {
+          result.push(cur.trim());
+          cur = '';
+        } else {
+          cur += char;
+        }
+      }
+      result.push(cur.trim());
+      return result.map(c => c.replace(/^="|"$/g, '').replace(/^"|"$/g, '').trim());
+    }
+
+    function parseFyersDateTimeStr(dtStr) {
+      if (!dtStr) return { date: new Date().toISOString().split('T')[0], time: '09:20' };
+      const m12 = dtStr.match(/(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4}),?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i);
+      if (m12) {
+        const day = m12[1].padStart(2, '0');
+        const mStr = m12[2].toUpperCase();
+        const months = { 'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05', 'JUN': '06', 'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12' };
+        const month = months[mStr] || '01';
+        const year = m12[3];
+        let hour = parseInt(m12[4]);
+        const min = m12[5];
+        const ampm = (m12[7] || '').toUpperCase();
+        if (ampm === 'PM' && hour < 12) hour += 12;
+        if (ampm === 'AM' && hour === 12) hour = 0;
+        const hourStr = String(hour).padStart(2, '0');
+        return { date: `${year}-${month}-${day}`, time: `${hourStr}:${min}` };
+      }
+      const mIso = dtStr.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?/);
+      if (mIso) {
+        const year = mIso[1];
+        const month = mIso[2].padStart(2, '0');
+        const day = mIso[3].padStart(2, '0');
+        const hour = mIso[4] ? mIso[4].padStart(2, '0') : '09';
+        const min = mIso[5] || '20';
+        return { date: `${year}-${month}-${day}`, time: `${hour}:${min}` };
+      }
+      return { date: new Date().toISOString().split('T')[0], time: '09:20' };
+    }
+
+    const FYERS_COMPANY_TO_TICKER = {
+      'IIFL FINANCE LIMITED': 'IIFL',
+      'V2 RETAIL LIMITED': 'V2RETAIL',
+      'AWFIS SPACE SOLUTIONS LTD': 'AWFIS',
+      'ALKYL AMINES CHEM. LTD': 'ALKYLAMINE',
+      'WELSPUN LIVING LIMITED': 'WELSPUNLIV',
+      'TRIVENI ENGG. & INDS. LTD': 'TRIVENI',
+      'INDO COUNT INDUSTRIES LTD': 'ICIL',
+      'KSH INTERNATIONAL LIMITED': 'KSHINTL',
+      'PARAG MILK FOODS LIMITED': 'PARAGMILK',
+      'PARAGMILK': 'PARAGMILK',
+      'PWL': 'PWL',
+      'FRACTAL': 'FRACTAL'
+    };
+
+    function normalizeFyersSymbol(rawSym) {
+      let s = (rawSym || '').trim().toUpperCase();
+      if (FYERS_COMPANY_TO_TICKER[s]) return FYERS_COMPANY_TO_TICKER[s];
+      for (const [k, v] of Object.entries(FYERS_COMPANY_TO_TICKER)) {
+        if (s.includes(k) || k.includes(s)) return v;
+      }
+      return s.replace(/^NSE:/, '').replace(/-EQ$/, '').replace(/\s+/g, '');
     }
 
     function parseRawFyersTradebook(csvContent, defaultSetup = 'Default Setup') {
@@ -11102,8 +11180,24 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         return;
       }
 
-      const delimiter = lines[0].includes('\t') ? '\t' : ',';
-      const headers = lines[0].split(delimiter).map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
+      let headerIdx = -1;
+      let delimiter = ',';
+      for (let i = 0; i < Math.min(lines.length, 30); i++) {
+        const l = lines[i].toLowerCase();
+        if ((l.includes('symbol') || l.includes('scrip') || l.includes('instrument')) &&
+            (l.includes('qty') || l.includes('price') || l.includes('side') || l.includes('order'))) {
+          headerIdx = i;
+          if (lines[i].includes('\t')) delimiter = '\t';
+          break;
+        }
+      }
+
+      if (headerIdx === -1) {
+        alert("Could not identify FYERS columns (Symbol, Price, Qty). Please ensure the tradebook has valid headers.");
+        return;
+      }
+
+      const headers = splitFyersCsvLine(lines[headerIdx], delimiter).map(h => h.toLowerCase());
       const findCol = (...names) => {
         for (let name of names) {
           const idx = headers.findIndex(h => h.includes(name.toLowerCase()));
@@ -11112,12 +11206,14 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         return -1;
       };
 
-      const colSym = findCol('symbol', 'scrip', 'instrument', 'tradingsymbol');
-      const colSide = findCol('side', 'type', 'action', 'buy/sell', 'trade type', 'transtype');
-      const colPrice = findCol('price', 'trade price', 'avg price', 'rate', 'avg. price');
+      const colSymCode = findCol('symbol code', 'scrip code', 'ticker');
+      const colSymName = findCol('symbol name', 'symbol', 'instrument');
+      const colSym = colSymCode !== -1 ? colSymCode : colSymName;
+      const colSide = headers.findIndex(h => (h.includes('side') || h.includes('action') || h.includes('buy/sell') || h.includes('type')) && !h.includes('product'));
+      const colPrice = findCol('traded price', 'price', 'rate', 'avg price');
       const colQty = findCol('qty', 'quantity', 'trade qty', 'shares', 'filled');
-      const colTime = findCol('time', 'trade time', 'order time');
-      const colDate = findCol('date', 'trade date', 'order date');
+      const colDt = findCol('date & time', 'trade date', 'order date', 'date');
+      const colOrd = findCol('exchange order id', 'order id', 'oms order id');
       const colStatus = findCol('status', 'order status');
 
       if (colSym === -1 || colPrice === -1 || colQty === -1) {
@@ -11125,9 +11221,9 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
         return;
       }
 
-      const executionsBySymbol = {};
-      for (let i = 1; i < lines.length; i++) {
-        const cells = lines[i].split(delimiter).map(c => c.trim().replace(/^"|"$/g, ''));
+      const rawFills = [];
+      for (let i = headerIdx + 1; i < lines.length; i++) {
+        const cells = splitFyersCsvLine(lines[i], delimiter);
         if (cells.length <= colSym) continue;
 
         if (colStatus !== -1 && cells[colStatus]) {
@@ -11137,25 +11233,57 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           }
         }
 
-        let symbol = cells[colSym].replace('NSE:', '').replace('-EQ', '').trim().toUpperCase();
-        let sideRaw = (colSide !== -1 ? cells[colSide] : 'BUY').toUpperCase();
-        let side = (sideRaw.includes('BUY') || sideRaw === 'B' || sideRaw === '1') ? 'BUY' : 'SELL';
-        let price = parseFloat(cells[colPrice].replace(/[^0-9.]/g, ''));
-        let qty = parseInt(cells[colQty].replace(/[^0-9]/g, ''));
-        let timeStr = (colTime !== -1 && cells[colTime]) ? cells[colTime] : '09:20';
-        let dateStr = (colDate !== -1 && cells[colDate]) ? cells[colDate] : new Date().toISOString().split('T')[0];
+        let sym = cells[colSym];
+        if (!sym && colSymName !== -1) sym = cells[colSymName];
+        sym = normalizeFyersSymbol(sym);
 
-        if (!symbol || isNaN(price) || isNaN(qty) || qty <= 0) continue;
+        const sideRaw = (colSide !== -1 ? cells[colSide] : 'BUY').toUpperCase();
+        const side = (sideRaw.includes('BUY') || sideRaw === 'B' || sideRaw === '1') ? 'BUY' : 'SELL';
+        const price = parseFloat(cells[colPrice].replace(/[^0-9.]/g, ''));
+        const qty = Math.round(parseFloat(cells[colQty].replace(/[^0-9.]/g, '')));
+        const dtStr = colDt !== -1 ? cells[colDt] : '';
+        const { date, time } = parseFyersDateTimeStr(dtStr);
+        const orderId = colOrd !== -1 ? cells[colOrd] : '';
 
-        if (!executionsBySymbol[symbol]) executionsBySymbol[symbol] = [];
-        executionsBySymbol[symbol].push({
-          symbol,
-          side,
-          price,
-          qty,
-          time: timeStr,
-          date: dateStr
-        });
+        if (!sym || isNaN(price) || isNaN(qty) || qty <= 0) continue;
+        rawFills.push({ symbol: sym, side, price, qty, date, time, orderId, lineIdx: i });
+      }
+
+      if (rawFills.length === 0) {
+        alert("No valid trade fills found in this FYERS file.");
+        return;
+      }
+
+      // Check chronological ordering: if first fill timestamp > last fill timestamp, reverse to ascending
+      if (rawFills.length > 1) {
+        const f0 = rawFills[0];
+        const fL = rawFills[rawFills.length - 1];
+        if (f0.date > fL.date || (f0.date === fL.date && f0.time > fL.time)) {
+          rawFills.reverse();
+        }
+      }
+
+      // Aggregate micro-slices sharing the same order ID
+      const aggregated = [];
+      const orderGroups = {};
+      for (const f of rawFills) {
+        const key = f.orderId ? `${f.date}_${f.symbol}_${f.side}_${f.orderId}` : `${f.date}_${f.symbol}_${f.side}_line_${f.lineIdx}`;
+        if (!orderGroups[key]) {
+          orderGroups[key] = { ...f, totalValue: f.price * f.qty };
+          aggregated.push(orderGroups[key]);
+        } else {
+          orderGroups[key].qty += f.qty;
+          orderGroups[key].totalValue += f.price * f.qty;
+          orderGroups[key].price = parseFloat((orderGroups[key].totalValue / orderGroups[key].qty).toFixed(2));
+        }
+      }
+
+      // Group fills by day & symbol
+      const dayGroups = {};
+      for (const f of aggregated) {
+        const k = `${f.date}_${f.symbol}`;
+        if (!dayGroups[k]) dayGroups[k] = [];
+        dayGroups[k].push(f);
       }
 
       pendingFyersTrades = [];
@@ -11166,16 +11294,13 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
 
       let currentIdCounter = existingMaxId;
 
-      for (const [symbol, execs] of Object.entries(executionsBySymbol)) {
-        // Chronological order
-        execs.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
-
+      for (const [key, fills] of Object.entries(dayGroups)) {
         let buyQueue = [];
         let sellQueue = [];
 
-        for (const ex of execs) {
-          if (ex.side === 'BUY') buyQueue.push({...ex});
-          else sellQueue.push({...ex});
+        for (const ex of fills) {
+          if (ex.side === 'BUY') buyQueue.push({ ...ex });
+          else sellQueue.push({ ...ex });
         }
 
         while (buyQueue.length > 0 && sellQueue.length > 0) {
@@ -11190,6 +11315,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
           const entryTime = isLong ? buyEx.time : sellEx.time;
           const exitTime = isLong ? sellEx.time : buyEx.time;
           const tradeDate = buyEx.date || sellEx.date || new Date().toISOString().split('T')[0];
+          const symbol = buyEx.symbol || sellEx.symbol;
 
           // -------------------------------------------------------------
           // EXACT RULE BASELINE: 0.8% Planned SL, 2.0% Target, 2.50R
@@ -11256,7 +11382,7 @@ RELIANCE-EQ  SELL  100  2512.50  FILLED  09:28:10" class="w-full bg-slate-950 bo
             emotion_during: 2,
             emotion_after: netPnL > 0 ? 2 : 3,
             trade_valid: 'Y',
-            lesson: `Imported FYERS trade fill. Planned SL: 0.8% (₹${stopPrice}), Target: 2.0% (₹${targetPrice}), RR: 2.50R.`,
+            lesson: `Imported FYERS Tradebook fill (${symbol}). 0.8% planned SL (₹${stopPrice}), 2.0% target (₹${targetPrice}), RR: 2.50R.`,
             screenshot_link: `https://www.tradingview.com/chart/?symbol=NSE:${symbol}`
           });
 
