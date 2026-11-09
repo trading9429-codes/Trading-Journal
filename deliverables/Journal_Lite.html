@@ -91,8 +91,8 @@
         <button onclick="switchTab('fyers')" id="tabBtn-fyers" class="tab-btn px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5">
           <span class="text-orange-400">⚡</span> FYERS Import
         </button>
-        <button onclick="switchTab('rules')" id="tabBtn-rules" class="tab-btn px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
-          Rules &amp; Lockbox
+        <button onclick="switchTab('rules')" id="tabBtn-rules" class="tab-btn px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5">
+          <span>📖</span> Playbook
         </button>
         <button onclick="switchTab('config')" id="tabBtn-config" class="tab-btn px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5">
           <span>⚙️</span> Config
@@ -538,16 +538,53 @@
           </div>
 
           <div>
-            <label class="block text-slate-400 mb-1">Strategy Setup</label>
-            <select id="log_setup" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
-              <option value="Default Setup">Default Setup</option>
-              <option value="1m VWAP Bounce">1m VWAP Bounce</option>
-              <option value="1m Pullback to 9EMA">1m Pullback to 9EMA</option>
-              <option value="Opening Range Breakout (ORB)">Opening Range Breakout (ORB)</option>
-              <option value="1m Breakout &amp; Re-test">1m Breakout &amp; Re-test</option>
-              <option value="Support / Resistance Bounce">Support / Resistance Bounce</option>
-              <option value="5m Fakeout / Trapped Volume">5m Fakeout / Trapped Volume</option>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-slate-400">Playbook Strategy Setup</label>
+              <span class="text-[10px] font-mono text-blue-400">1-Click Presets:</span>
+            </div>
+            
+            <!-- 1-Click Playbook Preset Buttons -->
+            <div class="grid grid-cols-3 gap-2 mb-2">
+              <button type="button" onclick="selectPlaybookPreset('Setup A: VWAP & EMA Breakout (VWAP BO)', 2.0)" class="p-2 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800/60 text-emerald-300 text-[11px] font-mono text-left transition">
+                <span class="block font-bold">⚡ Setup A</span>
+                <span class="text-[9px] text-slate-400 truncate block">VWAP BO (2.0R)</span>
+              </button>
+              <button type="button" onclick="selectPlaybookPreset('Setup B: 5-Minute Volume Surge & EMA Continuation', 2.5)" class="p-2 rounded-lg bg-blue-950/40 hover:bg-blue-900/60 border border-blue-800/60 text-blue-300 text-[11px] font-mono text-left transition">
+                <span class="block font-bold">⚡ Setup B</span>
+                <span class="text-[9px] text-slate-400 truncate block">Vol Surge (2.5R)</span>
+              </button>
+              <button type="button" onclick="selectPlaybookPreset('Setup C: The EMA & VWAP Pullback Reversal', 2.0)" class="p-2 rounded-lg bg-purple-950/40 hover:bg-purple-900/60 border border-purple-800/60 text-purple-300 text-[11px] font-mono text-left transition">
+                <span class="block font-bold">⚡ Setup C</span>
+                <span class="text-[9px] text-slate-400 truncate block">Pullback (2.0R)</span>
+              </button>
+            </div>
+
+            <select id="log_setup" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none cursor-pointer">
+              <!-- Dynamically populated from setupsData -->
             </select>
+          </div>
+
+          <!-- Playbook Execution Pre-Flight Checklist -->
+          <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
+            <span class="text-[10px] uppercase font-mono tracking-wider text-slate-400 block font-bold">🛡️ Playbook Pre-Flight Checklist</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-300">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="chk_trend_stack" checked class="w-3.5 h-3.5 rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0">
+                <span>10 &gt; 20 &gt; 50 EMA Stack (Price &gt; 50 EMA)</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="chk_trigger_met" checked class="w-3.5 h-3.5 rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0">
+                <span>Candle Trigger confirmed (Close / Wick)</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="chk_no_chase" checked class="w-3.5 h-3.5 rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0">
+                <span>No chase; entered on pull or confirmation</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="chk_risk_capped" checked class="w-3.5 h-3.5 rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0">
+                <span>Hard SL defined; Risk &le; ₹2,500</span>
+              </label>
+            </div>
           </div>
 
           <!-- Real-Time Calculation Preview Card -->
@@ -666,60 +703,369 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- TAB 5: RULES & LOCKBOX                    -->
+    <!-- TAB 5: INTRADAY TRADING EXECUTION PLAYBOOK -->
     <!-- ========================================== -->
-    <div id="tabContent-rules" class="hidden max-w-3xl mx-auto space-y-4">
-      <div class="glass-panel p-6 rounded-2xl space-y-4">
-        <div class="border-b border-slate-800 pb-3">
-          <h2 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
-            <span>🛡️</span> Institutional Execution Boundaries
-          </h2>
-          <p class="text-xs text-slate-400 font-mono">Strict rules designed to eradicate emotional tilt and overtrading</p>
+    <div id="tabContent-rules" class="hidden max-w-5xl mx-auto space-y-6">
+      
+      <!-- Top Title Banner -->
+      <div class="glass-panel p-6 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-l-4 border-l-blue-500">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs uppercase font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold">Execution Playbook</span>
+            <span class="text-xs font-mono text-slate-400">FYERS / Cash Segment</span>
+          </div>
+          <h2 class="text-xl font-bold text-white tracking-tight mt-1">INTRADAY TRADING EXECUTION PLAYBOOK</h2>
+          <p class="text-xs text-slate-400 font-mono mt-1">Exact Setup Definitions, Entry Rules, EMA Stack &amp; Candle Triggers</p>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs font-mono">
-          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
-            <div class="flex items-center justify-between text-slate-400">
-              <span class="font-bold text-white">1. Execution Window</span>
-              <span class="text-emerald-400">09:15 - 10:30 AM IST</span>
-            </div>
-            <p class="text-slate-500">All intraday momentum orders must be executed within the morning volume peak. No new entries after 10:30 AM.</p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
-            <div class="flex items-center justify-between text-slate-400">
-              <span class="font-bold text-white">2. Daily Kill Switch</span>
-              <span class="text-rose-400">Max 2 Losses</span>
-            </div>
-            <p class="text-slate-500">Terminal locks upon incurring 2 consecutive losses or 2R drawdown. Immediate 30-minute physical walkaway mandatory.</p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
-            <div class="flex items-center justify-between text-slate-400">
-              <span class="font-bold text-white">3. Planned Risk &amp; RR</span>
-              <span class="text-blue-400">0.8% SL &bull; &ge; 2.2R</span>
-            </div>
-            <p class="text-slate-500">Every trade must have a hard stop defined at 0.8% of entry price and a technical target offering at least 2.2R (2.0% target = 2.50R).</p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
-            <div class="flex items-center justify-between text-slate-400">
-              <span class="font-bold text-white">4. Anti-Chasing Mandate</span>
-              <span class="text-amber-400">Limit Orders Only</span>
-            </div>
-            <p class="text-slate-500">No market orders on breakout bars. Wait for the re-test of 9EMA or VWAP pullback to capture favorable entry pricing.</p>
-          </div>
-        </div>
-
-        <!-- Today's Lockbox Status -->
-        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between font-mono text-xs">
-          <div>
-            <span class="text-slate-400">Today's Lockbox Status:</span>
-            <span id="lockboxStatusBadge" class="ml-2 font-bold text-emerald-400">ACTIVE &bull; PASSED (0 Losses)</span>
-          </div>
-          <span class="text-slate-500 text-[11px]" id="lockboxDateDisp">Date: Today</span>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-mono px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
+            Risk Cap: <strong class="text-emerald-400">₹2,500</strong>
+          </span>
+          <span class="text-xs font-mono px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
+            Daily SL: <strong class="text-rose-400">₹10,000</strong>
+          </span>
+          <span class="text-xs font-mono px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
+            Max: <strong class="text-blue-400">2 Trades/Day</strong>
+          </span>
         </div>
       </div>
+
+      <!-- Live Execution Guardrails Monitor -->
+      <div class="glass-panel p-5 rounded-2xl bg-gradient-to-r from-slate-950/80 via-slate-900/60 to-slate-950/80 border border-slate-800 space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+          <h3 class="text-xs font-mono uppercase tracking-wider font-bold text-white flex items-center gap-2">
+            <span>🛡️</span> Live Discipline Guardrails Monitor
+          </h3>
+          <span class="text-[11px] font-mono text-slate-400" id="playbookTodayDateDisp">Date: Today</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1">
+            <span class="text-slate-400 text-[11px]">Daily Trades Taken</span>
+            <div class="flex items-center justify-between">
+              <span id="pbTradesCountDisp" class="text-lg font-bold text-white">0 / 2 Max</span>
+              <span id="pbTradesBadge" class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">Within Limit</span>
+            </div>
+            <p class="text-[10px] text-slate-500">Strictly 2 trades max to eliminate revenge trading</p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1">
+            <span class="text-slate-400 text-[11px]">Hard Daily Stop-Loss</span>
+            <div class="flex items-center justify-between">
+              <span id="pbDailyLossDisp" class="text-lg font-bold text-emerald-400">₹0 / ₹10,000</span>
+              <span id="pbKillSwitchBadge" class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">Passed</span>
+            </div>
+            <p class="text-[10px] text-slate-500">Locked in FYERS; kill-switch terminates session upon breach</p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1">
+            <span class="text-slate-400 text-[11px]">Position Sizing &amp; Risk Cap</span>
+            <div class="flex items-center justify-between">
+              <span class="text-lg font-bold text-blue-400">₹2,500 Max</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold">10% Reset Size</span>
+            </div>
+            <p class="text-[10px] text-slate-500">Normal size reduced to 10% during system reset phase</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 0: Core Indicator Rules: The EMA Stack (10, 20, 50 EMA) -->
+      <div class="glass-panel p-6 rounded-2xl space-y-4">
+        <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 font-bold">Rule 0</span>
+            <h3 class="text-base font-bold text-white tracking-tight mt-1 flex items-center gap-2">
+              <span>📊</span> Core Indicator Rules: The EMA Stack (10, 20, 50 EMA)
+            </h3>
+          </div>
+          <span class="text-xs font-mono text-slate-400">5-Minute Chart</span>
+        </div>
+
+        <p class="text-xs text-slate-300 font-sans leading-relaxed">
+          <strong>Trend Filter:</strong> On the 5-minute chart, the 10, 20, and 50 EMAs define institutional trend control. <strong>Never take a long trade if the EMAs are tangled or in a bearish stack.</strong>
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+          <div class="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 space-y-1.5">
+            <div class="flex items-center justify-between text-emerald-400 font-bold">
+              <span>🟢 Bullish Trend Stack</span>
+              <span>10 &gt; 20 &gt; 50 EMA</span>
+            </div>
+            <p class="text-slate-300 text-[11px]">All three EMAs sloping upwards. Price must be interacting cleanly with the 10 or 20 EMA.</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-rose-950/20 border border-rose-500/30 space-y-1.5">
+            <div class="flex items-center justify-between text-rose-400 font-bold">
+              <span>🔴 Bearish Trend Stack</span>
+              <span>10 &lt; 20 &lt; 50 EMA</span>
+            </div>
+            <p class="text-slate-300 text-[11px]">All three EMAs sloping downwards. Avoid longs completely; look for short continuum or stand aside.</p>
+          </div>
+        </div>
+
+        <!-- The Mandatory Rule Callout -->
+        <div class="p-4 rounded-xl bg-rose-950/40 border border-rose-500/50 flex items-start gap-3">
+          <span class="text-xl">⛔</span>
+          <div>
+            <h4 class="text-xs font-bold font-mono text-rose-300 uppercase tracking-wide">The Mandatory Trend Prohibition</h4>
+            <p class="text-xs text-rose-200 mt-0.5 font-sans leading-relaxed">
+              <strong>If price is below the 50 EMA, long setups are strictly prohibited regardless of volume spikes.</strong> Institutional order flow is not in your favor when below the 50 EMA baseline.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 1: Setup A: VWAP & EMA Breakout (VWAP BO) -->
+      <div class="glass-panel p-6 rounded-2xl space-y-4">
+        <div class="border-b border-slate-800 pb-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold">Setup A</span>
+              <h3 class="text-base font-bold text-white tracking-tight">VWAP &amp; EMA Breakout (VWAP BO)</h3>
+            </div>
+            <p class="text-xs text-slate-400 font-mono mt-0.5">High-momentum breakout through VWAP resistance with expanding institutional volume</p>
+          </div>
+          <button onclick="prefillPlaybookTrade('Setup A: VWAP & EMA Breakout (VWAP BO)', 2.0)" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs font-mono transition flex items-center gap-1.5">
+            <span>⚡</span> <span>Log Setup A Trade</span>
+          </button>
+        </div>
+
+        <!-- Condition -->
+        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs font-mono text-slate-300">
+          <strong class="text-blue-400">Condition:</strong> Stock consolidates above the 20 &amp; 50 EMA near VWAP, then prints a 5-minute candle breaking resistance with volume &ge; 3x previous bar and 10 EMA &gt; 20 EMA.
+        </div>
+
+        <!-- Visual SVG Schematic for Setup A -->
+        <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800/80 flex flex-col items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 180" class="w-full max-w-2xl h-auto rounded-lg">
+            <rect width="500" height="180" fill="#070a12" rx="8"/>
+            <line x1="20" y1="40" x2="480" y2="40" stroke="#1e293b" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <line x1="20" y1="80" x2="480" y2="80" stroke="#1e293b" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <line x1="20" y1="120" x2="480" y2="120" stroke="#1e293b" stroke-width="0.5"/>
+            
+            <!-- VWAP & EMAs -->
+            <path d="M 30,55 Q 200,52 470,48" fill="none" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="430" y="42" fill="#06b6d4" font-family="monospace" font-size="10" font-weight="bold">VWAP</text>
+            
+            <path d="M 30,75 Q 220,68 470,55" fill="none" stroke="#3b82f6" stroke-width="1.5"/>
+            <text x="430" y="65" fill="#3b82f6" font-family="monospace" font-size="10">10 EMA</text>
+            
+            <path d="M 30,95 Q 220,88 470,72" fill="none" stroke="#10b981" stroke-width="1.5"/>
+            <text x="430" y="82" fill="#10b981" font-family="monospace" font-size="10">20 EMA</text>
+            
+            <path d="M 30,115 Q 220,110 470,95" fill="none" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="430" y="105" fill="#f59e0b" font-family="monospace" font-size="10">50 EMA</text>
+            
+            <!-- Consolidation Candles -->
+            <line x1="90" y1="62" x2="90" y2="85" stroke="#10b981" stroke-width="1"/>
+            <rect x="86" y="67" width="8" height="12" fill="#10b981"/>
+            
+            <line x1="120" y1="60" x2="120" y2="82" stroke="#f43f5e" stroke-width="1"/>
+            <rect x="116" y="63" width="8" height="15" fill="#f43f5e"/>
+            
+            <line x1="150" y1="58" x2="150" y2="78" stroke="#10b981" stroke-width="1"/>
+            <rect x="146" y="62" width="8" height="10" fill="#10b981"/>
+            
+            <line x1="180" y1="56" x2="180" y2="75" stroke="#f43f5e" stroke-width="1"/>
+            <rect x="176" y="60" width="8" height="11" fill="#f43f5e"/>
+
+            <line x1="210" y1="55" x2="210" y2="72" stroke="#10b981" stroke-width="1"/>
+            <rect x="206" y="58" width="8" height="9" fill="#10b981"/>
+
+            <!-- Breakout Candle -->
+            <line x1="255" y1="20" x2="255" y2="70" stroke="#10b981" stroke-width="2"/>
+            <rect x="250" y="25" width="10" height="40" fill="#10b981" rx="1"/>
+            
+            <!-- Pointer Trigger -->
+            <line x1="255" y1="8" x2="255" y2="18" stroke="#38bdf8" stroke-width="1.5"/>
+            <circle cx="255" cy="20" r="2" fill="#38bdf8"/>
+            <text x="165" y="14" fill="#38bdf8" font-family="monospace" font-size="10" font-weight="bold">Entry on Close (Volume &ge; 3x)</text>
+
+            <!-- Volume Sub-panel -->
+            <rect x="87" y="150" width="6" height="10" fill="#10b981" opacity="0.6"/>
+            <rect x="117" y="148" width="6" height="12" fill="#f43f5e" opacity="0.6"/>
+            <rect x="147" y="152" width="6" height="8" fill="#10b981" opacity="0.6"/>
+            <rect x="177" y="151" width="6" height="9" fill="#f43f5e" opacity="0.6"/>
+            <rect x="207" y="153" width="6" height="7" fill="#10b981" opacity="0.6"/>
+            
+            <!-- Spiking Volume Bar -->
+            <rect x="251" y="130" width="8" height="30" fill="#10b981"/>
+            <text x="265" y="148" fill="#10b981" font-family="monospace" font-size="9" font-weight="bold">Volume Surge</text>
+          </svg>
+        </div>
+
+        <!-- Exact Rules Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+            <span class="text-slate-400 font-bold block text-[11px] uppercase">Entry Rule</span>
+            <p class="text-slate-300 text-[11px]">Enter on the close of the breakout candle <strong>only when 10, 20, and 50 EMA are in a bullish stack</strong>.</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+            <span class="text-slate-400 font-bold block text-[11px] uppercase">Candle Trigger</span>
+            <p class="text-slate-300 text-[11px]">Clean close across VWAP with expanding volume and <strong>closing range &ge; 0.7</strong>.</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+            <span class="text-slate-400 font-bold block text-[11px] uppercase">Stop Loss &amp; Target</span>
+            <p class="text-slate-300 text-[11px]">Hard stop placed <strong>strictly below the 20 EMA or breakout candle low</strong>. Target minimum <strong>1:2 R:R (2.0R)</strong>.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: Setup B: 5-Minute Volume Surge & EMA Continuation -->
+      <div class="glass-panel p-6 rounded-2xl space-y-4">
+        <div class="border-b border-slate-800 pb-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 font-bold">Setup B</span>
+              <h3 class="text-base font-bold text-white tracking-tight">5-Minute Volume Surge &amp; EMA Continuation</h3>
+            </div>
+            <p class="text-xs text-slate-400 font-mono mt-0.5">Trend-continuation pullback after high-volume scanner surge with strict anti-chase discipline</p>
+          </div>
+          <button onclick="prefillPlaybookTrade('Setup B: 5-Minute Volume Surge & EMA Continuation', 2.5)" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs font-mono transition flex items-center gap-1.5">
+            <span>⚡</span> <span>Log Setup B Trade</span>
+          </button>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs font-mono text-slate-300">
+          <strong class="text-blue-400">Condition:</strong> Scanner triggers on volume &ge; 5x 20-period SMA, ADR &ge; 4%, with price trading well above the rising 50 EMA.
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-amber-950/20 border border-amber-500/30 text-xs font-mono text-amber-200">
+          ⚠️ <strong>Anti-Chase Mandate:</strong> NEVER chase initial spike candles that surge too far away from the 10 EMA. Wait for a mean-reversion pull toward the moving averages.
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+            <span class="text-slate-400 font-bold block text-[11px] uppercase">Candle Trigger</span>
+            <p class="text-slate-300 text-[11px]">Bullish rejection wick off the <strong>10 EMA or 20 EMA line</strong> during high volume.</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+            <span class="text-slate-400 font-bold block text-[11px] uppercase">Stop Loss &amp; Risk Limit</span>
+            <p class="text-slate-300 text-[11px]">Hard stop <strong>below the 50 EMA or swing low</strong>. <strong>Risk capped strictly at ₹2,500 per trade</strong>.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: Setup C: The EMA & VWAP Pullback Reversal -->
+      <div class="glass-panel p-6 rounded-2xl space-y-4">
+        <div class="border-b border-slate-800 pb-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 font-bold">Setup C</span>
+              <h3 class="text-base font-bold text-white tracking-tight">The EMA &amp; VWAP Pullback Reversal</h3>
+            </div>
+            <p class="text-xs text-slate-400 font-mono mt-0.5">High-probability mean-reversion entry on volume exhaustion at confluence support</p>
+          </div>
+          <button onclick="prefillPlaybookTrade('Setup C: The EMA & VWAP Pullback Reversal', 2.0)" class="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs font-mono transition flex items-center gap-1.5">
+            <span>⚡</span> <span>Log Setup C Trade</span>
+          </button>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs font-mono text-slate-300">
+          <strong class="text-purple-400">Condition:</strong> Price surges, then pulls back precisely into the rising 10 EMA, 20 EMA, or VWAP zone on declining volume.
+        </div>
+
+        <!-- Visual SVG Schematic for Setup C -->
+        <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800/80 flex flex-col items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 180" class="w-full max-w-2xl h-auto rounded-lg">
+            <rect width="500" height="180" fill="#070a12" rx="8"/>
+            <line x1="20" y1="40" x2="480" y2="40" stroke="#1e293b" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <line x1="20" y1="90" x2="480" y2="90" stroke="#1e293b" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <line x1="20" y1="130" x2="480" y2="130" stroke="#1e293b" stroke-width="0.5"/>
+            
+            <!-- 20 EMA / VWAP Zone Line -->
+            <line x1="30" y1="95" x2="470" y2="85" stroke="#10b981" stroke-width="2.5"/>
+            <text x="340" y="80" fill="#10b981" font-family="monospace" font-size="10" font-weight="bold">20 EMA / VWAP Zone</text>
+
+            <!-- Initial Surge Green Candle -->
+            <line x1="80" y1="30" x2="80" y2="90" stroke="#10b981" stroke-width="1.5"/>
+            <rect x="75" y="35" width="10" height="45" fill="#10b981" rx="1"/>
+
+            <!-- Pullback Red Candles -->
+            <line x1="115" y1="45" x2="115" y2="80" stroke="#f43f5e" stroke-width="1"/>
+            <rect x="111" y="50" width="8" height="22" fill="#f43f5e"/>
+
+            <line x1="145" y1="60" x2="145" y2="88" stroke="#f43f5e" stroke-width="1"/>
+            <rect x="141" y="65" width="8" height="18" fill="#f43f5e"/>
+
+            <!-- Hammer / Rejection Wick at 20 EMA -->
+            <line x1="180" y1="65" x2="180" y2="97" stroke="#10b981" stroke-width="2"/>
+            <rect x="175" y="68" width="10" height="12" fill="#10b981" rx="1"/>
+
+            <!-- Pointer Trigger -->
+            <line x1="180" y1="40" x2="180" y2="60" stroke="#38bdf8" stroke-width="1.5"/>
+            <circle cx="180" cy="62" r="2" fill="#38bdf8"/>
+            <text x="135" y="32" fill="#38bdf8" font-family="monospace" font-size="10" font-weight="bold">Trigger: Rejection Wick at 20 EMA</text>
+
+            <!-- Next confirmation candle -->
+            <line x1="215" y1="50" x2="215" y2="85" stroke="#10b981" stroke-width="1.5"/>
+            <rect x="210" y="55" width="10" height="25" fill="#10b981" rx="1"/>
+
+            <!-- Volume Sub-panel -->
+            <rect x="76" y="135" width="8" height="25" fill="#10b981" opacity="0.8"/>
+            <rect x="112" y="145" width="6" height="15" fill="#f43f5e" opacity="0.5"/>
+            <rect x="142" y="150" width="6" height="10" fill="#f43f5e" opacity="0.4"/>
+            <rect x="176" y="152" width="8" height="8" fill="#10b981" opacity="0.5"/>
+            <rect x="211" y="138" width="8" height="22" fill="#10b981" opacity="0.9"/>
+            <text x="115" y="158" fill="#94a3b8" font-family="monospace" font-size="9">Low Vol Pullback</text>
+          </svg>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+            <span class="text-slate-400 font-bold block text-[11px] uppercase">Entry Rule</span>
+            <p class="text-slate-300 text-[11px]">Enter when pullback volume dries up and price taps the rising 10 or 20 EMA support zone.</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+            <span class="text-slate-400 font-bold block text-[11px] uppercase">Candle Trigger</span>
+            <p class="text-slate-300 text-[11px]">Rejection wick or inside bar breakout confirming support at the 20 EMA.</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+            <span class="text-slate-400 font-bold block text-[11px] uppercase">Stop Loss &amp; Quota</span>
+            <p class="text-slate-300 text-[11px]">Hard stop placed <strong>strictly below the 50 EMA or pullback low</strong>. <strong>Max 2 trades per day total</strong>.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: Risk & Discipline Guardrails Table -->
+      <div class="glass-panel p-6 rounded-2xl space-y-4">
+        <div class="border-b border-slate-800 pb-3">
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 font-bold">Rule 4</span>
+          <h3 class="text-base font-bold text-white tracking-tight mt-1 flex items-center gap-2">
+            <span>🔒</span> Mandatory Risk &amp; Discipline Guardrails
+          </h3>
+          <p class="text-xs text-slate-400 font-mono mt-0.5">Non-negotiable institutional risk limits locked into execution protocol</p>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400 bg-slate-950/60">
+                <th class="py-3 px-4">Rule Parameter</th>
+                <th class="py-3 px-4">Mandatory Operational Limit</th>
+                <th class="py-3 px-4">System Enforcement Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60">
+              <tr class="hover:bg-slate-800/20">
+                <td class="py-3 px-4 font-bold text-white">Hard Daily Stop-Loss</td>
+                <td class="py-3 px-4 text-rose-400 font-bold">Locked at ₹10,000 in FYERS</td>
+                <td class="py-3 px-4 text-slate-300">Kill-switch terminates session instantly upon breach.</td>
+              </tr>
+              <tr class="hover:bg-slate-800/20">
+                <td class="py-3 px-4 font-bold text-white">Max Daily Trades</td>
+                <td class="py-3 px-4 text-amber-400 font-bold">Strictly 2 trades max per day</td>
+                <td class="py-3 px-4 text-slate-300">Eliminates overtrading and revenge trading loops entirely.</td>
+              </tr>
+              <tr class="hover:bg-slate-800/20">
+                <td class="py-3 px-4 font-bold text-white">Position Sizing &amp; Risk</td>
+                <td class="py-3 px-4 text-blue-400 font-bold">10% normal size during reset phase</td>
+                <td class="py-3 px-4 text-slate-300">Risk per trade capped strictly at ₹2,500.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
 
     <!-- ========================================== -->
@@ -1126,6 +1472,74 @@
       }
     }
 
+    
+    // ========================================================
+    // PLAYBOOK EXECUTION & LIVE GUARDRAILS ENGINE
+    // ========================================================
+    function prefillPlaybookTrade(setupName, targetRR) {
+      switchTab('log');
+      selectPlaybookPreset(setupName, targetRR);
+    }
+
+    function selectPlaybookPreset(setupName, targetRR) {
+      const sel = document.getElementById('log_setup');
+      if (sel) {
+        if (!Array.from(sel.options).some(o => o.value === setupName)) {
+          const opt = document.createElement('option');
+          opt.value = setupName;
+          opt.textContent = `${setupName} (${targetRR}R)`;
+          sel.prepend(opt);
+        }
+        sel.value = setupName;
+      }
+      calcManualPreview();
+    }
+
+    function updatePlaybookGuardrails() {
+      const today = new Date().toISOString().split('T')[0];
+      const todayElem = document.getElementById('playbookTodayDateDisp');
+      if (todayElem) todayElem.textContent = `Date: ${today}`;
+
+      const todayTrades = tradesData.filter(t => t.date === today);
+      const tradesCount = todayTrades.length;
+
+      let todayLoss = 0;
+      todayTrades.forEach(t => {
+        const net = parseFloat(t.net_pnl) || 0;
+        if (net < 0) todayLoss += Math.abs(net);
+      });
+
+      // 1. Daily Trades Quota (Max 2 Trades)
+      const countDisp = document.getElementById('pbTradesCountDisp');
+      const countBadge = document.getElementById('pbTradesBadge');
+      if (countDisp && countBadge) {
+        countDisp.textContent = `${tradesCount} / 2 Max`;
+        if (tradesCount >= 2) {
+          countBadge.textContent = 'Quota Met';
+          countBadge.className = 'text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold';
+        } else {
+          countBadge.textContent = 'Active (Ready)';
+          countBadge.className = 'text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold';
+        }
+      }
+
+      // 2. Hard Daily Stop-Loss (₹10,000 Kill-Switch)
+      const lossDisp = document.getElementById('pbDailyLossDisp');
+      const killBadge = document.getElementById('pbKillSwitchBadge');
+      if (lossDisp && killBadge) {
+        lossDisp.textContent = `-₹${todayLoss.toLocaleString('en-IN', { maximumFractionDigits: 0 })} / ₹10,000`;
+        if (todayLoss >= 10000) {
+          lossDisp.className = 'text-lg font-bold text-rose-500 animate-pulse';
+          killBadge.textContent = '🛑 KILL SWITCH TRIGGERED';
+          killBadge.className = 'text-[10px] px-2 py-0.5 rounded bg-rose-600 text-white font-bold animate-pulse';
+        } else {
+          lossDisp.className = 'text-lg font-bold text-emerald-400';
+          killBadge.textContent = 'Passed (Safe)';
+          killBadge.className = 'text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold';
+        }
+      }
+    }
+
     function updateAllViews() {
       document.getElementById('navTradesCount').textContent = tradesData.length;
       renderKPIs();
@@ -1136,6 +1550,7 @@
       renderSetupsManager();
       renderSetupDropdowns();
       applyMetricsVisibility();
+      updatePlaybookGuardrails();
     }
 
     
@@ -2482,7 +2897,12 @@
       const net = gross - fyers.totalCosts;
       const r = totalRisk > 0 ? (net / totalRisk) : 0;
 
-      document.getElementById('previewRiskAmt').textContent = '₹' + totalRisk.toFixed(2);
+      const riskElem = document.getElementById('previewRiskAmt');
+      if (totalRisk > 2500) {
+        riskElem.innerHTML = `₹${totalRisk.toFixed(2)} <span class="text-[10px] text-rose-400 block font-bold">⚠️ Exceeds ₹2,500 playbook cap!</span>`;
+      } else {
+        riskElem.innerHTML = `₹${totalRisk.toFixed(2)} <span class="text-[10px] text-emerald-400 block font-bold">✓ Within ₹2,500 cap</span>`;
+      }
       document.getElementById('previewRR').textContent = plannedRR.toFixed(2) + 'R';
       document.getElementById('previewGrossPnL').textContent = '₹' + gross.toFixed(2);
       document.getElementById('previewFriction').textContent = '₹' + fyers.totalCosts.toFixed(2);

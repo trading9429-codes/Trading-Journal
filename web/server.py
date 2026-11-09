@@ -10,13 +10,13 @@ PUBLIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public")
 SETUPS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "setups_store.json")
 
 DEFAULT_SETUPS = [
-    {"id": "setup-1", "name": "Default Setup", "desc": "Standard unassigned setup", "target_rr": 2.5},
-    {"id": "setup-2", "name": "1m VWAP Bounce", "desc": "Institutional liquidity rejection at VWAP", "target_rr": 2.5},
-    {"id": "setup-3", "name": "1m Pullback to 9EMA", "desc": "Trend continuation on 9EMA pullback", "target_rr": 2.2},
-    {"id": "setup-4", "name": "Opening Range Breakout (ORB)", "desc": "Break of 09:15-09:30 range high/low", "target_rr": 2.5},
-    {"id": "setup-5", "name": "1m Breakout & Re-test", "desc": "Clean breakout with re-test confirmation", "target_rr": 2.5},
-    {"id": "setup-6", "name": "Support / Resistance Bounce", "desc": "Key daily/hourly level bounce", "target_rr": 2.0},
-    {"id": "setup-7", "name": "5m Fakeout / Trapped Volume", "desc": "Trapped breakout traders stop run", "target_rr": 3.0}
+    {"id": "setup-playbook-a", "name": "Setup A: VWAP & EMA Breakout (VWAP BO)", "desc": "Consolidates above 20 & 50 EMA near VWAP; 5m breakout candle with Vol >= 3x prev bar, 10 EMA > 20 EMA > 50 EMA stack. Hard stop below 20 EMA or breakout candle low. Min 1:2 R:R.", "target_rr": 2.0},
+    {"id": "setup-playbook-b", "name": "Setup B: 5-Minute Volume Surge & EMA Continuation", "desc": "Scanner Vol >= 5x 20-SMA, ADR >= 4%, price well above rising 50 EMA. Never chase spike; wait for mean-reversion pull to 10/20 EMA. Bullish rejection wick. Stop below 50 EMA/swing low. Risk capped at ₹2,500.", "target_rr": 2.5},
+    {"id": "setup-playbook-c", "name": "Setup C: The EMA & VWAP Pullback Reversal", "desc": "Price surges, then pulls back to rising 10/20 EMA or VWAP on low volume. Rejection wick or inside bar breakout confirming 20 EMA support. Stop below 50 EMA/pullback low. Max 2 trades/day.", "target_rr": 2.0},
+    {"id": "setup-default", "name": "Default Setup", "desc": "Standard unassigned setup / system fallback", "target_rr": 2.5},
+    {"id": "setup-1m-pullback", "name": "1m Pullback to 9EMA", "desc": "Trend continuation on 9EMA pullback with volume contraction", "target_rr": 2.2},
+    {"id": "setup-1m-vwap", "name": "1m VWAP Bounce", "desc": "Institutional liquidity rejection at VWAP", "target_rr": 2.5},
+    {"id": "setup-orb", "name": "Opening Range Breakout (ORB)", "desc": "Break of 09:15-09:30 range high/low with volume expansion", "target_rr": 2.5}
 ]
 
 def get_setups():
