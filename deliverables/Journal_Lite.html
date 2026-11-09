@@ -94,6 +94,9 @@
         <button onclick="switchTab('rules')" id="tabBtn-rules" class="tab-btn px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
           Rules &amp; Lockbox
         </button>
+        <button onclick="switchTab('config')" id="tabBtn-config" class="tab-btn px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5">
+          <span>⚙️</span> Config
+        </button>
       </nav>
 
       <!-- Action Utilities -->
@@ -119,11 +122,24 @@
     <!-- ========================================== -->
     <div id="tabContent-overview" class="space-y-6">
       
+      <!-- Dashboard Top Controls Bar -->
+      <div class="flex items-center justify-between gap-2 pb-1">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-mono font-bold text-white tracking-tight uppercase">Performance Analytics</span>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-900 text-slate-400 border border-slate-800" id="dashActiveMetricsCount">14 / 14 Active</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openQuickMetricsModal()" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-mono flex items-center gap-1.5 transition" title="Show or hide metrics on dashboard">
+            <span>⚙️</span> <span>Customize Metrics</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Top KPI Row: 6 Institutional Trading Metrics -->
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+      <div id="overviewKpiGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
         
         <!-- 1. Net Realized P&L -->
-        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
+        <div id="metricPanel-kpi_net_pnl" class="glass-panel p-4 rounded-xl flex flex-col justify-between">
           <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Net Realized P&amp;L</span>
           <div class="my-1.5">
             <h2 id="kpiNetPnL" class="text-2xl font-bold font-mono text-slate-200">₹0.00</h2>
@@ -136,7 +152,7 @@
         </div>
 
         <!-- 2. Win Rate & Streaks -->
-        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
+        <div id="metricPanel-kpi_win_rate" class="glass-panel p-4 rounded-xl flex flex-col justify-between">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Win Rate %</span>
             <span id="kpiCurrentStreakBadge" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-bold">--</span>
@@ -152,7 +168,7 @@
         </div>
 
         <!-- 3. Win/Loss Payoff Ratio -->
-        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
+        <div id="metricPanel-kpi_payoff" class="glass-panel p-4 rounded-xl flex flex-col justify-between">
           <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Payoff Ratio</span>
           <div class="my-1.5">
             <h2 id="kpiPayoffRatio" class="text-2xl font-bold font-mono text-slate-200">0.00x</h2>
@@ -165,7 +181,7 @@
         </div>
 
         <!-- 4. Expectancy & Profit Factor -->
-        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
+        <div id="metricPanel-kpi_profit_factor" class="glass-panel p-4 rounded-xl flex flex-col justify-between">
           <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Profit Factor</span>
           <div class="my-1.5">
             <h2 id="kpiProfitFactor" class="text-2xl font-bold font-mono text-slate-200">0.00</h2>
@@ -178,7 +194,7 @@
         </div>
 
         <!-- 5. Max Drawdown (Peak to Trough) -->
-        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
+        <div id="metricPanel-kpi_drawdown" class="glass-panel p-4 rounded-xl flex flex-col justify-between">
           <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Max Drawdown</span>
           <div class="my-1.5">
             <h2 id="kpiMaxDrawdown" class="text-2xl font-bold font-mono text-rose-400">0.0%</h2>
@@ -191,7 +207,7 @@
         </div>
 
         <!-- 6. Account Equity & High-Water Mark -->
-        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
+        <div id="metricPanel-kpi_equity" class="glass-panel p-4 rounded-xl flex flex-col justify-between">
           <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Account Equity</span>
           <div class="my-1.5">
             <h2 id="kpiCurrentCapital" class="text-2xl font-bold font-mono text-slate-200">₹2,00,000</h2>
@@ -206,10 +222,10 @@
       </div>
 
       <!-- Charts Section: Row 1 (Capital Trajectory & Underwater Drawdown) -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div id="overviewRow1Grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         
         <!-- Cumulative Equity Curve with High-Water Mark -->
-        <div class="glass-panel p-5 rounded-2xl">
+        <div id="metricPanel-chart_equity_curve" class="glass-panel p-5 rounded-2xl">
           <div class="flex items-center justify-between mb-4">
             <div>
               <h3 class="text-sm font-bold text-white tracking-tight flex items-center gap-2">
@@ -225,7 +241,7 @@
         </div>
 
         <!-- Underwater Drawdown Curve (% Drop from Peak) -->
-        <div class="glass-panel p-5 rounded-2xl">
+        <div id="metricPanel-chart_drawdown_curve" class="glass-panel p-5 rounded-2xl">
           <div class="flex items-center justify-between mb-4">
             <div>
               <h3 class="text-sm font-bold text-white tracking-tight flex items-center gap-2">
@@ -243,10 +259,10 @@
       </div>
 
       <!-- Charts Section: Row 2 (Daily P&L & Hourly Time-of-Day Edge) -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div id="overviewRow2Grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         
         <!-- Daily Net P&L Bar Chart -->
-        <div class="glass-panel p-5 rounded-2xl">
+        <div id="metricPanel-chart_daily_pnl" class="glass-panel p-5 rounded-2xl">
           <div class="flex items-center justify-between mb-4">
             <div>
               <h3 class="text-sm font-bold text-white tracking-tight flex items-center gap-2">
@@ -262,7 +278,7 @@
         </div>
 
         <!-- Hourly Edge / Time of Day Bar Chart -->
-        <div class="glass-panel p-5 rounded-2xl">
+        <div id="metricPanel-chart_hourly_edge" class="glass-panel p-5 rounded-2xl">
           <div class="flex items-center justify-between mb-4">
             <div>
               <h3 class="text-sm font-bold text-white tracking-tight flex items-center gap-2">
@@ -280,10 +296,10 @@
       </div>
 
       <!-- Charts Section: Row 3 (Cumulative R-Curve & Outcome/Direction Donut) -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div id="overviewRow3Grid" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         
         <!-- Cumulative R-Multiple Curve (2 cols on lg) -->
-        <div class="glass-panel p-5 rounded-2xl lg:col-span-2">
+        <div id="metricPanel-chart_r_curve" class="glass-panel p-5 rounded-2xl lg:col-span-2">
           <div class="flex items-center justify-between mb-4">
             <div>
               <h3 class="text-sm font-bold text-white tracking-tight flex items-center gap-2">
@@ -299,7 +315,7 @@
         </div>
 
         <!-- Outcome & Direction Distribution Donut (1 col on lg) -->
-        <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between">
+        <div id="metricPanel-chart_outcome_donut" class="glass-panel p-5 rounded-2xl flex flex-col justify-between">
           <div class="flex items-center justify-between mb-2">
             <div>
               <h3 class="text-sm font-bold text-white tracking-tight flex items-center gap-2">
@@ -319,7 +335,7 @@
       </div>
 
       <!-- Performance Attribution: Top Winning vs Top Bleeding Scrips -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div id="metricPanel-widget_scrip_attribution" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         
         <!-- Top Winning Scrips -->
         <div class="glass-panel p-5 rounded-2xl">
@@ -350,7 +366,7 @@
       </div>
 
       <!-- Strategy Setups Performance Matrix -->
-      <div class="glass-panel p-5 rounded-2xl">
+      <div id="metricPanel-widget_setup_matrix" class="glass-panel p-5 rounded-2xl">
         <div class="flex items-center justify-between mb-3">
           <h3 class="text-sm font-bold text-white tracking-tight">Strategy Performance Matrix</h3>
           <span class="text-xs font-mono text-slate-400">Setup Quantitative Breakdown</span>
@@ -706,6 +722,180 @@
       </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- TAB 6: CONFIGURATION & USER PREFERENCES   -->
+    <!-- ========================================== -->
+    <div id="tabContent-config" class="hidden max-w-5xl mx-auto space-y-6">
+      
+      <!-- Page Header -->
+      <div class="glass-panel p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+            <span>⚙️</span> System Configuration &amp; User Preferences
+          </h2>
+          <p class="text-xs text-slate-400 font-mono mt-1">Manage strategy setups, customize dashboard metric cards, and personalize chart visibility.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="resetAllConfigToDefaults()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-mono transition">
+            Reset All Preferences
+          </button>
+        </div>
+      </div>
+
+      <!-- Grid: 2 Columns on desktop -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Column 1: Setup Types Manager (7 cols) -->
+        <div class="lg:col-span-7 glass-panel p-6 rounded-2xl space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span>🎯</span> Strategy Setup Types
+              </h3>
+              <p class="text-xs text-slate-400 font-mono">Add, edit, or delete trading setup definitions used across logger and imports.</p>
+            </div>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20" id="configSetupsCountBadge">0 Setups</span>
+          </div>
+
+          <!-- Add / Edit Setup Form -->
+          <form id="setupConfigForm" onsubmit="handleSaveSetup(event)" class="bg-slate-950/70 p-4 rounded-xl border border-slate-800 space-y-3 text-xs font-mono">
+            <input type="hidden" id="config_setup_edit_id" value="">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="sm:col-span-2">
+                <label class="block text-slate-400 mb-1">Setup Name</label>
+                <input type="text" id="config_setup_name" required placeholder="e.g. 5m EMA Pullback, VWAP Rejection" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Target R:R</label>
+                <input type="number" step="0.1" id="config_setup_rr" value="2.5" required placeholder="2.5" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-slate-400 mb-1">Setup Rules / Description (Optional)</label>
+              <input type="text" id="config_setup_desc" placeholder="e.g. Wait for 5m rejection wick tap on 20EMA with volume spike" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+            </div>
+
+            <div class="flex items-center justify-between pt-1">
+              <button type="button" id="config_setup_cancel_btn" onclick="cancelEditSetup()" class="hidden px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 text-xs transition">
+                Cancel Edit
+              </button>
+              <button type="submit" id="config_setup_submit_btn" class="ml-auto px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition flex items-center gap-1.5">
+                <span>+</span> <span id="config_setup_btn_text">Add Setup</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Setups List -->
+          <div class="space-y-2">
+            <h4 class="text-xs font-mono uppercase tracking-wider text-slate-400">Configured Setups</h4>
+            <div id="configSetupsList" class="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2: Dashboard Metrics & Charts Visibility (5 cols) -->
+        <div class="lg:col-span-5 glass-panel p-6 rounded-2xl space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span>👁️</span> Dashboard Metrics &amp; Charts
+              </h3>
+              <p class="text-xs text-slate-400 font-mono">Show or hide specific KPI cards and chart modules based on preference.</p>
+            </div>
+            <div class="flex items-center gap-1">
+              <button onclick="toggleAllMetrics(true)" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition">All</button>
+              <button onclick="setMinimalMetrics()" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition">Minimal</button>
+            </div>
+          </div>
+
+          <!-- KPI Metric Cards Toggles -->
+          <div class="space-y-2 text-xs font-mono">
+            <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400 block border-b border-slate-800/60 pb-1">KPI Summary Cards</span>
+            
+            <label class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 hover:bg-slate-800/30 cursor-pointer transition">
+              <span class="text-slate-300 font-medium">Net Realized P&amp;L (Gross/Friction)</span>
+              <input type="checkbox" id="chkConfig-kpi_net_pnl" onchange="handleMetricToggle('kpi_net_pnl', this.checked)" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+            </label>
+
+            <label class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 hover:bg-slate-800/30 cursor-pointer transition">
+              <span class="text-slate-300 font-medium">Win Rate &amp; Streaks (W/L/BE)</span>
+              <input type="checkbox" id="chkConfig-kpi_win_rate" onchange="handleMetricToggle('kpi_win_rate', this.checked)" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+            </label>
+
+            <label class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 hover:bg-slate-800/30 cursor-pointer transition">
+              <span class="text-slate-300 font-medium">Win/Loss Payoff Ratio</span>
+              <input type="checkbox" id="chkConfig-kpi_payoff" onchange="handleMetricToggle('kpi_payoff', this.checked)" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+            </label>
+
+            <label class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 hover:bg-slate-800/30 cursor-pointer transition">
+              <span class="text-slate-300 font-medium">Profit Factor &amp; Expectancy</span>
+              <input type="checkbox" id="chkConfig-kpi_profit_factor" onchange="handleMetricToggle('kpi_profit_factor', this.checked)" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+            </label>
+
+            <label class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 hover:bg-slate-800/30 cursor-pointer transition">
+              <span class="text-slate-300 font-medium">Max Drawdown (MDD)</span>
+              <input type="checkbox" id="chkConfig-kpi_drawdown" onchange="handleMetricToggle('kpi_drawdown', this.checked)" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+            </label>
+
+            <label class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 hover:bg-slate-800/30 cursor-pointer transition">
+              <span class="text-slate-300 font-medium">Account Equity &amp; Peak HWM</span>
+              <input type="checkbox" id="chkConfig-kpi_equity" onchange="handleMetricToggle('kpi_equity', this.checked)" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+            </label>
+          </div>
+
+          <!-- Charts Toggles -->
+          <div class="space-y-2 text-xs font-mono pt-2">
+            <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400 block border-b border-slate-800/60 pb-1">Charts &amp; Visual Analytics</span>
+            
+            <label class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 hover:bg-slate-800/30 cursor-pointer transition">
+              <span class="text-slate-300 font-medium">📈 Cumulative Equity Curve</span>
+              <input type="checkbox" id="chkConfig-chart_equity_curve" onchange="handleMetricToggle('chart_equity_curve', this.checked)" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+            </label>
+
+            <label class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 hover:bg-slate-800/30 cursor-pointer transition">
+              <span class="text-slate-300 font-medium">📉 Underwater Drawdown Curve</span>
+              <input type="checkbox" id="chkConfig-chart_drawdown_curve" onchange="handleMetricToggle('chart_drawdown_curve', this.checked)" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+            </label>
+
+            <label class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 hover:bg-slate-800/30 cursor-pointer transition">
+              <span class="text-slate-300 font-medium">📅 Daily Net P&amp;L Bar Chart</span>
+              <input type="checkbox" id="chkConfig-chart_daily_pnl" onchange="handleMetricToggle('chart_daily_pnl', this.checked)" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+            </label>
+
+            <label class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 hover:bg-slate-800/30 cursor-pointer transition">
+              <span class="text-slate-300 font-medium">⏱️ Hourly / Time-of-Day Edge</span>
+              <input type="checkbox" id="chkConfig-chart_hourly_edge" onchange="handleMetricToggle('chart_hourly_edge', this.checked)" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+            </label>
+
+            <label class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 hover:bg-slate-800/30 cursor-pointer transition">
+              <span class="text-slate-300 font-medium">🎯 Cumulative R-Multiple Curve</span>
+              <input type="checkbox" id="chkConfig-chart_r_curve" onchange="handleMetricToggle('chart_r_curve', this.checked)" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+            </label>
+
+            <label class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 hover:bg-slate-800/30 cursor-pointer transition">
+              <span class="text-slate-300 font-medium">🍩 Outcomes &amp; Direction Donut</span>
+              <input type="checkbox" id="chkConfig-chart_outcome_donut" onchange="handleMetricToggle('chart_outcome_donut', this.checked)" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+            </label>
+
+            <label class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 hover:bg-slate-800/30 cursor-pointer transition">
+              <span class="text-slate-300 font-medium">🏆 Scrip Attribution (Winners/Bleeders)</span>
+              <input type="checkbox" id="chkConfig-widget_scrip_attribution" onchange="handleMetricToggle('widget_scrip_attribution', this.checked)" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+            </label>
+
+            <label class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 hover:bg-slate-800/30 cursor-pointer transition">
+              <span class="text-slate-300 font-medium">📊 Strategy Performance Matrix</span>
+              <input type="checkbox" id="chkConfig-widget_setup_matrix" onchange="handleMetricToggle('widget_setup_matrix', this.checked)" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
   </main>
 
   <!-- ======================================================== -->
@@ -715,12 +905,32 @@
     // State
     let tradesData = [];
     let pendingFyersTrades = [];
+    let setupsData = [];
     let equityChart = null;
     let drawdownChart = null;
     let dailyPnLChart = null;
     let hourlyPnLChart = null;
     let rCurveChart = null;
     let outcomeDonutChart = null;
+
+    // Metrics Visibility User Configuration (Saved in localStorage)
+    const DEFAULT_METRICS_CONFIG = {
+      kpi_net_pnl: true,
+      kpi_win_rate: true,
+      kpi_payoff: true,
+      kpi_profit_factor: true,
+      kpi_drawdown: true,
+      kpi_equity: true,
+      chart_equity_curve: true,
+      chart_drawdown_curve: true,
+      chart_daily_pnl: true,
+      chart_hourly_edge: true,
+      chart_r_curve: true,
+      chart_outcome_donut: true,
+      widget_scrip_attribution: true,
+      widget_setup_matrix: true
+    };
+    let metricsConfig = { ...DEFAULT_METRICS_CONFIG };
 
     // --- FYERS Intraday Equity Statutory Charges Exact Formula ---
     function computeFyersCharges(buyTurnover, sellTurnover) {
@@ -827,7 +1037,7 @@
 
     // --- Tab Navigation ---
     function switchTab(tabId) {
-      ['overview', 'trades', 'log', 'fyers', 'rules'].forEach(id => {
+      ['overview', 'trades', 'log', 'fyers', 'rules', 'config'].forEach(id => {
         const content = document.getElementById(`tabContent-${id}`);
         const btn = document.getElementById(`tabBtn-${id}`);
         if (content) {
@@ -847,14 +1057,20 @@
       });
 
       if (tabId === 'overview') {
+        applyMetricsVisibility();
         renderCharts();
+      } else if (tabId === 'config') {
+        renderSetupsManager();
+        applyMetricsVisibility();
       }
     }
 
     // --- Initialize Application ---
     async function init() {
       startClock();
+      loadMetricsConfig();
       document.getElementById('log_date').value = new Date().toISOString().split('T')[0];
+      await loadSetups();
       await loadTrades();
     }
 
@@ -917,6 +1133,393 @@
       renderCharts();
       renderScripAttribution();
       renderSetupMatrix();
+      renderSetupsManager();
+      renderSetupDropdowns();
+      applyMetricsVisibility();
+    }
+
+    
+    // ========================================================
+    // STRATEGY SETUPS CONFIGURATION ENGINE
+    // ========================================================
+    const SYSTEM_DEFAULT_SETUPS = [
+      { id: "setup-1", name: "Default Setup", desc: "Standard unassigned setup", target_rr: 2.5 },
+      { id: "setup-2", name: "1m VWAP Bounce", desc: "Institutional liquidity rejection at VWAP", target_rr: 2.5 },
+      { id: "setup-3", name: "1m Pullback to 9EMA", desc: "Trend continuation on 9EMA pullback", target_rr: 2.2 },
+      { id: "setup-4", name: "Opening Range Breakout (ORB)", desc: "Break of 09:15-09:30 range high/low", target_rr: 2.5 },
+      { id: "setup-5", name: "1m Breakout & Re-test", desc: "Clean breakout with re-test confirmation", target_rr: 2.5 },
+      { id: "setup-6", name: "Support / Resistance Bounce", desc: "Key daily/hourly level bounce", target_rr: 2.0 },
+      { id: "setup-7", name: "5m Fakeout / Trapped Volume", desc: "Trapped breakout traders stop run", target_rr: 3.0 }
+    ];
+
+    async function loadSetups() {
+      try {
+        const res = await fetch('/api/setups');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.setups && Array.isArray(data.setups) && data.setups.length > 0) {
+            setupsData = data.setups;
+            localStorage.setItem('trader_reset_setups_lite', JSON.stringify(setupsData));
+            renderSetupsManager();
+            renderSetupDropdowns();
+            return;
+          }
+        }
+      } catch(e) {
+        console.warn("Could not fetch /api/setups, checking localStorage:", e);
+      }
+
+      const cached = localStorage.getItem('trader_reset_setups_lite');
+      if (cached) {
+        try {
+          setupsData = JSON.parse(cached);
+        } catch(e) {
+          setupsData = [...SYSTEM_DEFAULT_SETUPS];
+        }
+      } else {
+        setupsData = [...SYSTEM_DEFAULT_SETUPS];
+      }
+
+      // Discover setups used in trades that might not be in the list
+      const knownNames = new Set(setupsData.map(s => s.name));
+      tradesData.forEach(t => {
+        if (t.setup_name && !knownNames.has(t.setup_name)) {
+          knownNames.add(t.setup_name);
+          setupsData.push({
+            id: 'setup-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+            name: t.setup_name,
+            desc: "Discovered from trade history",
+            target_rr: 2.5
+          });
+        }
+      });
+
+      localStorage.setItem('trader_reset_setups_lite', JSON.stringify(setupsData));
+      renderSetupsManager();
+      renderSetupDropdowns();
+    }
+
+    async function syncSetups() {
+      localStorage.setItem('trader_reset_setups_lite', JSON.stringify(setupsData));
+      try {
+        await fetch('/api/setups', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(setupsData)
+        });
+      } catch(e) {
+        console.warn("Could not sync setups to backend /api/setups:", e);
+      }
+    }
+
+    function renderSetupsManager() {
+      const container = document.getElementById('configSetupsList');
+      if (!container) return;
+
+      const badge = document.getElementById('configSetupsCountBadge');
+      if (badge) badge.textContent = `${setupsData.length} Setups`;
+
+      // Aggregate trade statistics per setup
+      const usageMap = {};
+      tradesData.forEach(t => {
+        const s = t.setup_name || 'Default Setup';
+        if (!usageMap[s]) usageMap[s] = { count: 0, net: 0, wins: 0 };
+        usageMap[s].count++;
+        usageMap[s].net += (parseFloat(t.net_pnl) || 0);
+        if ((parseFloat(t.net_pnl) || 0) > 0) usageMap[s].wins++;
+      });
+
+      if (setupsData.length === 0) {
+        container.innerHTML = `<div class="p-4 text-center text-slate-500 text-xs font-mono">No setups configured. Add one above!</div>`;
+        return;
+      }
+
+      container.innerHTML = setupsData.map(s => {
+        const stats = usageMap[s.name] || { count: 0, net: 0, wins: 0 };
+        const winRate = stats.count > 0 ? ((stats.wins / stats.count) * 100).toFixed(0) : '0';
+        const isProfitable = stats.net >= 0;
+        const isDefault = s.name === 'Default Setup';
+
+        return `
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700/80 transition flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono">
+            <div class="space-y-1 flex-1">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-white font-sans text-sm">${escapeHtml(s.name)}</span>
+                <span class="text-[10px] px-1.5 py-0.2 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold">${s.target_rr}R Target</span>
+                ${isDefault ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">System Fallback</span>' : ''}
+              </div>
+              <p class="text-slate-400 text-[11px]">${escapeHtml(s.desc || 'No specific description provided.')}</p>
+              <div class="flex items-center gap-3 text-[11px] text-slate-500 pt-0.5">
+                <span>Trades: <strong class="text-slate-300">${stats.count}</strong></span>
+                <span>Win Rate: <strong class="${parseInt(winRate) >= 50 ? 'text-emerald-400' : 'text-slate-400'}">${winRate}%</strong></span>
+                <span>Net P&amp;L: <strong class="${isProfitable ? 'text-emerald-400' : 'text-rose-400'}">${stats.net >= 0 ? '+' : ''}₹${stats.net.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1.5 self-end sm:self-center">
+              <button onclick="editSetup('${s.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition flex items-center gap-1" title="Edit Setup">
+                <span>✏️</span> <span>Edit</span>
+              </button>
+              ${!isDefault ? `
+                <button onclick="deleteSetup('${s.id}')" class="px-2.5 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-900/40 text-rose-300 hover:text-rose-200 transition flex items-center gap-1" title="Delete Setup">
+                  <span>🗑️</span>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderSetupDropdowns() {
+      const selects = [
+        document.getElementById('log_setup'),
+        document.getElementById('fyersSetupSelect')
+      ];
+
+      selects.forEach(sel => {
+        if (!sel) return;
+        const currentVal = sel.value;
+        sel.innerHTML = setupsData.map(s => `
+          <option value="${escapeHtml(s.name)}">${escapeHtml(s.name)} (${s.target_rr}R)</option>
+        `).join('');
+
+        if (currentVal && setupsData.some(s => s.name === currentVal)) {
+          sel.value = currentVal;
+        } else if (setupsData.length > 0) {
+          sel.value = setupsData[0].name;
+        }
+      });
+    }
+
+    function handleSaveSetup(e) {
+      e.preventDefault();
+      const editId = document.getElementById('config_setup_edit_id').value;
+      const name = document.getElementById('config_setup_name').value.trim();
+      const rr = parseFloat(document.getElementById('config_setup_rr').value) || 2.5;
+      const desc = document.getElementById('config_setup_desc').value.trim();
+
+      if (!name) {
+        alert("Setup Name is required.");
+        return;
+      }
+
+      if (editId) {
+        // Edit existing setup
+        const existing = setupsData.find(s => s.id === editId);
+        if (!existing) return;
+
+        const oldName = existing.name;
+        if (oldName !== name) {
+          // If name changed, check if trades use old name
+          const affectedTrades = tradesData.filter(t => t.setup_name === oldName);
+          if (affectedTrades.length > 0) {
+            affectedTrades.forEach(t => t.setup_name = name);
+            syncWithBackend();
+          }
+        }
+
+        existing.name = name;
+        existing.target_rr = rr;
+        existing.desc = desc;
+      } else {
+        // Add new setup
+        if (setupsData.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+          alert(`A setup named "${name}" already exists.`);
+          return;
+        }
+
+        setupsData.push({
+          id: 'setup-' + Date.now(),
+          name: name,
+          target_rr: rr,
+          desc: desc
+        });
+      }
+
+      syncSetups();
+      cancelEditSetup();
+      updateAllViews();
+    }
+
+    function editSetup(id) {
+      const s = setupsData.find(x => x.id === id);
+      if (!s) return;
+
+      document.getElementById('config_setup_edit_id').value = s.id;
+      document.getElementById('config_setup_name').value = s.name;
+      document.getElementById('config_setup_rr').value = s.target_rr;
+      document.getElementById('config_setup_desc').value = s.desc || '';
+
+      document.getElementById('config_setup_btn_text').textContent = 'Save Changes';
+      document.getElementById('config_setup_cancel_btn').classList.remove('hidden');
+
+      // Scroll form into view
+      document.getElementById('setupConfigForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById('config_setup_name').focus();
+    }
+
+    function cancelEditSetup() {
+      document.getElementById('config_setup_edit_id').value = '';
+      document.getElementById('config_setup_name').value = '';
+      document.getElementById('config_setup_rr').value = '2.5';
+      document.getElementById('config_setup_desc').value = '';
+
+      document.getElementById('config_setup_btn_text').textContent = 'Add Setup';
+      document.getElementById('config_setup_cancel_btn').classList.add('hidden');
+    }
+
+    function deleteSetup(id) {
+      const s = setupsData.find(x => x.id === id);
+      if (!s) return;
+
+      if (s.name === 'Default Setup') {
+        alert("The 'Default Setup' is protected and cannot be deleted.");
+        return;
+      }
+
+      const affected = tradesData.filter(t => t.setup_name === s.name);
+      if (affected.length > 0) {
+        if (!confirm(`This setup is currently assigned to ${affected.length} trade(s).\n\nDeleting it will safely reassign those trades to 'Default Setup'. Proceed?`)) {
+          return;
+        }
+        affected.forEach(t => t.setup_name = 'Default Setup');
+        syncWithBackend();
+      } else {
+        if (!confirm(`Are you sure you want to delete setup '${s.name}'?`)) {
+          return;
+        }
+      }
+
+      setupsData = setupsData.filter(x => x.id !== id);
+      syncSetups();
+      cancelEditSetup();
+      updateAllViews();
+    }
+
+    function resetSetupsToDefault() {
+      if (confirm("Reset all strategy setups to the default template?")) {
+        setupsData = [...SYSTEM_DEFAULT_SETUPS];
+        syncSetups();
+        cancelEditSetup();
+        updateAllViews();
+      }
+    }
+
+    // ========================================================
+    // DASHBOARD METRICS VISIBILITY ENGINE
+    // ========================================================
+    function loadMetricsConfig() {
+      const cached = localStorage.getItem('trader_reset_metrics_config');
+      if (cached) {
+        try {
+          metricsConfig = { ...DEFAULT_METRICS_CONFIG, ...JSON.parse(cached) };
+        } catch(e) {
+          metricsConfig = { ...DEFAULT_METRICS_CONFIG };
+        }
+      }
+      applyMetricsVisibility();
+    }
+
+    function applyMetricsVisibility() {
+      let activeCount = 0;
+      const totalCount = Object.keys(DEFAULT_METRICS_CONFIG).length;
+
+      for (const [key, isVisible] of Object.entries(metricsConfig)) {
+        const elem = document.getElementById(`metricPanel-${key}`);
+        if (elem) {
+          if (isVisible) {
+            elem.classList.remove('hidden');
+            activeCount++;
+          } else {
+            elem.classList.add('hidden');
+          }
+        }
+
+        // Keep checkboxes in sync
+        const chkConfig = document.getElementById(`chkConfig-${key}`);
+        if (chkConfig) chkConfig.checked = !!isVisible;
+
+        const chkQuick = document.getElementById(`chkQuick-${key}`);
+        if (chkQuick) chkQuick.checked = !!isVisible;
+      }
+
+      // Handle multi-column grid rows: if only 1 child is visible, expand to full width
+      ['overviewRow1Grid', 'overviewRow2Grid', 'overviewRow3Grid'].forEach(rowId => {
+        const row = document.getElementById(rowId);
+        if (!row) return;
+        const visibleChildren = Array.from(row.children).filter(c => !c.classList.contains('hidden'));
+        if (visibleChildren.length === 0) {
+          row.classList.add('hidden');
+        } else {
+          row.classList.remove('hidden');
+          if (visibleChildren.length === 1 && (rowId === 'overviewRow1Grid' || rowId === 'overviewRow2Grid')) {
+            visibleChildren[0].classList.add('lg:col-span-2');
+          } else {
+            visibleChildren.forEach(c => c.classList.remove('lg:col-span-2'));
+          }
+        }
+      });
+
+      const badge = document.getElementById('dashActiveMetricsCount');
+      if (badge) badge.textContent = `${activeCount} / ${totalCount} Active`;
+
+      localStorage.setItem('trader_reset_metrics_config', JSON.stringify(metricsConfig));
+    }
+
+    function handleMetricToggle(key, isChecked) {
+      metricsConfig[key] = isChecked;
+      applyMetricsVisibility();
+      renderCharts();
+    }
+
+    function toggleAllMetrics(showAll) {
+      for (const key of Object.keys(metricsConfig)) {
+        metricsConfig[key] = showAll;
+      }
+      applyMetricsVisibility();
+      renderCharts();
+    }
+
+    function setMinimalMetrics() {
+      metricsConfig = {
+        kpi_net_pnl: true,
+        kpi_win_rate: true,
+        kpi_payoff: false,
+        kpi_profit_factor: false,
+        kpi_drawdown: false,
+        kpi_equity: false,
+        chart_equity_curve: true,
+        chart_drawdown_curve: false,
+        chart_daily_pnl: true,
+        chart_hourly_edge: false,
+        chart_r_curve: false,
+        chart_outcome_donut: false,
+        widget_scrip_attribution: false,
+        widget_setup_matrix: true
+      };
+      applyMetricsVisibility();
+      renderCharts();
+    }
+
+    function resetAllConfigToDefaults() {
+      if (confirm("Reset all setups and dashboard metric preferences back to default?")) {
+        setupsData = [...SYSTEM_DEFAULT_SETUPS];
+        metricsConfig = { ...DEFAULT_METRICS_CONFIG };
+        syncSetups();
+        applyMetricsVisibility();
+        updateAllViews();
+      }
+    }
+
+    function openQuickMetricsModal() {
+      const modal = document.getElementById('quickMetricsModal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeQuickMetricsModal() {
+      const modal = document.getElementById('quickMetricsModal');
+      if (modal) modal.classList.add('hidden');
     }
 
     // --- Render KPIs (Institutional Trading Metrics) ---
@@ -1096,12 +1699,12 @@
 
     // --- Render All Charts ---
     function renderCharts() {
-      renderEquityCurve();
-      renderDrawdownChart();
-      renderDailyPnL();
-      renderHourlyPnL();
-      renderRCurve();
-      renderOutcomeDonut();
+      if (metricsConfig.chart_equity_curve) renderEquityCurve();
+      if (metricsConfig.chart_drawdown_curve) renderDrawdownChart();
+      if (metricsConfig.chart_daily_pnl) renderDailyPnL();
+      if (metricsConfig.chart_hourly_edge) renderHourlyPnL();
+      if (metricsConfig.chart_r_curve) renderRCurve();
+      if (metricsConfig.chart_outcome_donut) renderOutcomeDonut();
     }
 
     // 1. Cumulative Equity Curve with High-Water Mark
@@ -2250,5 +2853,108 @@
 
     window.addEventListener('DOMContentLoaded', init);
   </script>
+
+  <!-- ======================================================== -->
+  <!-- QUICK METRICS CUSTOMIZER MODAL                           -->
+  <!-- ======================================================== -->
+  <div id="quickMetricsModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="glass-panel bg-[#0b0f19] border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-5 max-h-[90vh] flex flex-col shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>⚙️</span> Customize Dashboard Metrics
+          </h3>
+          <p class="text-xs text-slate-400 font-mono">Toggle visible KPI cards and charts on your dashboard.</p>
+        </div>
+        <button onclick="closeQuickMetricsModal()" class="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-800 transition">✕</button>
+      </div>
+
+      <div class="space-y-4 overflow-y-auto pr-1 flex-1 text-xs font-mono">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">KPI Summary Cards</span>
+            <div class="flex gap-1.5">
+              <button onclick="toggleAllMetrics(true)" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">All</button>
+              <button onclick="setMinimalMetrics()" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">Minimal</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+              <span class="text-slate-300">Net Realized P&amp;L</span>
+              <input type="checkbox" id="chkQuick-kpi_net_pnl" onchange="handleMetricToggle('kpi_net_pnl', this.checked)" class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+              <span class="text-slate-300">Win Rate &amp; Streaks</span>
+              <input type="checkbox" id="chkQuick-kpi_win_rate" onchange="handleMetricToggle('kpi_win_rate', this.checked)" class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+              <span class="text-slate-300">Payoff Ratio</span>
+              <input type="checkbox" id="chkQuick-kpi_payoff" onchange="handleMetricToggle('kpi_payoff', this.checked)" class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+              <span class="text-slate-300">Profit Factor &amp; Avg R</span>
+              <input type="checkbox" id="chkQuick-kpi_profit_factor" onchange="handleMetricToggle('kpi_profit_factor', this.checked)" class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+              <span class="text-slate-300">Max Drawdown</span>
+              <input type="checkbox" id="chkQuick-kpi_drawdown" onchange="handleMetricToggle('kpi_drawdown', this.checked)" class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+              <span class="text-slate-300">Account Equity</span>
+              <input type="checkbox" id="chkQuick-kpi_equity" onchange="handleMetricToggle('kpi_equity', this.checked)" class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0">
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-2">Charts &amp; Visual Analytics</span>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+              <span class="text-slate-300">📈 Equity Curve</span>
+              <input type="checkbox" id="chkQuick-chart_equity_curve" onchange="handleMetricToggle('chart_equity_curve', this.checked)" class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+              <span class="text-slate-300">📉 Underwater DD</span>
+              <input type="checkbox" id="chkQuick-chart_drawdown_curve" onchange="handleMetricToggle('chart_drawdown_curve', this.checked)" class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+              <span class="text-slate-300">📅 Daily P&amp;L</span>
+              <input type="checkbox" id="chkQuick-chart_daily_pnl" onchange="handleMetricToggle('chart_daily_pnl', this.checked)" class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+              <span class="text-slate-300">⏱️ Hourly Edge</span>
+              <input type="checkbox" id="chkQuick-chart_hourly_edge" onchange="handleMetricToggle('chart_hourly_edge', this.checked)" class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+              <span class="text-slate-300">🎯 R-Curve</span>
+              <input type="checkbox" id="chkQuick-chart_r_curve" onchange="handleMetricToggle('chart_r_curve', this.checked)" class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+              <span class="text-slate-300">🍩 Outcomes Donut</span>
+              <input type="checkbox" id="chkQuick-chart_outcome_donut" onchange="handleMetricToggle('chart_outcome_donut', this.checked)" class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+              <span class="text-slate-300">🏆 Scrip Attribution</span>
+              <input type="checkbox" id="chkQuick-widget_scrip_attribution" onchange="handleMetricToggle('widget_scrip_attribution', this.checked)" class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+              <span class="text-slate-300">📊 Setups Matrix</span>
+              <input type="checkbox" id="chkQuick-widget_setup_matrix" onchange="handleMetricToggle('widget_setup_matrix', this.checked)" class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0">
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-800 pt-3 flex justify-between items-center">
+        <button onclick="switchTab('config'); closeQuickMetricsModal();" class="text-blue-400 hover:text-blue-300 text-xs font-mono hover:underline">
+          Manage Strategy Setups &rarr;
+        </button>
+        <button onclick="closeQuickMetricsModal()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs font-mono transition">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

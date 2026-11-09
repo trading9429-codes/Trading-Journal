@@ -7,6 +7,37 @@ from excel_service import manager, XLSX_PATH
 
 PORT = int(os.environ.get("PORT", 8080))
 PUBLIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public")
+SETUPS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "setups_store.json")
+
+DEFAULT_SETUPS = [
+    {"id": "setup-1", "name": "Default Setup", "desc": "Standard unassigned setup", "target_rr": 2.5},
+    {"id": "setup-2", "name": "1m VWAP Bounce", "desc": "Institutional liquidity rejection at VWAP", "target_rr": 2.5},
+    {"id": "setup-3", "name": "1m Pullback to 9EMA", "desc": "Trend continuation on 9EMA pullback", "target_rr": 2.2},
+    {"id": "setup-4", "name": "Opening Range Breakout (ORB)", "desc": "Break of 09:15-09:30 range high/low", "target_rr": 2.5},
+    {"id": "setup-5", "name": "1m Breakout & Re-test", "desc": "Clean breakout with re-test confirmation", "target_rr": 2.5},
+    {"id": "setup-6", "name": "Support / Resistance Bounce", "desc": "Key daily/hourly level bounce", "target_rr": 2.0},
+    {"id": "setup-7", "name": "5m Fakeout / Trapped Volume", "desc": "Trapped breakout traders stop run", "target_rr": 3.0}
+]
+
+def get_setups():
+    if os.path.exists(SETUPS_PATH):
+        try:
+            with open(SETUPS_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list) and len(data) > 0:
+                    return data
+        except Exception:
+            pass
+    return DEFAULT_SETUPS
+
+def save_setups(setups_list):
+    try:
+        with open(SETUPS_PATH, "w", encoding="utf-8") as f:
+            json.dump(setups_list, f, indent=2)
+        return True
+    except Exception as e:
+        print(f"[Setups Save Error] {e}")
+        return False
 
 class WebAppHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -34,6 +65,8 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
             trades = manager.get_trades()
             stats = manager.get_stats()
             self._send_json({"trades": trades, "stats": stats})
+        elif path == "/api/setups":
+            self._send_json({"setups": get_setups()})
         elif path == "/api/download":
             if os.path.exists(XLSX_PATH):
                 with open(XLSX_PATH, "rb") as f:
@@ -129,6 +162,13 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
         elif path == "/api/defaults":
             result = manager.reload_defaults()
             self._send_json(result)
+        elif path == "/api/setups":
+            if isinstance(payload, list):
+                setups_data = payload
+            else:
+                setups_data = payload.get("setups", [])
+            save_setups(setups_data)
+            self._send_json({"status": "ok", "setups": get_setups()})
         elif path == "/api/fyers/upload":
             try:
                 import base64
