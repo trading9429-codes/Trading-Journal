@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trader Reset // Lite Journal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b0f19; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+  </style>
+</head>
+<body class="bg-[#080c14] text-slate-200 font-sans min-h-screen flex flex-col antialiased selection:bg-blue-500/30 selection:text-white">
+
+  <!-- ======================================================== -->
+  <!-- TOP APP BAR                                              -->
+  <!-- ======================================================== -->
+  <header class="sticky top-0 z-40 bg-[#0b0f19]/90 backdrop-blur-md border-b border-slate-800/80 px-4 lg:px-8 py-2.5">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+      
+      <!-- Brand & Telemetry -->
+      <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center font-mono font-bold text-sm">
+            ⚡
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-sm font-bold text-white tracking-tight">TRADER RESET</h1>
+              <span class="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-semibold tracking-wider">Lite</span>
+            </div>
+            <p class="text-[11px] text-slate-400 font-mono" id="liveClock">IST --:--:--</p>
+          </div>
+        </div>
+
+        <!-- Quick market status tag -->
+        <div class="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs font-mono">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-slate-400" id="tradingSessionStatus">Session: 09:15 - 10:30 AM</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800/80 text-xs font-medium">
+        <button onclick="switchTab('overview')" id="tabBtn-overview" class="tab-btn px-3.5 py-1.5 rounded-lg text-white bg-blue-600 font-semibold transition">
+          Dashboard
+        </button>
+        <button onclick="switchTab('trades')" id="tabBtn-trades" class="tab-btn px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
+          Trades <span id="navTradesCount" class="ml-1 text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-slate-800">0</span>
+        </button>
+        <button onclick="switchTab('log')" id="tabBtn-log" class="tab-btn px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
+          + Log Trade
+        </button>
+        <button onclick="switchTab('fyers')" id="tabBtn-fyers" class="tab-btn px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5">
+          <span class="text-orange-400">⚡</span> FYERS Import
+        </button>
+        <button onclick="switchTab('rules')" id="tabBtn-rules" class="tab-btn px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
+          Rules &amp; Lockbox
+        </button>
+      </nav>
+
+      <!-- Action Utilities -->
+      <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+        <button onclick="exportExcelSpreadsheet()" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-mono flex items-center gap-1.5 transition" title="Export synced Excel Spreadsheet">
+          <span>📥</span> <span>Excel</span>
+        </button>
+        <a href="/" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-blue-400 text-xs font-medium transition flex items-center gap-1.5" title="Switch to Full Classic Journal UI">
+          <span>⚡</span> <span>Classic (/)</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- MAIN CONTAINER                                           -->
+  <!-- ======================================================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8 space-y-6">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: OVERVIEW DASHBOARD                 -->
+    <!-- ========================================== -->
+    <div id="tabContent-overview" class="space-y-6">
+      
+      <!-- Top KPI Row -->
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
+        
+        <!-- Net P&L Card -->
+        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
+          <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Net Realized P&amp;L</span>
+          <div class="my-1.5">
+            <h2 id="kpiNetPnL" class="text-2xl font-bold font-mono text-slate-200">₹0.00</h2>
+            <p id="kpiNetPnLPct" class="text-xs font-mono text-slate-400">0.00% on capital</p>
+          </div>
+          <div class="text-[11px] font-mono text-slate-500 flex justify-between border-t border-slate-800/80 pt-1.5">
+            <span>Gross: <span id="kpiGrossPnL" class="text-slate-300">₹0</span></span>
+            <span>Costs: <span id="kpiFriction" class="text-rose-400">₹0</span></span>
+          </div>
+        </div>
+
+        <!-- Win Rate Card -->
+        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
+          <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Win Rate %</span>
+          <div class="my-1.5">
+            <h2 id="kpiWinRate" class="text-2xl font-bold font-mono text-slate-200">0.0%</h2>
+            <p id="kpiWinLossCount" class="text-xs font-mono text-slate-400">0 Wins &bull; 0 Losses</p>
+          </div>
+          <div class="text-[11px] font-mono text-slate-500 border-t border-slate-800/80 pt-1.5">
+            <span>Target: <span class="text-emerald-400">&ge; 60%</span></span>
+          </div>
+        </div>
+
+        <!-- Average R / Expectancy -->
+        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
+          <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Avg R / Trade</span>
+          <div class="my-1.5">
+            <h2 id="kpiAvgR" class="text-2xl font-bold font-mono text-slate-200">0.00R</h2>
+            <p id="kpiProfitFactor" class="text-xs font-mono text-slate-400">PF: 0.00</p>
+          </div>
+          <div class="text-[11px] font-mono text-slate-500 border-t border-slate-800/80 pt-1.5">
+            <span>Expectancy: <span id="kpiExpectancy" class="text-blue-400 font-bold">Neutral</span></span>
+          </div>
+        </div>
+
+        <!-- Account Capital -->
+        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
+          <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Account Equity</span>
+          <div class="my-1.5">
+            <h2 id="kpiCurrentCapital" class="text-2xl font-bold font-mono text-slate-200">₹2,00,000</h2>
+            <p class="text-xs font-mono text-slate-400">Base: ₹2,00,000</p>
+          </div>
+          <div class="text-[11px] font-mono text-slate-500 border-t border-slate-800/80 pt-1.5">
+            <span>Risk / Trade: <span class="text-slate-300">0.8% Planned</span></span>
+          </div>
+        </div>
+
+        <!-- Discipline & Rule Score -->
+        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between col-span-2 lg:col-span-1">
+          <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Execution Score</span>
+          <div class="my-1.5">
+            <h2 id="kpiAdherence" class="text-2xl font-bold font-mono text-emerald-400">100%</h2>
+            <p id="kpiRuleViolations" class="text-xs font-mono text-slate-400">0 Violations</p>
+          </div>
+          <div class="text-[11px] font-mono text-slate-500 border-t border-slate-800/80 pt-1.5">
+            <span>Status: <span class="text-emerald-400 font-bold">System Compliant</span></span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Charts Section -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        
+        <!-- Cumulative Equity Curve -->
+        <div class="glass-panel p-5 rounded-2xl">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-white tracking-tight">Cumulative Net Equity Curve</h3>
+              <p class="text-xs text-slate-400 font-mono">Net realized growth after all FYERS brokerage and statutory charges</p>
+            </div>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400" id="equityCurveTradesCount">0 Trades</span>
+          </div>
+          <div class="relative h-64 w-full">
+            <canvas id="equityCurveCanvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Daily Net P&L Bar Chart -->
+        <div class="glass-panel p-5 rounded-2xl">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-white tracking-tight">Daily Net Realized P&amp;L</h3>
+              <p class="text-xs text-slate-400 font-mono">Realized performance broken down by individual trading day</p>
+            </div>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400" id="dailyPnLDaysCount">0 Days</span>
+          </div>
+          <div class="relative h-64 w-full">
+            <canvas id="dailyPnLCanvas"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Strategy Setups Performance Matrix -->
+      <div class="glass-panel p-5 rounded-2xl">
+        <h3 class="text-sm font-bold text-white tracking-tight mb-3">Strategy Performance Matrix</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400">
+                <th class="py-2.5 px-3">Strategy Setup</th>
+                <th class="py-2.5 px-3 text-center">Trades</th>
+                <th class="py-2.5 px-3 text-center">Win Rate</th>
+                <th class="py-2.5 px-3 text-right">Gross P&amp;L</th>
+                <th class="py-2.5 px-3 text-right">Net P&amp;L</th>
+                <th class="py-2.5 px-3 text-center">Avg R</th>
+              </tr>
+            </thead>
+            <tbody id="setupMatrixTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: MASTER TRADE LEDGER                -->
+    <!-- ========================================== -->
+    <div id="tabContent-trades" class="hidden space-y-4">
+      
+      <!-- Filter and Search Toolbar -->
+      <div class="glass-panel p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5 flex-1 min-w-[240px]">
+          <span class="text-slate-500 text-xs">🔍</span>
+          <input type="text" id="ledgerSearchInput" oninput="filterTrades()" placeholder="Search symbol, setup, date..." class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-mono">
+        </div>
+
+        <div class="flex items-center gap-2 text-xs font-mono flex-wrap">
+          <select id="filterDirection" onchange="filterTrades()" class="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-slate-300 focus:outline-none focus:border-blue-500">
+            <option value="ALL">All Directions</option>
+            <option value="Long">Long Only</option>
+            <option value="Short">Short Only</option>
+          </select>
+
+          <select id="filterOutcome" onchange="filterTrades()" class="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-slate-300 focus:outline-none focus:border-blue-500">
+            <option value="ALL">All Outcomes</option>
+            <option value="Win">Wins Only</option>
+            <option value="Loss">Losses Only</option>
+            <option value="Break-Even">Break-Even</option>
+          </select>
+
+          <button onclick="clearLedgerFilters()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition">
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Ledger Table -->
+      <div class="glass-panel rounded-2xl overflow-hidden border border-slate-800/80">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono border-collapse">
+            <thead class="bg-slate-950/90 text-slate-400 border-b border-slate-800 select-none">
+              <tr>
+                <th class="py-3 px-3">ID</th>
+                <th class="py-3 px-3">Date</th>
+                <th class="py-3 px-2">Window</th>
+                <th class="py-3 px-3">Symbol</th>
+                <th class="py-3 px-2">Dir</th>
+                <th class="py-3 px-3">Setup</th>
+                <th class="py-3 px-2 text-right">Qty</th>
+                <th class="py-3 px-2 text-right">Entry</th>
+                <th class="py-3 px-2 text-right text-rose-400">SL (0.8%)</th>
+                <th class="py-3 px-2 text-right text-emerald-400">Target (2%)</th>
+                <th class="py-3 px-2 text-right">Exit</th>
+                <th class="py-3 px-3 text-right">Gross P&amp;L</th>
+                <th class="py-3 px-2 text-right text-slate-400">Costs</th>
+                <th class="py-3 px-3 text-right font-bold">Net P&amp;L</th>
+                <th class="py-3 px-2 text-center">Net R</th>
+                <th class="py-3 px-2 text-center">Result</th>
+                <th class="py-3 px-3 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tradesTableBody" class="divide-y divide-slate-800/60">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Ledger Footer Stats -->
+        <div class="p-3 bg-slate-950/60 border-t border-slate-800 flex flex-wrap items-center justify-between text-xs font-mono text-slate-400 gap-2">
+          <div>Showing <span id="filteredCountDisp" class="text-white font-bold">0</span> of <span id="totalCountDisp" class="text-white font-bold">0</span> recorded trades</div>
+          <div class="flex items-center gap-4">
+            <span>Filtered Net: <strong id="filteredNetPnLDisp" class="text-white">₹0.00</strong></span>
+            <span>Win Rate: <strong id="filteredWinRateDisp" class="text-white">0%</strong></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: QUICK LOG TRADE                    -->
+    <!-- ========================================== -->
+    <div id="tabContent-log" class="hidden max-w-2xl mx-auto space-y-4">
+      <div class="glass-panel p-6 rounded-2xl space-y-5">
+        <div class="border-b border-slate-800 pb-3">
+          <h2 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
+            <span>⚡</span> Manual Trade Quick-Logger
+          </h2>
+          <p class="text-xs text-slate-400 font-mono">Enforces strict 0.8% Stop Loss, 2.0% Target (2.50R), and automated FYERS friction</p>
+        </div>
+
+        <form id="quickLogForm" onsubmit="handleManualTradeSubmit(event)" class="space-y-4 text-xs font-mono">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-400 mb-1">Symbol Code</label>
+              <input type="text" id="log_symbol" required placeholder="e.g. RELIANCE, TRIVENI" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white uppercase focus:border-blue-500 focus:outline-none">
+            </div>
+
+            <div>
+              <label class="block text-slate-400 mb-1">Direction</label>
+              <select id="log_direction" onchange="calcManualPreview()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none cursor-pointer">
+                <option value="Long">Long (Buy &rarr; Sell)</option>
+                <option value="Short">Short (Sell &rarr; Buy)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-slate-400 mb-1">Date</label>
+              <input type="date" id="log_date" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Entry Time</label>
+              <input type="time" id="log_entry_time" value="09:20" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Exit Time</label>
+              <input type="time" id="log_exit_time" value="09:35" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-400 mb-1">Entry Price (₹)</label>
+              <input type="number" step="0.05" id="log_entry_px" required oninput="calcManualPreview()" placeholder="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Quantity</label>
+              <input type="number" id="log_qty" required oninput="calcManualPreview()" placeholder="100" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-rose-400 mb-1">Planned SL (0.8%)</label>
+              <input type="number" step="0.05" id="log_stop_px" oninput="calcManualPreview()" class="w-full bg-slate-900 border border-rose-900/50 rounded-lg px-3 py-2 text-rose-300 focus:border-rose-500 focus:outline-none font-bold">
+            </div>
+            <div>
+              <label class="block text-emerald-400 mb-1">Planned Target (2.0%)</label>
+              <input type="number" step="0.05" id="log_target_px" oninput="calcManualPreview()" class="w-full bg-slate-900 border border-emerald-900/50 rounded-lg px-3 py-2 text-emerald-300 focus:border-emerald-500 focus:outline-none font-bold">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Actual Exit (₹)</label>
+              <input type="number" step="0.05" id="log_exit_px" required oninput="calcManualPreview()" placeholder="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-slate-400 mb-1">Strategy Setup</label>
+            <select id="log_setup" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+              <option value="Default Setup">Default Setup</option>
+              <option value="1m VWAP Bounce">1m VWAP Bounce</option>
+              <option value="1m Pullback to 9EMA">1m Pullback to 9EMA</option>
+              <option value="Opening Range Breakout (ORB)">Opening Range Breakout (ORB)</option>
+              <option value="1m Breakout &amp; Re-test">1m Breakout &amp; Re-test</option>
+              <option value="Support / Resistance Bounce">Support / Resistance Bounce</option>
+              <option value="5m Fakeout / Trapped Volume">5m Fakeout / Trapped Volume</option>
+            </select>
+          </div>
+
+          <!-- Real-Time Calculation Preview Card -->
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between text-slate-400">
+              <span>Planned Risk: <strong id="previewRiskAmt" class="text-white">₹0.00</strong></span>
+              <span>Planned RR: <strong id="previewRR" class="text-blue-400">2.50R</strong></span>
+            </div>
+            <div class="flex items-center justify-between text-slate-400">
+              <span>Gross P&amp;L: <strong id="previewGrossPnL" class="text-white">₹0.00</strong></span>
+              <span>FYERS Friction: <strong id="previewFriction" class="text-rose-400">₹0.00</strong></span>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 text-sm">
+              <span class="font-bold text-white">Estimated Net P&amp;L:</span>
+              <span id="previewNetPnL" class="font-bold text-slate-300">₹0.00 (0.00R)</span>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-slate-400 mb-1">Execution Notes / Lesson</label>
+            <textarea id="log_lesson" rows="2" placeholder="Strict rules followed, entry limit order, passive target execution..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none"></textarea>
+          </div>
+
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-blue-600/20">
+            <span>💾</span> Save Trade to Journal &amp; Excel
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: FYERS TRADEBOOK IMPORTER            -->
+    <!-- ========================================== -->
+    <div id="tabContent-fyers" class="hidden max-w-3xl mx-auto space-y-5">
+      <div class="glass-panel p-6 rounded-2xl space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center font-bold text-lg">⚡</div>
+            <div>
+              <h2 class="text-base font-bold text-white tracking-tight">FYERS Tradebook CSV Ingestion</h2>
+              <p class="text-xs text-slate-400 font-mono">Consolidates daily scrip sessions (Option A) with exact broker ledger P&amp;L</p>
+            </div>
+          </div>
+          <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">0.8% SL &bull; 2.0% Target</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+          <div>
+            <label class="block text-slate-400 mb-1">Default Strategy Setup</label>
+            <select id="fyersSetupSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-orange-500 focus:outline-none">
+              <option value="Default Setup">Default Setup</option>
+              <option value="1m VWAP Bounce">1m VWAP Bounce</option>
+              <option value="1m Pullback to 9EMA">1m Pullback to 9EMA</option>
+              <option value="Opening Range Breakout (ORB)">Opening Range Breakout (ORB)</option>
+              <option value="1m Breakout &amp; Re-test">1m Breakout &amp; Re-test</option>
+              <option value="Support / Resistance Bounce">Support / Resistance Bounce</option>
+              <option value="5m Fakeout / Trapped Volume">5m Fakeout / Trapped Volume</option>
+            </select>
+          </div>
+          <div class="flex items-end">
+            <p class="text-[11px] text-slate-400">Directly accepts official Tradebook report CSV downloads from the FYERS portal.</p>
+          </div>
+        </div>
+
+        <!-- Drag & Drop Zone -->
+        <div id="fyersDropZone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" onclick="document.getElementById('fyersFileInput').click()" class="border-2 border-dashed border-slate-700 hover:border-orange-500/80 bg-slate-900/50 hover:bg-orange-950/10 rounded-2xl p-8 text-center cursor-pointer transition flex flex-col items-center justify-center gap-3">
+          <input type="file" id="fyersFileInput" accept=".csv,.tsv,.xlsx" onchange="handleFileSelect(event)" class="hidden">
+          <div class="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center text-2xl font-bold">
+            📄
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-white">Click or drag &amp; drop FYERS Tradebook CSV here</p>
+            <p class="text-xs text-slate-500 mt-1 font-mono">Supports official broker Tradebook reports (.csv, .tsv, .xlsx)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview Container (Visible after file selection) -->
+      <div id="fyersPreviewContainer" class="hidden glass-panel p-6 rounded-2xl space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              Parsed Execution Review
+              <span id="fyersMatchCountBadge" class="text-xs font-mono px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">12 Trades Matched</span>
+            </h3>
+            <p class="text-xs text-slate-400 font-mono">Verify execution windows, prices, planned stop/target, and net P&amp;L before commit</p>
+          </div>
+          <button onclick="commitFyersTrades()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition cursor-pointer shadow-lg shadow-emerald-600/20">
+            ✓ Import All Trades
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono border-collapse">
+            <thead class="bg-slate-950/80 text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="py-2.5 px-3">Date</th>
+                <th class="py-2.5 px-2">Window</th>
+                <th class="py-2.5 px-3">Symbol</th>
+                <th class="py-2.5 px-2">Dir</th>
+                <th class="py-2.5 px-2 text-right">Qty</th>
+                <th class="py-2.5 px-2 text-right">Entry</th>
+                <th class="py-2.5 px-2 text-right text-rose-400">SL (0.8%)</th>
+                <th class="py-2.5 px-2 text-right text-emerald-400">Tgt (2%)</th>
+                <th class="py-2.5 px-2 text-right">Exit</th>
+                <th class="py-2.5 px-3 text-right">Gross P&amp;L</th>
+                <th class="py-2.5 px-3 text-right font-bold">Net P&amp;L</th>
+              </tr>
+            </thead>
+            <tbody id="fyersPreviewTableBody" class="divide-y divide-slate-800/60">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: RULES & LOCKBOX                    -->
+    <!-- ========================================== -->
+    <div id="tabContent-rules" class="hidden max-w-3xl mx-auto space-y-4">
+      <div class="glass-panel p-6 rounded-2xl space-y-4">
+        <div class="border-b border-slate-800 pb-3">
+          <h2 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
+            <span>🛡️</span> Institutional Execution Boundaries
+          </h2>
+          <p class="text-xs text-slate-400 font-mono">Strict rules designed to eradicate emotional tilt and overtrading</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs font-mono">
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+            <div class="flex items-center justify-between text-slate-400">
+              <span class="font-bold text-white">1. Execution Window</span>
+              <span class="text-emerald-400">09:15 - 10:30 AM IST</span>
+            </div>
+            <p class="text-slate-500">All intraday momentum orders must be executed within the morning volume peak. No new entries after 10:30 AM.</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+            <div class="flex items-center justify-between text-slate-400">
+              <span class="font-bold text-white">2. Daily Kill Switch</span>
+              <span class="text-rose-400">Max 2 Losses</span>
+            </div>
+            <p class="text-slate-500">Terminal locks upon incurring 2 consecutive losses or 2R drawdown. Immediate 30-minute physical walkaway mandatory.</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+            <div class="flex items-center justify-between text-slate-400">
+              <span class="font-bold text-white">3. Planned Risk &amp; RR</span>
+              <span class="text-blue-400">0.8% SL &bull; &ge; 2.2R</span>
+            </div>
+            <p class="text-slate-500">Every trade must have a hard stop defined at 0.8% of entry price and a technical target offering at least 2.2R (2.0% target = 2.50R).</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+            <div class="flex items-center justify-between text-slate-400">
+              <span class="font-bold text-white">4. Anti-Chasing Mandate</span>
+              <span class="text-amber-400">Limit Orders Only</span>
+            </div>
+            <p class="text-slate-500">No market orders on breakout bars. Wait for the re-test of 9EMA or VWAP pullback to capture favorable entry pricing.</p>
+          </div>
+        </div>
+
+        <!-- Today's Lockbox Status -->
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between font-mono text-xs">
+          <div>
+            <span class="text-slate-400">Today's Lockbox Status:</span>
+            <span id="lockboxStatusBadge" class="ml-2 font-bold text-emerald-400">ACTIVE &bull; PASSED (0 Losses)</span>
+          </div>
+          <span class="text-slate-500 text-[11px]" id="lockboxDateDisp">Date: Today</span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- JAVASCRIPT CORE LOGIC                                    -->
+  <!-- ======================================================== -->
+  <script>
+    // State
+    let tradesData = [];
+    let pendingFyersTrades = [];
+    let equityChart = null;
+    let dailyPnLChart = null;
+
+    // --- FYERS Intraday Equity Statutory Charges Exact Formula ---
+    function computeFyersCharges(buyTurnover, sellTurnover) {
+      const totalTurnover = buyTurnover + sellTurnover;
+      const buyBrok = Math.min(buyTurnover * 0.0003, 20.0);
+      const sellBrok = Math.min(sellTurnover * 0.0003, 20.0);
+      const totalBrokerage = buyBrok + sellBrok;
+      const stt = sellTurnover * 0.00025;
+      const exchangeCharges = totalTurnover * 0.0000297;
+      const sebiFee = totalTurnover * 0.0000001;
+      const stampDuty = buyTurnover * 0.00003;
+      const gst = (totalBrokerage + exchangeCharges + sebiFee) * 0.18;
+      const totalCosts = totalBrokerage + stt + exchangeCharges + sebiFee + stampDuty + gst;
+      return { totalCosts };
+    }
+
+    const FYERS_COMPANY_TO_TICKER = {
+      'IIFL FINANCE LIMITED': 'IIFL',
+      'V2 RETAIL LIMITED': 'V2RETAIL',
+      'AWFIS SPACE SOLUTIONS LTD': 'AWFIS',
+      'ALKYL AMINES CHEM. LTD': 'ALKYLAMINE',
+      'WELSPUN LIVING LIMITED': 'WELSPUNLIV',
+      'TRIVENI ENGG. & INDS. LTD': 'TRIVENI',
+      'INDO COUNT INDUSTRIES LTD': 'ICIL',
+      'KSH INTERNATIONAL LIMITED': 'KSHINTL',
+      'PARAG MILK FOODS LIMITED': 'PARAGMILK',
+      'PARAGMILK': 'PARAGMILK',
+      'PWL': 'PWL',
+      'FRACTAL': 'FRACTAL'
+    };
+
+    function normalizeFyersSymbol(rawSym) {
+      let s = (rawSym || '').trim().toUpperCase();
+      if (FYERS_COMPANY_TO_TICKER[s]) return FYERS_COMPANY_TO_TICKER[s];
+      for (const [k, v] of Object.entries(FYERS_COMPANY_TO_TICKER)) {
+        if (s.includes(k) || k.includes(s)) return v;
+      }
+      return s.replace(/^NSE:/, '').replace(/-EQ$/, '').replace(/\s+/g, '');
+    }
+
+    function splitFyersCsvLine(line, delimiter = ',') {
+      const result = [];
+      let cur = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+          if (inQuotes && line[i + 1] === '"') {
+            cur += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === delimiter && !inQuotes) {
+          result.push(cur.trim());
+          cur = '';
+        } else {
+          cur += char;
+        }
+      }
+      result.push(cur.trim());
+      return result.map(c => c.replace(/^="|"$/g, '').replace(/^"|"$/g, '').trim());
+    }
+
+    function parseFyersDateTimeStr(dtStr) {
+      if (!dtStr) return { date: new Date().toISOString().split('T')[0], time: '09:20' };
+      const m12 = dtStr.match(/(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4}),?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i);
+      if (m12) {
+        const day = m12[1].padStart(2, '0');
+        const mStr = m12[2].toUpperCase();
+        const months = { 'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05', 'JUN': '06', 'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12' };
+        const month = months[mStr] || '01';
+        const year = m12[3];
+        let hour = parseInt(m12[4]);
+        const min = m12[5];
+        const ampm = (m12[7] || '').toUpperCase();
+        if (ampm === 'PM' && hour < 12) hour += 12;
+        if (ampm === 'AM' && hour === 12) hour = 0;
+        const hourStr = String(hour).padStart(2, '0');
+        return { date: `${year}-${month}-${day}`, time: `${hourStr}:${min}` };
+      }
+      const mIso = dtStr.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?/);
+      if (mIso) {
+        const year = mIso[1];
+        const month = mIso[2].padStart(2, '0');
+        const day = mIso[3].padStart(2, '0');
+        const hour = mIso[4] ? mIso[4].padStart(2, '0') : '09';
+        const min = mIso[5] || '20';
+        return { date: `${year}-${month}-${day}`, time: `${hour}:${min}` };
+      }
+      return { date: new Date().toISOString().split('T')[0], time: '09:20' };
+    }
+
+    function getTradeWeekday(dateStr) {
+      if (!dateStr) return 'Mon';
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      try {
+        const d = new Date(dateStr);
+        return days[d.getDay()] || 'Mon';
+      } catch(e) {
+        return 'Mon';
+      }
+    }
+
+    // --- Tab Navigation ---
+    function switchTab(tabId) {
+      ['overview', 'trades', 'log', 'fyers', 'rules'].forEach(id => {
+        const content = document.getElementById(`tabContent-${id}`);
+        const btn = document.getElementById(`tabBtn-${id}`);
+        if (content) {
+          if (id === tabId) {
+            content.classList.remove('hidden');
+          } else {
+            content.classList.add('hidden');
+          }
+        }
+        if (btn) {
+          if (id === tabId) {
+            btn.className = 'tab-btn px-3.5 py-1.5 rounded-lg text-white bg-blue-600 font-semibold transition';
+          } else {
+            btn.className = 'tab-btn px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition';
+          }
+        }
+      });
+
+      if (tabId === 'overview') {
+        renderCharts();
+      }
+    }
+
+    // --- Initialize Application ---
+    async function init() {
+      startClock();
+      document.getElementById('log_date').value = new Date().toISOString().split('T')[0];
+      await loadTrades();
+    }
+
+    function startClock() {
+      function update() {
+        const now = new Date();
+        const options = { timeZone: 'Asia/Kolkata', hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' };
+        document.getElementById('liveClock').textContent = 'IST ' + now.toLocaleTimeString('en-US', options);
+      }
+      update();
+      setInterval(update, 1000);
+    }
+
+    // --- Data Load & Sync ---
+    async function loadTrades() {
+      try {
+        const res = await fetch('/api/trades');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.trades)) {
+            tradesData = data.trades;
+            localStorage.setItem('trader_reset_trades_lite', JSON.stringify(tradesData));
+            updateAllViews();
+            return;
+          }
+        }
+      } catch(e) {
+        console.warn("Backend /api/trades unavailable, loading cached local storage:", e);
+      }
+
+      // Offline / LocalStorage fallback
+      const cached = localStorage.getItem('trader_reset_trades_lite') || localStorage.getItem('trader_reset_trades');
+      if (cached) {
+        try {
+          tradesData = JSON.parse(cached);
+        } catch(e) {
+          tradesData = [];
+        }
+      }
+      updateAllViews();
+    }
+
+    async function syncWithBackend() {
+      localStorage.setItem('trader_reset_trades_lite', JSON.stringify(tradesData));
+      try {
+        await fetch('/api/trades/bulk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(tradesData)
+        });
+      } catch(e) {
+        console.warn("Could not sync with backend /api/trades/bulk:", e);
+      }
+    }
+
+    function updateAllViews() {
+      document.getElementById('navTradesCount').textContent = tradesData.length;
+      renderKPIs();
+      renderTradesTable();
+      renderCharts();
+      renderSetupMatrix();
+    }
+
+    // --- Render KPIs ---
+    function renderKPIs() {
+      const totalTrades = tradesData.length;
+      let totalNet = 0;
+      let totalGross = 0;
+      let totalFriction = 0;
+      let wins = 0;
+      let losses = 0;
+      let totalR = 0;
+      let grossProfit = 0;
+      let grossLoss = 0;
+
+      tradesData.forEach(t => {
+        const net = parseFloat(t.net_pnl) || 0;
+        const gross = parseFloat(t.gross_pnl) || 0;
+        const costs = parseFloat(t.costs) || 0;
+        const r = parseFloat(t.r_multiple) || 0;
+
+        totalNet += net;
+        totalGross += gross;
+        totalFriction += costs;
+        totalR += r;
+
+        if (net > 0) wins++;
+        else if (net < 0) losses++;
+
+        if (gross > 0) grossProfit += gross;
+        else if (gross < 0) grossLoss += Math.abs(gross);
+      });
+
+      const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : '0.0';
+      const avgR = totalTrades > 0 ? (totalR / totalTrades).toFixed(2) : '0.00';
+      const pf = grossLoss > 0 ? (grossProfit / grossLoss).toFixed(2) : (grossProfit > 0 ? '∞' : '0.00');
+
+      const pnlElem = document.getElementById('kpiNetPnL');
+      pnlElem.textContent = (totalNet >= 0 ? '+₹' : '-₹') + Math.abs(totalNet).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      pnlElem.className = totalNet >= 0 ? 'text-2xl font-bold font-mono text-emerald-400' : 'text-2xl font-bold font-mono text-rose-400';
+
+      const cap = 200000 + totalNet;
+      const capPct = ((totalNet / 200000) * 100).toFixed(2);
+      document.getElementById('kpiNetPnLPct').textContent = `${capPct >= 0 ? '+' : ''}${capPct}% on capital`;
+      document.getElementById('kpiGrossPnL').textContent = '₹' + totalGross.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('kpiFriction').textContent = '₹' + totalFriction.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      document.getElementById('kpiWinRate').textContent = `${winRate}%`;
+      document.getElementById('kpiWinLossCount').textContent = `${wins} Wins • ${losses} Losses`;
+
+      document.getElementById('kpiAvgR').textContent = `${avgR}R`;
+      document.getElementById('kpiProfitFactor').textContent = `Profit Factor: ${pf}`;
+      document.getElementById('kpiExpectancy').textContent = parseFloat(avgR) >= 0.5 ? 'Strong Edge' : (parseFloat(avgR) > 0 ? 'Positive Edge' : 'Negative Edge');
+      document.getElementById('kpiExpectancy').className = parseFloat(avgR) > 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+
+      document.getElementById('kpiCurrentCapital').textContent = '₹' + cap.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // --- Render Charts ---
+    function renderCharts() {
+      renderEquityCurve();
+      renderDailyPnL();
+    }
+
+    function renderEquityCurve() {
+      const canvas = document.getElementById('equityCurveCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      // Sort trades chronologically
+      const sorted = [...tradesData].sort((a, b) => {
+        if (a.date !== b.date) return (a.date || '').localeCompare(b.date || '');
+        return (a.time || '').localeCompare(b.time || '');
+      });
+
+      document.getElementById('equityCurveTradesCount').textContent = `${sorted.length} Trades`;
+
+      let running = 200000;
+      const labels = ['Start'];
+      const dataPoints = [running];
+
+      sorted.forEach((t, i) => {
+        running += (parseFloat(t.net_pnl) || 0);
+        labels.push(t.date ? t.date.slice(5) : `#${i+1}`);
+        dataPoints.push(running);
+      });
+
+      if (equityChart) equityChart.destroy();
+
+      const isProfitable = running >= 200000;
+      const strokeColor = isProfitable ? '#10b981' : '#f43f5e';
+
+      equityChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Capital (₹)',
+            data: dataPoints,
+            borderColor: strokeColor,
+            borderWidth: 2,
+            pointRadius: dataPoints.length > 30 ? 0 : 2,
+            pointHoverRadius: 5,
+            fill: true,
+            backgroundColor: isProfitable ? 'rgba(16, 185, 129, 0.08)' : 'rgba(244, 63, 94, 0.08)',
+            tension: 0.15
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              callbacks: {
+                label: ctx => `Equity: ₹${ctx.parsed.y.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.03)' },
+              ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
+            },
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: {
+                color: '#64748b',
+                font: { family: 'JetBrains Mono', size: 10 },
+                callback: v => '₹' + v.toLocaleString('en-IN')
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderDailyPnL() {
+      const canvas = document.getElementById('dailyPnLCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      const dayMap = {};
+      tradesData.forEach(t => {
+        const d = t.date || 'Unknown';
+        if (!dayMap[d]) dayMap[d] = 0;
+        dayMap[d] += (parseFloat(t.net_pnl) || 0);
+      });
+
+      const days = Object.keys(dayMap).sort();
+      document.getElementById('dailyPnLDaysCount').textContent = `${days.length} Days`;
+
+      const labels = days.map(d => d.slice(5));
+      const values = days.map(d => dayMap[d]);
+      const colors = values.map(v => v >= 0 ? '#10b981' : '#f43f5e');
+
+      if (dailyPnLChart) dailyPnLChart.destroy();
+
+      dailyPnLChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Net P&L',
+            data: values,
+            backgroundColor: colors,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => `Net P&L: ${ctx.parsed.y >= 0 ? '+' : ''}₹${ctx.parsed.y.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
+            },
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: {
+                color: '#64748b',
+                font: { family: 'JetBrains Mono', size: 10 },
+                callback: v => (v >= 0 ? '+' : '') + '₹' + v.toLocaleString('en-IN')
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderSetupMatrix() {
+      const tbody = document.getElementById('setupMatrixTableBody');
+      if (!tbody) return;
+
+      const matrix = {};
+      tradesData.forEach(t => {
+        const s = t.setup_name || 'Default Setup';
+        if (!matrix[s]) matrix[s] = { count: 0, wins: 0, gross: 0, net: 0, totalR: 0 };
+        matrix[s].count++;
+        const net = parseFloat(t.net_pnl) || 0;
+        const gross = parseFloat(t.gross_pnl) || 0;
+        const r = parseFloat(t.r_multiple) || 0;
+        matrix[s].gross += gross;
+        matrix[s].net += net;
+        matrix[s].totalR += r;
+        if (net > 0) matrix[s].wins++;
+      });
+
+      tbody.innerHTML = Object.entries(matrix).map(([setup, m]) => {
+        const winRate = ((m.wins / m.count) * 100).toFixed(1);
+        const avgR = (m.totalR / m.count).toFixed(2);
+        const pnlClass = m.net >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+        return `
+          <tr class="border-b border-slate-800/60 hover:bg-slate-800/20 transition">
+            <td class="py-2.5 px-3 font-sans font-medium text-white">${escapeHtml(setup)}</td>
+            <td class="py-2.5 px-3 text-center text-slate-300">${m.count}</td>
+            <td class="py-2.5 px-3 text-center font-bold ${parseFloat(winRate) >= 50 ? 'text-emerald-400' : 'text-slate-400'}">${winRate}%</td>
+            <td class="py-2.5 px-3 text-right text-slate-300">₹${m.gross.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            <td class="py-2.5 px-3 text-right ${pnlClass}">₹${m.net.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            <td class="py-2.5 px-3 text-center text-blue-400 font-bold">${avgR}R</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // --- Trades Ledger Table & Filters ---
+    function renderTradesTable() {
+      const tbody = document.getElementById('tradesTableBody');
+      if (!tbody) return;
+
+      const filtered = getFilteredTrades();
+      document.getElementById('filteredCountDisp').textContent = filtered.length;
+      document.getElementById('totalCountDisp').textContent = tradesData.length;
+
+      let filteredNet = 0;
+      let wins = 0;
+      filtered.forEach(t => {
+        const net = parseFloat(t.net_pnl) || 0;
+        filteredNet += net;
+        if (net > 0) wins++;
+      });
+
+      const winRate = filtered.length > 0 ? ((wins / filtered.length) * 100).toFixed(1) : '0';
+      document.getElementById('filteredNetPnLDisp').textContent = (filteredNet >= 0 ? '+₹' : '-₹') + Math.abs(filteredNet).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+      document.getElementById('filteredNetPnLDisp').className = filteredNet >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+      document.getElementById('filteredWinRateDisp').textContent = `${winRate}%`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="17" class="py-8 text-center text-slate-500">No trades match your search filters.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(t => {
+        const isLong = t.direction === 'Long';
+        const net = parseFloat(t.net_pnl) || 0;
+        const gross = parseFloat(t.gross_pnl) || 0;
+        const costs = parseFloat(t.costs) || 0;
+        const isWin = t.outcome === 'Win' || net > 0;
+        const isLoss = t.outcome === 'Loss' || net < 0;
+
+        const pnlClass = isWin ? 'text-emerald-400 font-bold' : (isLoss ? 'text-rose-400 font-bold' : 'text-slate-400');
+        const badgeClass = isWin 
+          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+          : (isLoss ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-slate-800 text-slate-400');
+
+        const windowStr = (t.time && t.exit_time) ? `${t.time}–${t.exit_time}` : (t.time || '--:--');
+
+        return `
+          <tr class="hover:bg-slate-800/30 transition">
+            <td class="py-2.5 px-3 text-slate-400 font-bold">${t.id}</td>
+            <td class="py-2.5 px-3 text-slate-300">${t.date}</td>
+            <td class="py-2.5 px-2 text-slate-400 text-[11px]">${windowStr}</td>
+            <td class="py-2.5 px-3 font-bold text-white">
+              <a href="https://www.tradingview.com/chart/?symbol=NSE:${t.symbol}" target="_blank" class="hover:text-blue-400 hover:underline inline-flex items-center gap-1" title="Open TradingView Chart">
+                ${t.symbol} ↗
+              </a>
+            </td>
+            <td class="py-2.5 px-2">
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${isLong ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-rose-950 text-rose-400 border border-rose-800'}">
+                ${t.direction}
+              </span>
+            </td>
+            <td class="py-2.5 px-3 font-sans text-slate-300 max-w-[140px] truncate" title="${escapeHtml(t.setup_name || 'Default Setup')}">
+              ${escapeHtml(t.setup_name || 'Default Setup')}
+            </td>
+            <td class="py-2.5 px-2 text-right text-slate-300">${t.qty}</td>
+            <td class="py-2.5 px-2 text-right text-slate-200">₹${parseFloat(t.entry_price || 0).toFixed(2)}</td>
+            <td class="py-2.5 px-2 text-right text-rose-400 font-bold">₹${parseFloat(t.stop_price || 0).toFixed(2)}</td>
+            <td class="py-2.5 px-2 text-right text-emerald-400 font-bold">₹${parseFloat(t.target_price || 0).toFixed(2)}</td>
+            <td class="py-2.5 px-2 text-right text-slate-200">₹${parseFloat(t.exit_price || 0).toFixed(2)}</td>
+            <td class="py-2.5 px-3 text-right text-slate-300">₹${gross.toFixed(2)}</td>
+            <td class="py-2.5 px-2 text-right text-slate-400">₹${costs.toFixed(2)}</td>
+            <td class="py-2.5 px-3 text-right ${pnlClass}">₹${net.toFixed(2)}</td>
+            <td class="py-2.5 px-2 text-center text-blue-400 font-bold">${parseFloat(t.r_multiple || 0).toFixed(2)}R</td>
+            <td class="py-2.5 px-2 text-center">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-sans font-bold ${badgeClass}">
+                ${t.outcome || (net > 0 ? 'Win' : 'Loss')}
+              </span>
+            </td>
+            <td class="py-2.5 px-3 text-center">
+              <button onclick="deleteTrade('${t.id}')" class="p-1 rounded hover:bg-rose-900/40 text-slate-500 hover:text-rose-400 transition" title="Delete Trade">
+                ✕
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function getFilteredTrades() {
+      const q = (document.getElementById('ledgerSearchInput')?.value || '').toLowerCase().trim();
+      const dir = document.getElementById('filterDirection')?.value || 'ALL';
+      const outcome = document.getElementById('filterOutcome')?.value || 'ALL';
+
+      return tradesData.filter(t => {
+        if (dir !== 'ALL' && t.direction !== dir) return false;
+        if (outcome !== 'ALL') {
+          if (outcome === 'Win' && t.outcome !== 'Win' && (parseFloat(t.net_pnl) || 0) <= 0) return false;
+          if (outcome === 'Loss' && t.outcome !== 'Loss' && (parseFloat(t.net_pnl) || 0) >= 0) return false;
+          if (outcome === 'Break-Even' && t.outcome !== 'Break-Even') return false;
+        }
+        if (q) {
+          const matchSym = (t.symbol || '').toLowerCase().includes(q);
+          const matchSetup = (t.setup_name || '').toLowerCase().includes(q);
+          const matchDate = (t.date || '').toLowerCase().includes(q);
+          if (!matchSym && !matchSetup && !matchDate) return false;
+        }
+        return true;
+      });
+    }
+
+    function filterTrades() {
+      renderTradesTable();
+    }
+
+    function clearLedgerFilters() {
+      if (document.getElementById('ledgerSearchInput')) document.getElementById('ledgerSearchInput').value = '';
+      if (document.getElementById('filterDirection')) document.getElementById('filterDirection').value = 'ALL';
+      if (document.getElementById('filterOutcome')) document.getElementById('filterOutcome').value = 'ALL';
+      renderTradesTable();
+    }
+
+    function deleteTrade(id) {
+      if (confirm(`Are you sure you want to delete trade ${id}?`)) {
+        tradesData = tradesData.filter(t => t.id !== id);
+        syncWithBackend();
+        updateAllViews();
+      }
+    }
+
+    // --- Manual Quick Log Real-Time Math ---
+    function calcManualPreview() {
+      const entry = parseFloat(document.getElementById('log_entry_px').value) || 0;
+      const qty = parseInt(document.getElementById('log_qty').value) || 0;
+      const dir = document.getElementById('log_direction').value || 'Long';
+      const isLong = dir === 'Long';
+
+      // Auto compute 0.8% Stop and 2.0% Target if not manually modified
+      const stopInput = document.getElementById('log_stop_px');
+      const targetInput = document.getElementById('log_target_px');
+      const exitInput = parseFloat(document.getElementById('log_exit_px').value) || 0;
+
+      if (entry > 0 && (!stopInput.value || stopInput.dataset.auto === 'true')) {
+        const defaultStop = isLong ? (entry * 0.992) : (entry * 1.008);
+        stopInput.value = defaultStop.toFixed(2);
+        stopInput.dataset.auto = 'true';
+      }
+
+      if (entry > 0 && (!targetInput.value || targetInput.dataset.auto === 'true')) {
+        const defaultTarget = isLong ? (entry * 1.020) : (entry * 0.980);
+        targetInput.value = defaultTarget.toFixed(2);
+        targetInput.dataset.auto = 'true';
+      }
+
+      const stop = parseFloat(stopInput.value) || 0;
+      const riskPerShare = Math.abs(entry - stop);
+      const totalRisk = riskPerShare * qty;
+      const target = parseFloat(targetInput.value) || 0;
+      const plannedRR = riskPerShare > 0 ? (Math.abs(target - entry) / riskPerShare) : 2.50;
+
+      const buyTurnover = entry * qty;
+      const sellTurnover = (exitInput > 0 ? exitInput : target) * qty;
+      const fyers = computeFyersCharges(buyTurnover, sellTurnover);
+
+      let gross = 0;
+      if (exitInput > 0) {
+        gross = isLong ? (exitInput - entry) * qty : (entry - exitInput) * qty;
+      }
+      const net = gross - fyers.totalCosts;
+      const r = totalRisk > 0 ? (net / totalRisk) : 0;
+
+      document.getElementById('previewRiskAmt').textContent = '₹' + totalRisk.toFixed(2);
+      document.getElementById('previewRR').textContent = plannedRR.toFixed(2) + 'R';
+      document.getElementById('previewGrossPnL').textContent = '₹' + gross.toFixed(2);
+      document.getElementById('previewFriction').textContent = '₹' + fyers.totalCosts.toFixed(2);
+
+      const netElem = document.getElementById('previewNetPnL');
+      netElem.textContent = `${net >= 0 ? '+₹' : '-₹'}${Math.abs(net).toFixed(2)} (${r >= 0 ? '+' : ''}${r.toFixed(2)}R)`;
+      netElem.className = net >= 0 ? 'font-bold text-emerald-400' : 'font-bold text-rose-400';
+    }
+
+    async function handleManualTradeSubmit(e) {
+      e.preventDefault();
+      const symbol = document.getElementById('log_symbol').value.trim().toUpperCase();
+      const direction = document.getElementById('log_direction').value;
+      const date = document.getElementById('log_date').value;
+      const entryTime = document.getElementById('log_entry_time').value;
+      const exitTime = document.getElementById('log_exit_time').value;
+      const entry = parseFloat(document.getElementById('log_entry_px').value);
+      const stop = parseFloat(document.getElementById('log_stop_px').value);
+      const target = parseFloat(document.getElementById('log_target_px').value);
+      const exit = parseFloat(document.getElementById('log_exit_px').value);
+      const qty = parseInt(document.getElementById('log_qty').value);
+      const setup = document.getElementById('log_setup').value;
+      const lesson = document.getElementById('log_lesson').value.trim() || 'Manual trade logged via Lite UI';
+
+      const isLong = direction === 'Long';
+      const gross = isLong ? (exit - entry) * qty : (entry - exit) * qty;
+      const fyers = computeFyersCharges(entry * qty, exit * qty);
+      const net = gross - fyers.totalCosts;
+      const riskPerShare = Math.abs(entry - stop);
+      const totalRisk = riskPerShare * qty;
+      const r = totalRisk > 0 ? (net / totalRisk) : 0;
+      const outcome = net > 10 ? 'Win' : (net < -10 ? 'Loss' : 'Break-Even');
+
+      const existingMaxId = tradesData.reduce((max, t) => {
+        const num = parseInt(String(t.id).replace(/[^\d]/g, '')) || 0;
+        return Math.max(max, num);
+      }, 0);
+      const tradeId = `T-${String(existingMaxId + 1).padStart(3, '0')}`;
+
+      const newTrade = {
+        id: tradeId,
+        date: date,
+        day: getTradeWeekday(date),
+        time: entryTime,
+        exit_time: exitTime,
+        hold_duration: 15,
+        symbol: symbol,
+        direction: direction,
+        setup_name: setup,
+        scanner_alert_time: entryTime,
+        htf_ok: 'Y',
+        no_chase: 'Y',
+        stop_defined: 'Y',
+        target_price: target,
+        rr_planned: 2.50,
+        risk_percent: 0.008,
+        risk_amount: parseFloat(totalRisk.toFixed(2)),
+        entry_price: entry,
+        stop_price: stop,
+        exit_price: exit,
+        qty: qty,
+        gross_pnl: parseFloat(gross.toFixed(2)),
+        costs: parseFloat(fyers.totalCosts.toFixed(2)),
+        net_pnl: parseFloat(net.toFixed(2)),
+        r_multiple: parseFloat(r.toFixed(2)),
+        outcome: outcome,
+        checklist_score: 5,
+        rule_violation: 'N',
+        violation_type: 'None',
+        emotion_before: 2,
+        emotion_during: 2,
+        emotion_after: net > 0 ? 2 : 3,
+        trade_valid: 'Y',
+        lesson: lesson,
+        screenshot_link: `https://www.tradingview.com/chart/?symbol=NSE:${symbol}`
+      };
+
+      tradesData.push(newTrade);
+      await syncWithBackend();
+      updateAllViews();
+      switchTab('trades');
+      alert(`Trade ${tradeId} (${symbol}) logged successfully!`);
+      e.target.reset();
+      document.getElementById('log_date').value = new Date().toISOString().split('T')[0];
+    }
+
+    // --- FYERS Drag & Drop & Upload Importer (Option A Consolidated) ---
+    function handleDragOver(e) { e.preventDefault(); e.stopPropagation(); document.getElementById('fyersDropZone').classList.add('border-orange-500', 'bg-orange-950/20'); }
+    function handleDragLeave(e) { e.preventDefault(); e.stopPropagation(); document.getElementById('fyersDropZone').classList.remove('border-orange-500', 'bg-orange-950/20'); }
+    function handleDrop(e) {
+      e.preventDefault(); e.stopPropagation();
+      document.getElementById('fyersDropZone').classList.remove('border-orange-500', 'bg-orange-950/20');
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        processFyersFile(e.dataTransfer.files[0]);
+      }
+    }
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      processFyersFile(file);
+      e.target.value = '';
+    }
+
+    async function processFyersFile(file) {
+      const defaultSetup = document.getElementById('fyersSetupSelect')?.value || 'Default Setup';
+
+      // Always try dispatching to the backend API first
+      const reader = new FileReader();
+      reader.onload = async function(evt) {
+        try {
+          const dataUrl = evt.target.result;
+          const base64Data = dataUrl.split(',')[1];
+          const res = await fetch('/api/fyers/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              base64: base64Data,
+              file_name: file.name,
+              default_setup: defaultSetup,
+              auto_commit: false
+            })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.trades && data.trades.length > 0) {
+              renderFyersPreview(data.trades);
+              return;
+            }
+          }
+          throw new Error('Fallback to client parser');
+        } catch(serverErr) {
+          // Client-side fallback parsing
+          const textReader = new FileReader();
+          textReader.onload = function(tEvt) {
+            try {
+              parseFyersTradebookClient(tEvt.target.result, defaultSetup);
+            } catch(pErr) {
+              alert('Error parsing FYERS Tradebook: ' + pErr.message);
+            }
+          };
+          textReader.readAsText(file);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function parseFyersTradebookClient(csvContent, defaultSetup = 'Default Setup') {
+      const lines = csvContent.split(/\r\n|\n/).filter(l => l.trim() !== '');
+      if (lines.length < 2) {
+        alert("Invalid file: lacks execution content.");
+        return;
+      }
+
+      let headerIdx = -1;
+      let delimiter = ',';
+      for (let i = 0; i < Math.min(lines.length, 30); i++) {
+        const l = lines[i].toLowerCase();
+        if ((l.includes('symbol') || l.includes('scrip')) && (l.includes('qty') || l.includes('price') || l.includes('side'))) {
+          headerIdx = i;
+          if (lines[i].includes('\t')) delimiter = '\t';
+          break;
+        }
+      }
+
+      if (headerIdx === -1) {
+        alert("Could not identify FYERS columns. Please ensure this is an official FYERS Tradebook report.");
+        return;
+      }
+
+      const headers = splitFyersCsvLine(lines[headerIdx], delimiter).map(h => h.toLowerCase());
+      const findCol = (...names) => {
+        for (let name of names) {
+          const idx = headers.findIndex(h => h.includes(name.toLowerCase()));
+          if (idx !== -1) return idx;
+        }
+        return -1;
+      };
+
+      const colSym = findCol('symbol code', 'scrip code', 'symbol name', 'symbol');
+      const colSide = headers.findIndex(h => (h.includes('side') || h.includes('action') || h.includes('buy/sell')) && !h.includes('product'));
+      const colPrice = findCol('traded price', 'price', 'rate');
+      const colQty = findCol('qty', 'quantity', 'trade qty');
+      const colDt = findCol('date & time', 'trade date', 'order date', 'date');
+
+      const rawFills = [];
+      for (let i = headerIdx + 1; i < lines.length; i++) {
+        const cells = splitFyersCsvLine(lines[i], delimiter);
+        if (cells.length <= colSym) continue;
+
+        let sym = normalizeFyersSymbol(cells[colSym]);
+        const sideRaw = (colSide !== -1 ? cells[colSide] : 'BUY').toUpperCase();
+        const side = (sideRaw.includes('BUY') || sideRaw === 'B') ? 'BUY' : 'SELL';
+        const price = parseFloat(cells[colPrice].replace(/[^0-9.]/g, ''));
+        const qty = Math.round(parseFloat(cells[colQty].replace(/[^0-9.]/g, '')));
+        const dtStr = colDt !== -1 ? cells[colDt] : '';
+        const { date, time } = parseFyersDateTimeStr(dtStr);
+
+        if (!sym || isNaN(price) || isNaN(qty) || qty <= 0) continue;
+        rawFills.push({ symbol: sym, side, price, qty, date, time });
+      }
+
+      // Option A: Consolidate by (date, symbol)
+      const dayGroups = {};
+      for (const f of rawFills) {
+        const k = `${f.date}_${f.symbol}`;
+        if (!dayGroups[k]) {
+          dayGroups[k] = {
+            date: f.date,
+            symbol: f.symbol,
+            buyQty: 0,
+            buyVal: 0,
+            sellQty: 0,
+            sellVal: 0,
+            buyTimes: [],
+            sellTimes: []
+          };
+        }
+        if (f.side === 'BUY') {
+          dayGroups[k].buyQty += f.qty;
+          dayGroups[k].buyVal += f.qty * f.price;
+          dayGroups[k].buyTimes.push(f.time);
+        } else {
+          dayGroups[k].sellQty += f.qty;
+          dayGroups[k].sellVal += f.qty * f.price;
+          dayGroups[k].sellTimes.push(f.time);
+        }
+      }
+
+      const tradeList = Object.values(dayGroups).map(g => {
+        const allTimes = [...g.buyTimes, ...g.sellTimes].sort();
+        const minTime = allTimes[0] || '09:20';
+        return { ...g, minTime };
+      });
+      tradeList.sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return a.minTime.localeCompare(b.minTime);
+      });
+
+      const existingMaxId = tradesData.reduce((max, t) => {
+        const num = parseInt(String(t.id).replace(/[^\d]/g, '')) || 0;
+        return Math.max(max, num);
+      }, 0);
+
+      let currentIdCounter = existingMaxId;
+      const parsedTrades = [];
+
+      for (const g of tradeList) {
+        const matchedQty = Math.min(g.buyQty, g.sellQty);
+        if (matchedQty <= 0) continue;
+
+        const buyAvg = parseFloat((g.buyVal / g.buyQty).toFixed(2));
+        const sellAvg = parseFloat((g.sellVal / g.sellQty).toFixed(2));
+
+        g.buyTimes.sort();
+        g.sellTimes.sort();
+        const firstBuy = g.buyTimes[0] || '23:59';
+        const firstSell = g.sellTimes[0] || '23:59';
+        const isLong = firstBuy <= firstSell;
+        const direction = isLong ? 'Long' : 'Short';
+
+        const entryPrice = isLong ? buyAvg : sellAvg;
+        const exitPrice = isLong ? sellAvg : buyAvg;
+        const entryTime = isLong ? firstBuy.slice(0, 5) : firstSell.slice(0, 5);
+        const exitTime = isLong ? g.sellTimes.slice(-1)[0].slice(0, 5) : g.buyTimes.slice(-1)[0].slice(0, 5);
+
+        const grossPnL = isLong ? parseFloat((g.sellVal - g.buyVal).toFixed(2)) : parseFloat((g.buyVal - g.sellVal).toFixed(2));
+        const stopPrice = isLong ? parseFloat((entryPrice * 0.992).toFixed(2)) : parseFloat((entryPrice * 1.008).toFixed(2));
+        const targetPrice = isLong ? parseFloat((entryPrice * 1.020).toFixed(2)) : parseFloat((entryPrice * 0.980).toFixed(2));
+        const riskPerShare = Math.abs(entryPrice - stopPrice);
+        const totalRisk = parseFloat((riskPerShare * matchedQty).toFixed(2));
+        const fyers = computeFyersCharges(entryPrice * matchedQty, exitPrice * matchedQty);
+        const netPnL = parseFloat((grossPnL - fyers.totalCosts).toFixed(2));
+        const realizedR = totalRisk > 0 ? parseFloat((netPnL / totalRisk).toFixed(2)) : 0;
+        const outcome = netPnL > 10 ? 'Win' : (netPnL < -10 ? 'Loss' : 'Break-Even');
+
+        currentIdCounter++;
+        parsedTrades.push({
+          id: `T-${String(currentIdCounter).padStart(3, '0')}`,
+          date: g.date,
+          day: getTradeWeekday(g.date),
+          time: entryTime,
+          exit_time: exitTime,
+          hold_duration: 15,
+          symbol: g.symbol,
+          direction: direction,
+          setup_name: defaultSetup,
+          scanner_alert_time: entryTime,
+          htf_ok: 'Y',
+          no_chase: 'Y',
+          stop_defined: 'Y',
+          target_price: targetPrice,
+          rr_planned: 2.50,
+          risk_percent: 0.008,
+          risk_amount: totalRisk,
+          entry_price: entryPrice,
+          stop_price: stopPrice,
+          exit_price: exitPrice,
+          qty: matchedQty,
+          gross_pnl: grossPnL,
+          costs: parseFloat(fyers.totalCosts.toFixed(2)),
+          net_pnl: netPnL,
+          r_multiple: realizedR,
+          outcome: outcome,
+          checklist_score: 5,
+          rule_violation: 'N',
+          violation_type: 'None',
+          emotion_before: 2,
+          emotion_during: 2,
+          emotion_after: netPnL > 0 ? 2 : 3,
+          trade_valid: 'Y',
+          lesson: `Imported FYERS Tradebook (${g.symbol}). VWAP Entry ₹${entryPrice}, Exit ₹${exitPrice}, 0.8% SL (₹${stopPrice}), 2.0% Target (₹${targetPrice}).`,
+          screenshot_link: `https://www.tradingview.com/chart/?symbol=NSE:${g.symbol}`
+        });
+      }
+
+      renderFyersPreview(parsedTrades);
+    }
+
+    function renderFyersPreview(trades) {
+      pendingFyersTrades = trades;
+      const container = document.getElementById('fyersPreviewContainer');
+      const badge = document.getElementById('fyersMatchCountBadge');
+      const tbody = document.getElementById('fyersPreviewTableBody');
+
+      badge.textContent = `${trades.length} Consolidated Trades`;
+      container.classList.remove('hidden');
+
+      tbody.innerHTML = trades.map(t => {
+        const isWin = t.outcome === 'Win' || t.net_pnl > 0;
+        const pnlClass = isWin ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+        return `
+          <tr class="hover:bg-slate-800/30">
+            <td class="py-2 px-3 text-slate-300">${t.date}</td>
+            <td class="py-2 px-2 text-slate-400 text-[11px]">${t.time}–${t.exit_time}</td>
+            <td class="py-2 px-3 font-bold text-white">${t.symbol}</td>
+            <td class="py-2 px-2 text-emerald-400 font-bold">${t.direction}</td>
+            <td class="py-2 px-2 text-right text-slate-300">${t.qty}</td>
+            <td class="py-2 px-2 text-right text-slate-200">₹${parseFloat(t.entry_price).toFixed(2)}</td>
+            <td class="py-2 px-2 text-right text-rose-400">₹${parseFloat(t.stop_price).toFixed(2)}</td>
+            <td class="py-2 px-2 text-right text-emerald-400">₹${parseFloat(t.target_price).toFixed(2)}</td>
+            <td class="py-2 px-2 text-right text-slate-200">₹${parseFloat(t.exit_price).toFixed(2)}</td>
+            <td class="py-2 px-3 text-right text-slate-300">₹${parseFloat(t.gross_pnl).toFixed(2)}</td>
+            <td class="py-2 px-3 text-right ${pnlClass}">₹${parseFloat(t.net_pnl).toFixed(2)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function commitFyersTrades() {
+      if (!pendingFyersTrades || pendingFyersTrades.length === 0) return;
+      tradesData = [...tradesData, ...pendingFyersTrades];
+      await syncWithBackend();
+      updateAllViews();
+      document.getElementById('fyersPreviewContainer').classList.add('hidden');
+      switchTab('trades');
+      alert(`Successfully imported ${pendingFyersTrades.length} trades into your journal!`);
+      pendingFyersTrades = [];
+    }
+
+    function exportExcelSpreadsheet() {
+      window.location.href = '/api/download';
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

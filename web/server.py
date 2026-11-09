@@ -16,7 +16,21 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
         
-        if path == "/api/trades":
+        if path in ["/lite", "/lite/", "/minimal", "/modern"]:
+            lite_path = os.path.join(PUBLIC_DIR, "lite.html")
+            if os.path.exists(lite_path):
+                with open(lite_path, "rb") as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(content)))
+                self.end_headers()
+                self.wfile.write(content)
+                return
+            else:
+                self.send_error(404, "Lite Journal not found.")
+                return
+        elif path == "/api/trades":
             trades = manager.get_trades()
             stats = manager.get_stats()
             self._send_json({"trades": trades, "stats": stats})
