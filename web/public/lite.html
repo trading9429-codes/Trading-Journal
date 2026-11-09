@@ -119,10 +119,10 @@
     <!-- ========================================== -->
     <div id="tabContent-overview" class="space-y-6">
       
-      <!-- Top KPI Row -->
-      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
+      <!-- Top KPI Row: 6 Institutional Trading Metrics -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
         
-        <!-- Net P&L Card -->
+        <!-- 1. Net Realized P&L -->
         <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
           <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Net Realized P&amp;L</span>
           <div class="my-1.5">
@@ -135,65 +135,87 @@
           </div>
         </div>
 
-        <!-- Win Rate Card -->
+        <!-- 2. Win Rate & Streaks -->
         <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
-          <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Win Rate %</span>
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Win Rate %</span>
+            <span id="kpiCurrentStreakBadge" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-bold">--</span>
+          </div>
           <div class="my-1.5">
             <h2 id="kpiWinRate" class="text-2xl font-bold font-mono text-slate-200">0.0%</h2>
             <p id="kpiWinLossCount" class="text-xs font-mono text-slate-400">0 Wins &bull; 0 Losses</p>
           </div>
-          <div class="text-[11px] font-mono text-slate-500 border-t border-slate-800/80 pt-1.5">
-            <span>Target: <span class="text-emerald-400">&ge; 60%</span></span>
+          <div class="text-[11px] font-mono text-slate-500 flex justify-between border-t border-slate-800/80 pt-1.5">
+            <span>Best: <span id="kpiMaxWinStreak" class="text-emerald-400 font-bold">0W</span></span>
+            <span>Max Loss: <span id="kpiMaxLossStreak" class="text-rose-400 font-bold">0L</span></span>
           </div>
         </div>
 
-        <!-- Average R / Expectancy -->
+        <!-- 3. Win/Loss Payoff Ratio -->
         <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
-          <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Avg R / Trade</span>
+          <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Payoff Ratio</span>
           <div class="my-1.5">
-            <h2 id="kpiAvgR" class="text-2xl font-bold font-mono text-slate-200">0.00R</h2>
-            <p id="kpiProfitFactor" class="text-xs font-mono text-slate-400">PF: 0.00</p>
+            <h2 id="kpiPayoffRatio" class="text-2xl font-bold font-mono text-slate-200">0.00x</h2>
+            <p class="text-xs font-mono text-slate-400">Avg Win vs Loss</p>
           </div>
-          <div class="text-[11px] font-mono text-slate-500 border-t border-slate-800/80 pt-1.5">
-            <span>Expectancy: <span id="kpiExpectancy" class="text-blue-400 font-bold">Neutral</span></span>
+          <div class="text-[11px] font-mono text-slate-500 flex justify-between border-t border-slate-800/80 pt-1.5">
+            <span>W: <span id="kpiAvgWinAmount" class="text-emerald-400 font-medium">₹0</span></span>
+            <span>L: <span id="kpiAvgLossAmount" class="text-rose-400 font-medium">₹0</span></span>
           </div>
         </div>
 
-        <!-- Account Capital -->
+        <!-- 4. Expectancy & Profit Factor -->
+        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
+          <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Profit Factor</span>
+          <div class="my-1.5">
+            <h2 id="kpiProfitFactor" class="text-2xl font-bold font-mono text-slate-200">0.00</h2>
+            <p id="kpiAvgR" class="text-xs font-mono text-slate-400">Avg R: 0.00R</p>
+          </div>
+          <div class="text-[11px] font-mono text-slate-500 border-t border-slate-800/80 pt-1.5 flex justify-between">
+            <span>Edge:</span>
+            <span id="kpiExpectancy" class="text-blue-400 font-bold">Neutral</span>
+          </div>
+        </div>
+
+        <!-- 5. Max Drawdown (Peak to Trough) -->
+        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
+          <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Max Drawdown</span>
+          <div class="my-1.5">
+            <h2 id="kpiMaxDrawdown" class="text-2xl font-bold font-mono text-rose-400">0.0%</h2>
+            <p id="kpiMaxDrawdownRupees" class="text-xs font-mono text-slate-400">-₹0 peak-to-trough</p>
+          </div>
+          <div class="text-[11px] font-mono text-slate-500 flex justify-between border-t border-slate-800/80 pt-1.5">
+            <span>Current DD:</span>
+            <span id="kpiCurrentDrawdown" class="text-slate-300 font-bold">0.0%</span>
+          </div>
+        </div>
+
+        <!-- 6. Account Equity & High-Water Mark -->
         <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
           <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Account Equity</span>
           <div class="my-1.5">
             <h2 id="kpiCurrentCapital" class="text-2xl font-bold font-mono text-slate-200">₹2,00,000</h2>
-            <p class="text-xs font-mono text-slate-400">Base: ₹2,00,000</p>
+            <p id="kpiPeakCapital" class="text-xs font-mono text-slate-400">Peak: ₹2,00,000</p>
           </div>
-          <div class="text-[11px] font-mono text-slate-500 border-t border-slate-800/80 pt-1.5">
-            <span>Risk / Trade: <span class="text-slate-300">0.8% Planned</span></span>
-          </div>
-        </div>
-
-        <!-- Discipline & Rule Score -->
-        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between col-span-2 lg:col-span-1">
-          <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Execution Score</span>
-          <div class="my-1.5">
-            <h2 id="kpiAdherence" class="text-2xl font-bold font-mono text-emerald-400">100%</h2>
-            <p id="kpiRuleViolations" class="text-xs font-mono text-slate-400">0 Violations</p>
-          </div>
-          <div class="text-[11px] font-mono text-slate-500 border-t border-slate-800/80 pt-1.5">
-            <span>Status: <span class="text-emerald-400 font-bold">System Compliant</span></span>
+          <div class="text-[11px] font-mono text-slate-500 flex justify-between border-t border-slate-800/80 pt-1.5">
+            <span>Base Capital:</span>
+            <span class="text-slate-300">₹2,00,000</span>
           </div>
         </div>
 
       </div>
 
-      <!-- Charts Section -->
+      <!-- Charts Section: Row 1 (Capital Trajectory & Underwater Drawdown) -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         
-        <!-- Cumulative Equity Curve -->
+        <!-- Cumulative Equity Curve with High-Water Mark -->
         <div class="glass-panel p-5 rounded-2xl">
           <div class="flex items-center justify-between mb-4">
             <div>
-              <h3 class="text-sm font-bold text-white tracking-tight">Cumulative Net Equity Curve</h3>
-              <p class="text-xs text-slate-400 font-mono">Net realized growth after all FYERS brokerage and statutory charges</p>
+              <h3 class="text-sm font-bold text-white tracking-tight flex items-center gap-2">
+                <span>📈</span> Cumulative Net Equity Curve
+              </h3>
+              <p class="text-xs text-slate-400 font-mono">Net equity vs High-Water Mark peak line after all FYERS brokerage and charges</p>
             </div>
             <span class="text-xs font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400" id="equityCurveTradesCount">0 Trades</span>
           </div>
@@ -202,11 +224,34 @@
           </div>
         </div>
 
+        <!-- Underwater Drawdown Curve (% Drop from Peak) -->
+        <div class="glass-panel p-5 rounded-2xl">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-white tracking-tight flex items-center gap-2">
+                <span>📉</span> Underwater Drawdown Curve
+              </h3>
+              <p class="text-xs text-slate-400 font-mono">Quant depth profile: % drop below peak capital across all chronological trades</p>
+            </div>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/20 text-rose-400 font-bold" id="drawdownCurrentBadge">0.0% DD</span>
+          </div>
+          <div class="relative h-64 w-full">
+            <canvas id="drawdownCanvas"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Charts Section: Row 2 (Daily P&L & Hourly Time-of-Day Edge) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        
         <!-- Daily Net P&L Bar Chart -->
         <div class="glass-panel p-5 rounded-2xl">
           <div class="flex items-center justify-between mb-4">
             <div>
-              <h3 class="text-sm font-bold text-white tracking-tight">Daily Net Realized P&amp;L</h3>
+              <h3 class="text-sm font-bold text-white tracking-tight flex items-center gap-2">
+                <span>📅</span> Daily Net Realized P&amp;L
+              </h3>
               <p class="text-xs text-slate-400 font-mono">Realized performance broken down by individual trading day</p>
             </div>
             <span class="text-xs font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400" id="dailyPnLDaysCount">0 Days</span>
@@ -216,11 +261,100 @@
           </div>
         </div>
 
+        <!-- Hourly Edge / Time of Day Bar Chart -->
+        <div class="glass-panel p-5 rounded-2xl">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-white tracking-tight flex items-center gap-2">
+                <span>⏱️</span> Hourly Edge / Time of Day
+              </h3>
+              <p class="text-xs text-slate-400 font-mono">P&amp;L breakdown across market sessions (Morning drive vs Midday/Afternoon bleed)</p>
+            </div>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 font-semibold" id="hourlyEdgeWindowTag">Window Edge</span>
+          </div>
+          <div class="relative h-64 w-full">
+            <canvas id="hourlyPnLCanvas"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Charts Section: Row 3 (Cumulative R-Curve & Outcome/Direction Donut) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        
+        <!-- Cumulative R-Multiple Curve (2 cols on lg) -->
+        <div class="glass-panel p-5 rounded-2xl lg:col-span-2">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-white tracking-tight flex items-center gap-2">
+                <span>🎯</span> Cumulative R-Multiple Growth
+              </h3>
+              <p class="text-xs text-slate-400 font-mono">Pure setup execution edge in R-multiples independent of position sizing</p>
+            </div>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-blue-400 font-bold" id="totalRDisp">0.00R</span>
+          </div>
+          <div class="relative h-64 w-full">
+            <canvas id="rCurveCanvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Outcome & Direction Distribution Donut (1 col on lg) -->
+        <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <h3 class="text-sm font-bold text-white tracking-tight flex items-center gap-2">
+                <span>🍩</span> Outcomes &amp; Direction
+              </h3>
+              <p class="text-xs text-slate-400 font-mono">Win/loss split across Long and Short setups</p>
+            </div>
+          </div>
+          <div class="relative h-48 w-full flex items-center justify-center">
+            <canvas id="outcomeDonutCanvas"></canvas>
+          </div>
+          <div id="outcomeDonutLegend" class="space-y-1 text-[11px] font-mono border-t border-slate-800/80 pt-2.5 mt-2">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Performance Attribution: Top Winning vs Top Bleeding Scrips -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        
+        <!-- Top Winning Scrips -->
+        <div class="glass-panel p-5 rounded-2xl">
+          <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2">
+            <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-2">
+              <span>🏆</span> Top Alpha Generators (Winning Scrips)
+            </h3>
+            <span class="text-[11px] font-mono text-slate-500">Highest Net Profit</span>
+          </div>
+          <div id="topWinningScripsList" class="space-y-2">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <!-- Top Leaking Scrips -->
+        <div class="glass-panel p-5 rounded-2xl">
+          <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2">
+            <h3 class="text-sm font-bold text-rose-400 flex items-center gap-2">
+              <span>🩸</span> Top Capital Bleeders (Losing Scrips)
+            </h3>
+            <span class="text-[11px] font-mono text-slate-500">Highest Net Drawdown</span>
+          </div>
+          <div id="topLosingScripsList" class="space-y-2">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
       </div>
 
       <!-- Strategy Setups Performance Matrix -->
       <div class="glass-panel p-5 rounded-2xl">
-        <h3 class="text-sm font-bold text-white tracking-tight mb-3">Strategy Performance Matrix</h3>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-bold text-white tracking-tight">Strategy Performance Matrix</h3>
+          <span class="text-xs font-mono text-slate-400">Setup Quantitative Breakdown</span>
+        </div>
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs font-mono border-collapse">
             <thead>
@@ -231,6 +365,7 @@
                 <th class="py-2.5 px-3 text-right">Gross P&amp;L</th>
                 <th class="py-2.5 px-3 text-right">Net P&amp;L</th>
                 <th class="py-2.5 px-3 text-center">Avg R</th>
+                <th class="py-2.5 px-3 text-center">Payoff</th>
               </tr>
             </thead>
             <tbody id="setupMatrixTableBody">
@@ -581,7 +716,11 @@
     let tradesData = [];
     let pendingFyersTrades = [];
     let equityChart = null;
+    let drawdownChart = null;
     let dailyPnLChart = null;
+    let hourlyPnLChart = null;
+    let rCurveChart = null;
+    let outcomeDonutChart = null;
 
     // --- FYERS Intraday Equity Statutory Charges Exact Formula ---
     function computeFyersCharges(buyTurnover, sellTurnover) {
@@ -776,10 +915,11 @@
       renderKPIs();
       renderTradesTable();
       renderCharts();
+      renderScripAttribution();
       renderSetupMatrix();
     }
 
-    // --- Render KPIs ---
+    // --- Render KPIs (Institutional Trading Metrics) ---
     function renderKPIs() {
       const totalTrades = tradesData.length;
       let totalNet = 0;
@@ -787,11 +927,32 @@
       let totalFriction = 0;
       let wins = 0;
       let losses = 0;
+      let breakEven = 0;
       let totalR = 0;
       let grossProfit = 0;
       let grossLoss = 0;
+      let winAmountsSum = 0;
+      let lossAmountsSum = 0;
 
-      tradesData.forEach(t => {
+      // Sort trades chronologically for streaks & drawdown
+      const sorted = [...tradesData].sort((a, b) => {
+        if (a.date !== b.date) return (a.date || '').localeCompare(b.date || '');
+        return (a.time || '').localeCompare(b.time || '');
+      });
+
+      let running = 200000;
+      let peak = 200000;
+      let maxDDRupees = 0;
+      let maxDDPct = 0;
+      let currentDDRupees = 0;
+      let currentDDPct = 0;
+
+      let winStreak = 0;
+      let lossStreak = 0;
+      let maxWinStreak = 0;
+      let maxLossStreak = 0;
+
+      sorted.forEach(t => {
         const net = parseFloat(t.net_pnl) || 0;
         const gross = parseFloat(t.gross_pnl) || 0;
         const costs = parseFloat(t.costs) || 0;
@@ -802,17 +963,66 @@
         totalFriction += costs;
         totalR += r;
 
-        if (net > 0) wins++;
-        else if (net < 0) losses++;
+        if (net > 0) {
+          wins++;
+          winAmountsSum += net;
+          winStreak++;
+          lossStreak = 0;
+          if (winStreak > maxWinStreak) maxWinStreak = winStreak;
+        } else if (net < 0) {
+          losses++;
+          lossAmountsSum += Math.abs(net);
+          lossStreak++;
+          winStreak = 0;
+          if (lossStreak > maxLossStreak) maxLossStreak = lossStreak;
+        } else {
+          breakEven++;
+        }
 
         if (gross > 0) grossProfit += gross;
         else if (gross < 0) grossLoss += Math.abs(gross);
+
+        // Drawdown tracking
+        running += net;
+        if (running > peak) {
+          peak = running;
+        }
+        const dd = peak - running;
+        const ddPct = peak > 0 ? (dd / peak) * 100 : 0;
+        if (dd > maxDDRupees) maxDDRupees = dd;
+        if (ddPct > maxDDPct) maxDDPct = ddPct;
       });
 
+      currentDDRupees = peak - running;
+      currentDDPct = peak > 0 ? (currentDDRupees / peak) * 100 : 0;
+
+      // Determine current streak
+      let currentStreakLabel = '--';
+      let currentStreakClass = 'bg-slate-800 text-slate-400';
+      if (sorted.length > 0) {
+        const lastNet = parseFloat(sorted[sorted.length - 1].net_pnl) || 0;
+        if (lastNet > 0) {
+          currentStreakLabel = `🔥 ${winStreak}W`;
+          currentStreakClass = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+        } else if (lastNet < 0) {
+          currentStreakLabel = `⚠️ ${lossStreak}L`;
+          currentStreakClass = 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
+        } else {
+          currentStreakLabel = 'BE';
+          currentStreakClass = 'bg-slate-800 text-slate-300';
+        }
+      }
+
+      // Calculations
       const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : '0.0';
       const avgR = totalTrades > 0 ? (totalR / totalTrades).toFixed(2) : '0.00';
       const pf = grossLoss > 0 ? (grossProfit / grossLoss).toFixed(2) : (grossProfit > 0 ? '∞' : '0.00');
 
+      const avgWin = wins > 0 ? (winAmountsSum / wins) : 0;
+      const avgLoss = losses > 0 ? (lossAmountsSum / losses) : 0;
+      const payoffRatio = avgLoss > 0 ? (avgWin / avgLoss).toFixed(2) : (avgWin > 0 ? '∞' : '0.00');
+
+      // 1. Net P&L Card
       const pnlElem = document.getElementById('kpiNetPnL');
       pnlElem.textContent = (totalNet >= 0 ? '+₹' : '-₹') + Math.abs(totalNet).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       pnlElem.className = totalNet >= 0 ? 'text-2xl font-bold font-mono text-emerald-400' : 'text-2xl font-bold font-mono text-rose-400';
@@ -821,31 +1031,85 @@
       const capPct = ((totalNet / 200000) * 100).toFixed(2);
       document.getElementById('kpiNetPnLPct').textContent = `${capPct >= 0 ? '+' : ''}${capPct}% on capital`;
       document.getElementById('kpiGrossPnL').textContent = '₹' + totalGross.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      document.getElementById('kpiFriction').textContent = '₹' + totalFriction.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const frictionDragPct = Math.abs(totalGross) > 0 ? ((totalFriction / Math.abs(totalGross)) * 100).toFixed(1) : '0.0';
+      document.getElementById('kpiFriction').textContent = `₹${totalFriction.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${frictionDragPct}%)`;
 
+      // 2. Win Rate & Streaks Card
       document.getElementById('kpiWinRate').textContent = `${winRate}%`;
-      document.getElementById('kpiWinLossCount').textContent = `${wins} Wins • ${losses} Losses`;
+      document.getElementById('kpiWinLossCount').textContent = `${wins}W • ${losses}L • ${breakEven}BE`;
+      const currentStreakElem = document.getElementById('kpiCurrentStreakBadge');
+      if (currentStreakElem) {
+        currentStreakElem.textContent = currentStreakLabel;
+        currentStreakElem.className = `text-[10px] font-mono px-1.5 py-0.5 rounded font-bold ${currentStreakClass}`;
+      }
+      if (document.getElementById('kpiMaxWinStreak')) document.getElementById('kpiMaxWinStreak').textContent = `${maxWinStreak}W`;
+      if (document.getElementById('kpiMaxLossStreak')) document.getElementById('kpiMaxLossStreak').textContent = `${maxLossStreak}L`;
 
-      document.getElementById('kpiAvgR').textContent = `${avgR}R`;
-      document.getElementById('kpiProfitFactor').textContent = `Profit Factor: ${pf}`;
-      document.getElementById('kpiExpectancy').textContent = parseFloat(avgR) >= 0.5 ? 'Strong Edge' : (parseFloat(avgR) > 0 ? 'Positive Edge' : 'Negative Edge');
-      document.getElementById('kpiExpectancy').className = parseFloat(avgR) > 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+      // 3. Payoff Ratio Card
+      const payoffElem = document.getElementById('kpiPayoffRatio');
+      if (payoffElem) {
+        payoffElem.textContent = `${payoffRatio}x`;
+        payoffElem.className = parseFloat(payoffRatio) >= 1.5 ? 'text-2xl font-bold font-mono text-emerald-400' : (parseFloat(payoffRatio) >= 1.0 ? 'text-2xl font-bold font-mono text-blue-400' : 'text-2xl font-bold font-mono text-rose-400');
+      }
+      if (document.getElementById('kpiAvgWinAmount')) document.getElementById('kpiAvgWinAmount').textContent = '₹' + avgWin.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+      if (document.getElementById('kpiAvgLossAmount')) document.getElementById('kpiAvgLossAmount').textContent = '₹' + avgLoss.toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
+      // 4. Profit Factor & Avg R Card
+      if (document.getElementById('kpiProfitFactor')) {
+        document.getElementById('kpiProfitFactor').textContent = `PF: ${pf}`;
+        document.getElementById('kpiProfitFactor').className = parseFloat(pf) >= 1.5 ? 'text-2xl font-bold font-mono text-emerald-400' : (parseFloat(pf) >= 1.0 ? 'text-2xl font-bold font-mono text-blue-400' : 'text-2xl font-bold font-mono text-rose-400');
+      }
+      if (document.getElementById('kpiAvgR')) document.getElementById('kpiAvgR').textContent = `Avg R: ${avgR}R`;
+      const expElem = document.getElementById('kpiExpectancy');
+      if (expElem) {
+        expElem.textContent = parseFloat(avgR) >= 0.5 ? 'Strong Edge' : (parseFloat(avgR) > 0 ? 'Positive Edge' : 'Negative Bleed');
+        expElem.className = parseFloat(avgR) > 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+      }
+
+      // 5. Max Drawdown Card
+      if (document.getElementById('kpiMaxDrawdown')) {
+        document.getElementById('kpiMaxDrawdown').textContent = `-${maxDDPct.toFixed(1)}%`;
+      }
+      if (document.getElementById('kpiMaxDrawdownRupees')) {
+        document.getElementById('kpiMaxDrawdownRupees').textContent = `-₹${maxDDRupees.toLocaleString('en-IN', { maximumFractionDigits: 0 })} peak-to-trough`;
+      }
+      if (document.getElementById('kpiCurrentDrawdown')) {
+        document.getElementById('kpiCurrentDrawdown').textContent = `-${currentDDPct.toFixed(1)}%`;
+        document.getElementById('kpiCurrentDrawdown').className = currentDDPct > 10 ? 'text-rose-400 font-bold' : 'text-slate-300 font-bold';
+      }
+
+      // 6. Account Equity Card
       document.getElementById('kpiCurrentCapital').textContent = '₹' + cap.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (document.getElementById('kpiPeakCapital')) {
+        document.getElementById('kpiPeakCapital').textContent = 'Peak: ₹' + peak.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+
+      // Badges
+      if (document.getElementById('drawdownCurrentBadge')) {
+        document.getElementById('drawdownCurrentBadge').textContent = `-${currentDDPct.toFixed(1)}% DD`;
+      }
+      if (document.getElementById('totalRDisp')) {
+        document.getElementById('totalRDisp').textContent = `${totalR >= 0 ? '+' : ''}${totalR.toFixed(2)}R`;
+        document.getElementById('totalRDisp').className = totalR >= 0 ? 'text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold' : 'text-xs font-mono px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/20 text-rose-400 font-bold';
+      }
     }
 
-    // --- Render Charts ---
+    // --- Render All Charts ---
     function renderCharts() {
       renderEquityCurve();
+      renderDrawdownChart();
       renderDailyPnL();
+      renderHourlyPnL();
+      renderRCurve();
+      renderOutcomeDonut();
     }
 
+    // 1. Cumulative Equity Curve with High-Water Mark
     function renderEquityCurve() {
       const canvas = document.getElementById('equityCurveCanvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
 
-      // Sort trades chronologically
       const sorted = [...tradesData].sort((a, b) => {
         if (a.date !== b.date) return (a.date || '').localeCompare(b.date || '');
         return (a.time || '').localeCompare(b.time || '');
@@ -854,13 +1118,17 @@
       document.getElementById('equityCurveTradesCount').textContent = `${sorted.length} Trades`;
 
       let running = 200000;
+      let peak = 200000;
       const labels = ['Start'];
       const dataPoints = [running];
+      const peakPoints = [peak];
 
       sorted.forEach((t, i) => {
         running += (parseFloat(t.net_pnl) || 0);
+        if (running > peak) peak = running;
         labels.push(t.date ? t.date.slice(5) : `#${i+1}`);
         dataPoints.push(running);
+        peakPoints.push(peak);
       });
 
       if (equityChart) equityChart.destroy();
@@ -872,28 +1140,50 @@
         type: 'line',
         data: {
           labels: labels,
-          datasets: [{
-            label: 'Capital (₹)',
-            data: dataPoints,
-            borderColor: strokeColor,
-            borderWidth: 2,
-            pointRadius: dataPoints.length > 30 ? 0 : 2,
-            pointHoverRadius: 5,
-            fill: true,
-            backgroundColor: isProfitable ? 'rgba(16, 185, 129, 0.08)' : 'rgba(244, 63, 94, 0.08)',
-            tension: 0.15
-          }]
+          datasets: [
+            {
+              label: 'Account Equity (₹)',
+              data: dataPoints,
+              borderColor: strokeColor,
+              borderWidth: 2,
+              pointRadius: dataPoints.length > 30 ? 0 : 2,
+              pointHoverRadius: 5,
+              fill: true,
+              backgroundColor: isProfitable ? 'rgba(16, 185, 129, 0.08)' : 'rgba(244, 63, 94, 0.08)',
+              tension: 0.15
+            },
+            {
+              label: 'Peak Equity (HWM)',
+              data: peakPoints,
+              borderColor: '#64748b',
+              borderDash: [4, 4],
+              borderWidth: 1.5,
+              pointRadius: 0,
+              fill: false,
+              tension: 0
+            }
+          ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { display: false },
+            legend: {
+              display: true,
+              position: 'top',
+              align: 'end',
+              labels: {
+                color: '#94a3b8',
+                font: { family: 'JetBrains Mono', size: 10 },
+                boxWidth: 12,
+                boxHeight: 6
+              }
+            },
             tooltip: {
               mode: 'index',
               intersect: false,
               callbacks: {
-                label: ctx => `Equity: ₹${ctx.parsed.y.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
+                label: ctx => `${ctx.dataset.label}: ₹${ctx.parsed.y.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
               }
             }
           },
@@ -915,6 +1205,80 @@
       });
     }
 
+    // 2. Underwater Drawdown Chart (% Drop from Peak)
+    function renderDrawdownChart() {
+      const canvas = document.getElementById('drawdownCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      const sorted = [...tradesData].sort((a, b) => {
+        if (a.date !== b.date) return (a.date || '').localeCompare(b.date || '');
+        return (a.time || '').localeCompare(b.time || '');
+      });
+
+      let running = 200000;
+      let peak = 200000;
+      const labels = ['Start'];
+      const ddPoints = [0];
+
+      sorted.forEach((t, i) => {
+        running += (parseFloat(t.net_pnl) || 0);
+        if (running > peak) peak = running;
+        const dd = peak - running;
+        const ddPct = peak > 0 ? -((dd / peak) * 100) : 0;
+        labels.push(t.date ? t.date.slice(5) : `#${i+1}`);
+        ddPoints.push(parseFloat(ddPct.toFixed(2)));
+      });
+
+      if (drawdownChart) drawdownChart.destroy();
+
+      drawdownChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Drawdown %',
+            data: ddPoints,
+            borderColor: '#f43f5e',
+            borderWidth: 2,
+            pointRadius: ddPoints.length > 30 ? 0 : 2,
+            pointHoverRadius: 4,
+            fill: true,
+            backgroundColor: 'rgba(244, 63, 94, 0.15)',
+            tension: 0.15
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => `Drawdown: ${ctx.parsed.y.toFixed(2)}%`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.03)' },
+              ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
+            },
+            y: {
+              max: 0,
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: {
+                color: '#64748b',
+                font: { family: 'JetBrains Mono', size: 10 },
+                callback: v => `${v}%`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // 3. Daily Net Realized P&L
     function renderDailyPnL() {
       const canvas = document.getElementById('dailyPnLCanvas');
       if (!canvas) return;
@@ -976,6 +1340,333 @@
       });
     }
 
+    // 4. Hourly Edge / Time of Day Bar Chart
+    function renderHourlyPnL() {
+      const canvas = document.getElementById('hourlyPnLCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      const buckets = [
+        '09:15–10:00',
+        '10:00–11:00',
+        '11:00–12:00',
+        '12:00–13:00',
+        '13:00–14:00',
+        '14:00–15:30'
+      ];
+
+      const pnlMap = {};
+      const countMap = {};
+      buckets.forEach(b => {
+        pnlMap[b] = 0;
+        countMap[b] = 0;
+      });
+
+      function getHourlyBucket(timeStr) {
+        if (!timeStr || !timeStr.includes(':')) return null;
+        const parts = timeStr.split(':');
+        const mins = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        if (mins < 9 * 60 + 15) return '09:15–10:00';
+        if (mins < 10 * 60) return '09:15–10:00';
+        if (mins < 11 * 60) return '10:00–11:00';
+        if (mins < 12 * 60) return '11:00–12:00';
+        if (mins < 13 * 60) return '12:00–13:00';
+        if (mins < 14 * 60) return '13:00–14:00';
+        return '14:00–15:30';
+      }
+
+      tradesData.forEach(t => {
+        const bucket = getHourlyBucket(t.time);
+        if (bucket && pnlMap.hasOwnProperty(bucket)) {
+          pnlMap[bucket] += (parseFloat(t.net_pnl) || 0);
+          countMap[bucket]++;
+        }
+      });
+
+      const values = buckets.map(b => pnlMap[b]);
+      const colors = values.map(v => v >= 0 ? '#10b981' : '#f43f5e');
+
+      // Find top performing bucket for badge
+      let bestBucket = null;
+      let maxVal = -Infinity;
+      buckets.forEach(b => {
+        if (pnlMap[b] > maxVal && countMap[b] > 0) {
+          maxVal = pnlMap[b];
+          bestBucket = b;
+        }
+      });
+
+      const badgeElem = document.getElementById('hourlyEdgeWindowTag');
+      if (badgeElem) {
+        if (bestBucket && maxVal > 0) {
+          badgeElem.textContent = `Prime Edge: ${bestBucket} (+₹${Math.round(maxVal/1000)}k)`;
+          badgeElem.className = 'text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold';
+        } else {
+          badgeElem.textContent = 'Session Edge';
+          badgeElem.className = 'text-xs font-mono px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 font-semibold';
+        }
+      }
+
+      if (hourlyPnLChart) hourlyPnLChart.destroy();
+
+      hourlyPnLChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: buckets,
+          datasets: [{
+            label: 'Hourly Net P&L',
+            data: values,
+            backgroundColor: colors,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => {
+                  const b = buckets[ctx.dataIndex];
+                  const count = countMap[b];
+                  return `Net: ${ctx.parsed.y >= 0 ? '+' : ''}₹${ctx.parsed.y.toLocaleString('en-IN', { minimumFractionDigits: 2 })} (${count} trades)`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
+            },
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: {
+                color: '#64748b',
+                font: { family: 'JetBrains Mono', size: 10 },
+                callback: v => (v >= 0 ? '+' : '') + '₹' + v.toLocaleString('en-IN')
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // 5. Cumulative R-Multiple Growth Curve
+    function renderRCurve() {
+      const canvas = document.getElementById('rCurveCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      const sorted = [...tradesData].sort((a, b) => {
+        if (a.date !== b.date) return (a.date || '').localeCompare(b.date || '');
+        return (a.time || '').localeCompare(b.time || '');
+      });
+
+      let runningR = 0;
+      const labels = ['0'];
+      const rPoints = [0];
+
+      sorted.forEach((t, i) => {
+        runningR += (parseFloat(t.r_multiple) || 0);
+        labels.push(t.date ? t.date.slice(5) : `#${i+1}`);
+        rPoints.push(parseFloat(runningR.toFixed(2)));
+      });
+
+      if (rCurveChart) rCurveChart.destroy();
+
+      const isPositive = runningR >= 0;
+      const strokeColor = isPositive ? '#06b6d4' : '#f43f5e';
+
+      rCurveChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Cumulative R',
+            data: rPoints,
+            borderColor: strokeColor,
+            borderWidth: 2,
+            pointRadius: rPoints.length > 30 ? 0 : 2,
+            pointHoverRadius: 4,
+            fill: true,
+            backgroundColor: isPositive ? 'rgba(6, 182, 212, 0.08)' : 'rgba(244, 63, 94, 0.08)',
+            tension: 0.15
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => `Cumulative R: ${ctx.parsed.y >= 0 ? '+' : ''}${ctx.parsed.y.toFixed(2)}R`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.03)' },
+              ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
+            },
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: {
+                color: '#64748b',
+                font: { family: 'JetBrains Mono', size: 10 },
+                callback: v => `${v >= 0 ? '+' : ''}${v}R`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // 6. Outcome & Direction Distribution Donut
+    function renderOutcomeDonut() {
+      const canvas = document.getElementById('outcomeDonutCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      let longWins = 0, longLosses = 0;
+      let shortWins = 0, shortLosses = 0;
+      let breakEven = 0;
+
+      tradesData.forEach(t => {
+        const net = parseFloat(t.net_pnl) || 0;
+        const isLong = t.direction === 'Long';
+        if (net > 0) {
+          if (isLong) longWins++; else shortWins++;
+        } else if (net < 0) {
+          if (isLong) longLosses++; else shortLosses++;
+        } else {
+          breakEven++;
+        }
+      });
+
+      const totalLongs = longWins + longLosses;
+      const totalShorts = shortWins + shortLosses;
+      const longWinRate = totalLongs > 0 ? ((longWins / totalLongs) * 100).toFixed(0) : '0';
+      const shortWinRate = totalShorts > 0 ? ((shortWins / totalShorts) * 100).toFixed(0) : '0';
+
+      const legendElem = document.getElementById('outcomeDonutLegend');
+      if (legendElem) {
+        legendElem.innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Longs (${totalLongs})</span>
+            <span class="text-slate-300 font-bold">${longWins}W / ${longLosses}L <span class="${parseInt(longWinRate) >= 50 ? 'text-emerald-400' : 'text-slate-400'}">(${longWinRate}%)</span></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-cyan-500"></span> Shorts (${totalShorts})</span>
+            <span class="text-slate-300 font-bold">${shortWins}W / ${shortLosses}L <span class="${parseInt(shortWinRate) >= 50 ? 'text-emerald-400' : 'text-slate-400'}">(${shortWinRate}%)</span></span>
+          </div>
+        `;
+      }
+
+      if (outcomeDonutChart) outcomeDonutChart.destroy();
+
+      outcomeDonutChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Long Win', 'Long Loss', 'Short Win', 'Short Loss'],
+          datasets: [{
+            data: [longWins, longLosses, shortWins, shortLosses],
+            backgroundColor: [
+              '#10b981', // emerald
+              '#f43f5e', // rose
+              '#06b6d4', // cyan
+              '#f59e0b'  // amber
+            ],
+            borderWidth: 0,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '68%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => ` ${ctx.label}: ${ctx.parsed} trades`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // --- Performance Attribution: Top Winning vs Bleeding Scrips ---
+    function renderScripAttribution() {
+      const winList = document.getElementById('topWinningScripsList');
+      const loseList = document.getElementById('topLosingScripsList');
+      if (!winList || !loseList) return;
+
+      const scripMap = {};
+      tradesData.forEach(t => {
+        const sym = t.symbol || 'UNKNOWN';
+        if (!scripMap[sym]) scripMap[sym] = { count: 0, wins: 0, net: 0, gross: 0 };
+        scripMap[sym].count++;
+        const net = parseFloat(t.net_pnl) || 0;
+        const gross = parseFloat(t.gross_pnl) || 0;
+        scripMap[sym].net += net;
+        scripMap[sym].gross += gross;
+        if (net > 0) scripMap[sym].wins++;
+      });
+
+      const winners = Object.entries(scripMap)
+        .filter(([_, m]) => m.net > 0)
+        .sort((a, b) => b[1].net - a[1].net)
+        .slice(0, 4);
+
+      const bleeders = Object.entries(scripMap)
+        .filter(([_, m]) => m.net < 0)
+        .sort((a, b) => a[1].net - b[1].net)
+        .slice(0, 4);
+
+      if (winners.length === 0) {
+        winList.innerHTML = `<div class="text-xs text-slate-500 font-mono py-3 text-center">No winning scrips recorded yet.</div>`;
+      } else {
+        winList.innerHTML = winners.map(([sym, m]) => `
+          <div class="flex items-center justify-between p-2 rounded-lg bg-slate-900/60 border border-slate-800/80 text-xs font-mono">
+            <div class="flex items-center gap-2">
+              <a href="https://www.tradingview.com/chart/?symbol=NSE:${sym}" target="_blank" class="font-bold text-white hover:text-blue-400 hover:underline">
+                ${sym} ↗
+              </a>
+              <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">${m.count} ${m.count === 1 ? 'trade' : 'trades'}</span>
+            </div>
+            <div class="text-right">
+              <span class="text-emerald-400 font-bold">+₹${m.net.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <span class="block text-[10px] text-slate-500">${((m.wins / m.count) * 100).toFixed(0)}% Win</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      if (bleeders.length === 0) {
+        loseList.innerHTML = `<div class="text-xs text-slate-500 font-mono py-3 text-center">No losing scrips recorded yet.</div>`;
+      } else {
+        loseList.innerHTML = bleeders.map(([sym, m]) => `
+          <div class="flex items-center justify-between p-2 rounded-lg bg-slate-900/60 border border-slate-800/80 text-xs font-mono">
+            <div class="flex items-center gap-2">
+              <a href="https://www.tradingview.com/chart/?symbol=NSE:${sym}" target="_blank" class="font-bold text-white hover:text-rose-400 hover:underline">
+                ${sym} ↗
+              </a>
+              <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">${m.count} ${m.count === 1 ? 'trade' : 'trades'}</span>
+            </div>
+            <div class="text-right">
+              <span class="text-rose-400 font-bold">-₹${Math.abs(m.net).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <span class="block text-[10px] text-slate-500">${((m.wins / m.count) * 100).toFixed(0)}% Win</span>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // --- Strategy Setups Performance Matrix ---
     function renderSetupMatrix() {
       const tbody = document.getElementById('setupMatrixTableBody');
       if (!tbody) return;
@@ -983,7 +1674,7 @@
       const matrix = {};
       tradesData.forEach(t => {
         const s = t.setup_name || 'Default Setup';
-        if (!matrix[s]) matrix[s] = { count: 0, wins: 0, gross: 0, net: 0, totalR: 0 };
+        if (!matrix[s]) matrix[s] = { count: 0, wins: 0, losses: 0, winNetSum: 0, lossNetSum: 0, gross: 0, net: 0, totalR: 0 };
         matrix[s].count++;
         const net = parseFloat(t.net_pnl) || 0;
         const gross = parseFloat(t.gross_pnl) || 0;
@@ -991,13 +1682,23 @@
         matrix[s].gross += gross;
         matrix[s].net += net;
         matrix[s].totalR += r;
-        if (net > 0) matrix[s].wins++;
+        if (net > 0) {
+          matrix[s].wins++;
+          matrix[s].winNetSum += net;
+        } else if (net < 0) {
+          matrix[s].losses++;
+          matrix[s].lossNetSum += Math.abs(net);
+        }
       });
 
       tbody.innerHTML = Object.entries(matrix).map(([setup, m]) => {
         const winRate = ((m.wins / m.count) * 100).toFixed(1);
         const avgR = (m.totalR / m.count).toFixed(2);
         const pnlClass = m.net >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+        const avgW = m.wins > 0 ? (m.winNetSum / m.wins) : 0;
+        const avgL = m.losses > 0 ? (m.lossNetSum / m.losses) : 0;
+        const payoff = avgL > 0 ? (avgW / avgL).toFixed(2) + 'x' : (avgW > 0 ? '∞' : '--');
+
         return `
           <tr class="border-b border-slate-800/60 hover:bg-slate-800/20 transition">
             <td class="py-2.5 px-3 font-sans font-medium text-white">${escapeHtml(setup)}</td>
@@ -1006,6 +1707,7 @@
             <td class="py-2.5 px-3 text-right text-slate-300">₹${m.gross.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             <td class="py-2.5 px-3 text-right ${pnlClass}">₹${m.net.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             <td class="py-2.5 px-3 text-center text-blue-400 font-bold">${avgR}R</td>
+            <td class="py-2.5 px-3 text-center text-slate-300 font-bold">${payoff}</td>
           </tr>
         `;
       }).join('');
