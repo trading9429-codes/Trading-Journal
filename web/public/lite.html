@@ -655,6 +655,27 @@
         </div>
       </div>
 
+      <!-- TOP 5 LEADERS SHOWCASE (ALERT COUNT RANKED) -->
+      <div class="glass-panel p-4 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-slate-900/95 via-amber-950/20 to-slate-900/95 space-y-3 font-mono">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-800/80 pb-2.5 gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-base">🔥</span>
+            <h3 class="text-sm font-bold text-white tracking-tight flex items-center gap-2">
+              Top 5 Alert Leaders of the Session
+            </h3>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+              Ranked by Alert Count
+            </span>
+          </div>
+          <span class="text-[11px] text-slate-400 font-mono">Click stock name to open chart on TradingView ↗</span>
+        </div>
+
+        <!-- 5-Column Grid for Top 5 Leaders -->
+        <div id="top5LeadersGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          <!-- Populated dynamically via renderTop5Leaders() -->
+        </div>
+      </div>
+
       <!-- Filter Presets & Search Toolbar -->
       <div class="glass-panel p-3 rounded-xl flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-1.5 flex-wrap">
@@ -4477,9 +4498,111 @@
         urlInput.value = window.location.origin + '/api/webhook/chartink';
       }
 
+      const leaderboard = getStockLeaderboard(chartinkAlerts);
+      renderTop5Leaders(leaderboard);
       renderScannerLeaderboardHead();
       renderScannerLeaderboard();
       updateScannerStatsRibbon();
+    }
+
+    // Render the Top 5 Alert Leaders Cards at the top of the Scanner
+    function renderTop5Leaders(leaderboard) {
+      const container = document.getElementById('top5LeadersGrid');
+      if (!container) return;
+
+      const top5 = Array.isArray(leaderboard) ? leaderboard.slice(0, 5) : [];
+
+      if (top5.length === 0) {
+        container.innerHTML = [1, 2, 3, 4, 5].map(rank => `
+          <div class="p-3 rounded-xl bg-slate-950/50 border border-slate-800/80 text-center space-y-1.5 opacity-60">
+            <div class="text-[10px] text-slate-500 font-bold font-mono">#${rank} SPOT</div>
+            <div class="text-sm font-bold text-slate-500 font-mono">--</div>
+            <div class="text-[10px] text-slate-600 font-mono">0 Alerts</div>
+            <div class="text-[9px] text-slate-600 font-mono">Awaiting Signal</div>
+          </div>
+        `).join('');
+        return;
+      }
+
+      const cardsHtml = [];
+      for (let i = 0; i < 5; i++) {
+        if (i < top5.length) {
+          const s = top5[i];
+          const rank = i + 1;
+          const tvUrl = getTradingViewUrl(s.symbol);
+          const topSetup = Object.keys(s.setups)[0] || 'Chartink Breakout';
+          const priceDisp = s.latestPrice > 0 ? `₹${s.latestPrice.toFixed(2)}` : '--';
+
+          let rankBadge = `<span class="text-slate-400 font-mono font-bold text-xs">#${rank}</span>`;
+          let cardBorder = 'border-slate-800/90 bg-slate-900/80 hover:border-blue-500/40';
+          let alertBadgeClass = 'bg-slate-800 text-slate-300 border-slate-700';
+
+          if (rank === 1) {
+            rankBadge = `<span class="inline-flex items-center gap-1 font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/40 text-[10px]">🥇 #1 LEADER</span>`;
+            cardBorder = 'border-amber-500/60 bg-gradient-to-b from-amber-950/30 to-slate-900/90 shadow-[0_0_20px_rgba(245,158,11,0.22)] ring-1 ring-amber-500/30';
+            alertBadgeClass = 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.25)]';
+          } else if (rank === 2) {
+            rankBadge = `<span class="inline-flex items-center gap-1 font-bold text-slate-200 bg-slate-700/50 px-1.5 py-0.5 rounded border border-slate-600 text-[10px]">🥈 #2</span>`;
+            cardBorder = 'border-slate-600/70 bg-gradient-to-b from-slate-800/40 to-slate-900/90 shadow-[0_0_14px_rgba(148,163,184,0.15)]';
+            alertBadgeClass = 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40';
+          } else if (rank === 3) {
+            rankBadge = `<span class="inline-flex items-center gap-1 font-bold text-amber-600 bg-amber-950/50 px-1.5 py-0.5 rounded border border-amber-800 text-[10px]">🥉 #3</span>`;
+            cardBorder = 'border-amber-800/60 bg-gradient-to-b from-amber-950/20 to-slate-900/90';
+            alertBadgeClass = 'bg-amber-500/10 text-amber-300 border-amber-500/30';
+          } else {
+            alertBadgeClass = s.count >= 2 ? 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30' : 'bg-slate-800 text-slate-300 border-slate-700';
+          }
+
+          let driftHtml = '';
+          if (s.earliestPrice > 0 && s.latestPrice > 0 && s.earliestPrice !== s.latestPrice) {
+            const diffPct = ((s.latestPrice - s.earliestPrice) / s.earliestPrice) * 100;
+            const diffColor = diffPct >= 0 ? 'text-emerald-400' : 'text-rose-400';
+            const sign = diffPct >= 0 ? '+' : '';
+            driftHtml = `<span class="${diffColor} text-[10px] font-mono">(${sign}${diffPct.toFixed(1)}%)</span>`;
+          }
+
+          cardsHtml.push(`
+            <div class="p-3 rounded-xl border ${cardBorder} flex flex-col justify-between gap-2.5 transition duration-200 hover:-translate-y-0.5">
+              <div class="flex items-center justify-between gap-1.5">
+                ${rankBadge}
+                <span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-bold border ${alertBadgeClass}">
+                  <span>${s.count >= 3 ? '🔥' : (s.count >= 2 ? '⚡' : '📌')}</span>
+                  <span>${s.count} Alert${s.count !== 1 ? 's' : ''}</span>
+                </span>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-baseline justify-between gap-1">
+                  <a href="${tvUrl}" target="_blank" rel="noopener noreferrer" class="group/tv inline-flex items-center gap-1 font-bold text-white hover:text-blue-400 text-sm transition" title="Open ${s.symbol} on TradingView">
+                    <span class="border-b border-dashed border-slate-600 group-hover/tv:border-blue-400">${s.symbol}</span>
+                    <span class="text-[10px] text-blue-400 group-hover/tv:translate-x-0.5 group-hover/tv:-translate-y-0.5 transition-transform">↗</span>
+                  </a>
+                  <span class="font-mono text-xs font-bold text-white">${priceDisp}</span>
+                </div>
+                <div class="flex items-center justify-between text-[10px] text-slate-400">
+                  <span class="truncate max-w-[110px]" title="${escapeHtml(topSetup)}">${escapeHtml(topSetup)}</span>
+                  ${driftHtml}
+                </div>
+              </div>
+
+              <button type="button" onclick="quickLogFromScanner('${s.symbol}', ${s.latestPrice}, '${escapeHtml(topSetup)}')" class="w-full py-1 rounded bg-blue-600/90 hover:bg-blue-500 text-white font-mono text-[10px] font-bold transition flex items-center justify-center gap-1 shadow-sm">
+                <span>⚡ Quick Log</span>
+              </button>
+            </div>
+          `);
+        } else {
+          const rank = i + 1;
+          cardsHtml.push(`
+            <div class="p-3 rounded-xl bg-slate-950/40 border border-slate-800/60 text-center flex flex-col items-center justify-center gap-1 opacity-50 font-mono">
+              <span class="text-[10px] text-slate-500 font-bold">#${rank} SPOT</span>
+              <span class="text-xs text-slate-600 font-bold">--</span>
+              <span class="text-[10px] text-slate-600">Awaiting Signal</span>
+            </div>
+          `);
+        }
+      }
+
+      container.innerHTML = cardsHtml.join('');
     }
 
     function renderScannerLeaderboardHead() {
@@ -4568,6 +4691,10 @@
 
       const searchInput = document.getElementById('scannerSearchInput');
       const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+      // Keep Top 5 Leaders cards in sync
+      const fullLeaderboard = getStockLeaderboard(chartinkAlerts);
+      renderTop5Leaders(fullLeaderboard);
 
       // --- Empty State ---
       if (chartinkAlerts.length === 0) {
