@@ -9,6 +9,7 @@ PORT = int(os.environ.get("PORT", 8080))
 PUBLIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public")
 SETUPS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "setups_store.json")
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config_store.json")
+ALERTS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "chartink_alerts.json")
 
 DEFAULT_GUARDRAILS = {
     "maxDailyTrades": 2,
@@ -16,6 +17,119 @@ DEFAULT_GUARDRAILS = {
     "maxTradeRisk": 2500,
     "enforceTimeFilter": True
 }
+
+def get_chartink_alerts():
+    if os.path.exists(ALERTS_PATH):
+        try:
+            with open(ALERTS_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    return data
+        except Exception as e:
+            print(f"[Chartink Alerts Read Error] {e}")
+    return []
+
+def save_chartink_alerts(alerts):
+    try:
+        with open(ALERTS_PATH, "w", encoding="utf-8") as f:
+            json.dump(alerts[:100], f, indent=2)
+        return True
+    except Exception as e:
+        print(f"[Chartink Alerts Save Error] {e}")
+        return False
+
+def add_chartink_alerts(new_alerts):
+    current = get_chartink_alerts()
+    # Prepend new alerts so newest appears first
+    combined = new_alerts + current
+    save_chartink_alerts(combined)
+    return combined
+
+def clear_chartink_alerts():
+    save_chartink_alerts([])
+    return []
+
+def parse_chartink_webhook(payload, raw_body=""):
+    import datetime
+    
+    # If payload is empty dict, try parsing raw_body as query string / urlencoded
+    if not payload and raw_body:
+        try:
+            qs = urllib.parse.parse_qs(raw_body)
+            payload = {k: v[0] if len(v) == 1 else v for k, v in qs.items()}
+        except Exception:
+            payload = {}
+
+    scan_name = payload.get("scan_name") or payload.get("scanName") or payload.get("setup") or payload.get("name") or "Chartink A+ Alert"
+    scan_url = payload.get("scan_url") or payload.get("scanUrl") or payload.get("url") or ""
+    triggered_at = payload.get("triggered_at") or payload.get("triggeredAt") or payload.get("time") or ""
+
+    now = datetime.datetime.now()
+    if not triggered_at:
+        triggered_at = now.strftime("%I:%M %p")
+
+    # Extract stocks list (supports comma-separated string or array)
+    raw_stocks = payload.get("stocks") or payload.get("stock") or payload.get("symbols") or payload.get("symbol") or ""
+    if isinstance(raw_stocks, list):
+        stocks_list = [str(s).strip().upper() for s in raw_stocks if str(s).strip()]
+    elif isinstance(raw_stocks, str):
+        stocks_list = [s.strip().upper() for s in raw_stocks.split(",") if s.strip()]
+    else:
+        stocks_list = []
+
+    # Extract trigger prices
+    raw_prices = payload.get("trigger_prices") or payload.get("triggerPrices") or payload.get("prices") or payload.get("price") or ""
+    prices_list = []
+    if isinstance(raw_prices, list):
+        for p in raw_prices:
+            try:
+                prices_list.append(float(p))
+            except Exception:
+                prices_list.append(0.0)
+    elif isinstance(raw_prices, (int, float)):
+        prices_list = [float(raw_prices)]
+    elif isinstance(raw_prices, str):
+        for p in raw_prices.split(","):
+            try:
+                prices_list.append(float(p.strip()))
+            except Exception:
+                prices_list.append(0.0)
+
+    # Determine setup category & highlight color from scan name
+    scan_lower = scan_name.lower()
+    if "mega" in scan_lower or "20-day" in scan_lower or "breakout" in scan_lower and "20" in scan_lower:
+        color = "amber"
+        category = "megarunner"
+    elif "f&o" in scan_lower or "fno" in scan_lower or "future" in scan_lower:
+        color = "cyan"
+        category = "fno"
+    elif "pullback" in scan_lower or "reversal" in scan_lower or "dip" in scan_lower:
+        color = "purple"
+        category = "pullback"
+    else:
+        color = "emerald"
+        category = "vwap"
+
+    alerts = []
+    timestamp_ms = int(datetime.datetime.now().timestamp() * 1000)
+
+    for i, sym in enumerate(stocks_list):
+        px = prices_list[i] if i < len(prices_list) else 0.0
+        alert_id = f"CHK-{timestamp_ms}-{i+1}"
+        alerts.append({
+            "id": alert_id,
+            "symbol": sym,
+            "price": px,
+            "setup": scan_name,
+            "setupCategory": category,
+            "color": color,
+            "time": triggered_at,
+            "received_at": now.isoformat(),
+            "scan_url": scan_url,
+            "source": "Chartink Webhook"
+        })
+
+    return alerts
 
 def get_guardrails():
     if os.path.exists(CONFIG_PATH):
@@ -99,6 +213,9 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
             self._send_json({"setups": get_setups()})
         elif path == "/api/guardrails":
             self._send_json({"guardrails": get_guardrails()})
+        elif path in ("/api/scanner/alerts", "/api/webhook/chartink", "/api/chartink/alerts"):
+            alerts = get_chartink_alerts()
+            self._send_json({"status": "ok", "alerts": alerts, "count": len(alerts)})
         elif path == "/api/download":
             if os.path.exists(XLSX_PATH):
                 with open(XLSX_PATH, "rb") as f:
@@ -207,6 +324,40 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
                 self._send_json({"status": "ok", "guardrails": get_guardrails()})
             else:
                 self._send_json({"error": "Payload must be a json object"}, status=400)
+        elif path in ("/api/webhook/chartink", "/api/chartink/webhook", "/new-stocks"):
+            new_alerts = parse_chartink_webhook(payload, body)
+            if new_alerts:
+                add_chartink_alerts(new_alerts)
+            try:
+                from scanner_service import scanner_manager
+                scanner_manager.process_webhook(payload)
+            except Exception:
+                pass
+            self._send_json({
+                "status": "ok",
+                "received_count": len(new_alerts),
+                "alerts": new_alerts,
+                "message": f"Successfully processed {len(new_alerts)} Chartink webhook alert(s)!"
+            })
+        elif path == "/api/scanner/alerts/clear":
+            clear_chartink_alerts()
+            self._send_json({"status": "ok", "alerts": [], "message": "All Chartink alerts cleared"})
+        elif path == "/api/scanner/test-alert":
+            test_payload = payload if payload else {
+                "stocks": "TRENT,DIXON",
+                "trigger_prices": "7120.0,14850.0",
+                "triggered_at": "09:35 AM",
+                "scan_name": "Setup 4: 20-Day Range Breakout Mega-Runner"
+            }
+            new_alerts = parse_chartink_webhook(test_payload, body)
+            if new_alerts:
+                add_chartink_alerts(new_alerts)
+            self._send_json({
+                "status": "ok",
+                "received_count": len(new_alerts),
+                "alerts": new_alerts,
+                "message": f"Test alert successfully delivered ({len(new_alerts)} stocks)!"
+            })
         elif path == "/api/fyers/upload":
             try:
                 import base64
@@ -287,13 +438,6 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
                 self._send_json({"success": success, "message": msg, "backup_status": status})
             except Exception as e:
                 self._send_json({"success": False, "error": str(e)}, status=500)
-        elif path == "/new-stocks" or path == "/api/webhook/chartink":
-            try:
-                from scanner_service import scanner_manager
-                res = scanner_manager.process_webhook(payload)
-                self._send_json(res)
-            except Exception as e:
-                self._send_json({"status": "error", "message": str(e)}, status=500)
         elif path == "/api/scanner/clear":
             try:
                 from scanner_service import scanner_manager

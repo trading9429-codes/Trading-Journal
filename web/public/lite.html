@@ -564,65 +564,94 @@
       <div class="glass-panel p-5 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-l-4 border-l-emerald-500">
         <div>
           <div class="flex items-center gap-2">
-            <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">Institutional Radar</span>
+            <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">Live Webhook Receiver</span>
             <span class="text-xs font-mono text-slate-400 flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-              <span id="scannerStatusText">Engine Active &bull; 5-Minute Candle Intervals</span>
+              <span id="scannerStatusText">Listening on /api/webhook/chartink</span>
             </span>
           </div>
           <h2 class="text-lg font-bold text-white tracking-tight mt-1 flex items-center gap-2">
-            <span>📡</span> Intraday A+ Breakout Scanner &amp; Leaderboard
+            <span>📡</span> Chartink Live Webhook Scanner &amp; Leaderboard
           </h2>
-          <p class="text-xs text-slate-400 font-mono mt-0.5">Real-time identification of multi-crore turnover breakout candidates, F&amp;O leaders, and 20-day high mega-runners</p>
+          <p class="text-xs text-slate-400 font-mono mt-0.5">Directly connected to Chartink screener alerts &bull; Instant audio chimes, toast notifications &amp; pre-filled trade logging</p>
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
-          <button type="button" onclick="triggerScannerRun(true)" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-emerald-950/40">
-            <span id="scannerRunIcon">🔄</span> <span>Scan Market Now</span>
+          <button type="button" onclick="fetchChartinkAlerts(true)" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-emerald-950/40">
+            <span id="scannerRunIcon">🔄</span> <span>Check Webhook Alerts</span>
           </button>
           
-          <!-- Auto-Scan Toggle -->
-          <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-xs font-mono">
-            <span class="text-slate-400">Auto-Scan</span>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="scannerAutoRefreshToggle" onchange="toggleAutoScanner(this.checked)" checked class="sr-only peer">
-              <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
-            </label>
-          </div>
-
           <!-- Sound Chime Toggle -->
           <button type="button" id="scannerSoundToggleBtn" onclick="toggleScannerSound()" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-mono flex items-center gap-1 transition" title="Toggle Sound Chimes">
             <span id="scannerSoundIcon">🔔</span>
           </button>
 
-          <!-- Test Toast Button -->
-          <button type="button" onclick="testScannerToast()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-mono transition" title="Trigger a preview toast notification">
-            Test Toast
+          <!-- Test Webhook Alert Button -->
+          <button type="button" onclick="sendTestWebhookAlert()" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition flex items-center gap-1 shadow-md" title="Simulate a real Chartink webhook payload">
+            <span>🧪</span> <span>Send Test Webhook</span>
           </button>
+
+          <!-- Clear Webhook History -->
+          <button type="button" onclick="clearWebhookAlerts()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-950/50 hover:text-rose-300 border border-slate-800 text-slate-400 text-xs font-mono transition" title="Clear all received alerts">
+            <span>🗑️</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Chartink Webhook URL Configuration Card -->
+      <div class="glass-panel p-4 rounded-xl border border-slate-800/90 bg-gradient-to-r from-slate-900/90 via-slate-950/90 to-slate-900/90 space-y-3 font-mono text-xs">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div class="space-y-1 flex-1">
+            <div class="flex items-center gap-2">
+              <span class="text-emerald-400 font-bold">🔗 Your Dedicated Chartink Webhook URL:</span>
+              <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">POST endpoint</span>
+            </div>
+            <div class="flex items-center gap-2 pt-1">
+              <input type="text" readonly id="chartinkWebhookUrlInput" value="Loading..." class="bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-blue-400 font-mono text-xs w-full max-w-xl select-all font-bold focus:outline-none">
+              <button type="button" onclick="copyWebhookUrl()" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold transition flex items-center gap-1.5 whitespace-nowrap shadow-sm">
+                <span id="copyWebhookIcon">📋</span> <span>Copy Webhook URL</span>
+              </button>
+            </div>
+          </div>
+          <button type="button" onclick="toggleWebhookInstructions()" class="text-blue-400 hover:text-blue-300 text-xs font-mono underline whitespace-nowrap self-start sm:self-center">
+            How to setup in Chartink &darr;
+          </button>
+        </div>
+
+        <!-- Collapsible instructions -->
+        <div id="chartinkWebhookInstructions" class="hidden p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-[11px] text-slate-300 space-y-2">
+          <div class="font-bold text-white flex items-center gap-1.5">
+            <span>📌</span> How to connect Chartink to your Journal in 3 simple steps:
+          </div>
+          <ol class="list-decimal list-inside space-y-1 text-slate-400">
+            <li>Open any screener on <a href="https://chartink.com" target="_blank" class="text-blue-400 underline">Chartink.com</a> (e.g. your saved A+ VWAP or 20-Day Breakout screener).</li>
+            <li>Click <strong>"Create Alert"</strong> &rarr; In the Alert Notifications section, select/check <strong>Webhook URL</strong>.</li>
+            <li>Paste your Webhook URL above into the field and save the alert. Chartink will instantly send every matched stock directly into this journal!</li>
+          </ol>
         </div>
       </div>
 
       <!-- Quick Metrics Ribbon -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div class="glass-panel p-3.5 rounded-xl border border-slate-800/80">
-          <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 block">Matched Candidates</span>
-          <div class="text-lg font-mono font-bold text-white mt-0.5" id="scanStatTotalMatches">7</div>
-          <span class="text-[10px] font-mono text-emerald-400">Above ₹50L 5m Turnover</span>
+          <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 block">Total Webhook Alerts</span>
+          <div class="text-lg font-mono font-bold text-white mt-0.5" id="scanStatTotalMatches">0</div>
+          <span class="text-[10px] font-mono text-emerald-400">Received from Chartink</span>
         </div>
         <div class="glass-panel p-3.5 rounded-xl border border-amber-500/30 bg-amber-950/10">
-          <span class="text-[10px] font-mono uppercase tracking-wider text-amber-400 block">🚀 Top Mega-Runner</span>
-          <div class="text-lg font-mono font-bold text-amber-300 mt-0.5" id="scanStatTopRunner">TRENT (+4.8%)</div>
-          <span class="text-[10px] font-mono text-slate-400">20-Day Range Breakout</span>
+          <span class="text-[10px] font-mono uppercase tracking-wider text-amber-400 block">🚀 Latest 20-Day Runner</span>
+          <div class="text-lg font-mono font-bold text-amber-300 mt-0.5" id="scanStatTopRunner">--</div>
+          <span class="text-[10px] font-mono text-slate-400">Multi-Day Breakout</span>
         </div>
         <div class="glass-panel p-3.5 rounded-xl border border-cyan-500/30 bg-cyan-950/10">
-          <span class="text-[10px] font-mono uppercase tracking-wider text-cyan-400 block">⚡ Top F&amp;O Leader</span>
-          <div class="text-lg font-mono font-bold text-cyan-300 mt-0.5" id="scanStatTopFNO">DIXON (+5.2%)</div>
-          <span class="text-[10px] font-mono text-slate-400">Score: 98 &bull; ₹4.2 Cr 5m Vol</span>
+          <span class="text-[10px] font-mono uppercase tracking-wider text-cyan-400 block">⚡ Latest F&amp;O Alert</span>
+          <div class="text-lg font-mono font-bold text-cyan-300 mt-0.5" id="scanStatTopFNO">--</div>
+          <span class="text-[10px] font-mono text-slate-400">F&amp;O Liquid Momentum</span>
         </div>
         <div class="glass-panel p-3.5 rounded-xl border border-slate-800/80">
-          <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 block">Avg Relative Volume</span>
-          <div class="text-lg font-mono font-bold text-blue-400 mt-0.5" id="scanStatAvgRvol">4.4x</div>
-          <span class="text-[10px] font-mono text-slate-400">Heavy Institutional Surge</span>
+          <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 block">Last Alert Timestamp</span>
+          <div class="text-lg font-mono font-bold text-blue-400 mt-0.5" id="scanStatLastTime">--</div>
+          <span class="text-[10px] font-mono text-slate-400">Real-time webhook sync</span>
         </div>
       </div>
 
@@ -630,10 +659,10 @@
       <div class="glass-panel p-3 rounded-xl flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-1.5 flex-wrap">
           <span class="text-xs font-mono text-slate-400 mr-1 flex items-center gap-1">
-            <span>🎯</span> Filters:
+            <span>🎯</span> Filter Alerts:
           </span>
           <button onclick="setScannerFilter('all')" id="scanFilterBtn-all" class="scan-filter-btn px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-blue-600 text-white transition">
-            All Setups (7)
+            All Alerts (<span id="filterCount-all">0</span>)
           </button>
           <button onclick="setScannerFilter('megarunner')" id="scanFilterBtn-megarunner" class="scan-filter-btn px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-slate-900 text-amber-400 border border-slate-800 hover:border-amber-500/40 transition">
             🚀 20-Day Mega-Runners
@@ -651,32 +680,33 @@
 
         <div class="flex items-center gap-2 flex-1 sm:flex-initial min-w-[200px]">
           <span class="text-slate-500 text-xs">🔍</span>
-          <input type="text" id="scannerSearchInput" oninput="filterScannerTable()" placeholder="Search symbol or setup..." class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-mono">
+          <input type="text" id="scannerSearchInput" oninput="filterScannerTable()" placeholder="Search symbol or scan name..." class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-mono">
         </div>
       </div>
 
       <!-- Intraday Breakout Leaderboard Table -->
       <div class="glass-panel p-4 rounded-2xl space-y-3">
         <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
-          <h3 class="text-sm font-bold text-white font-mono flex items-center gap-2">
-            <span>🏆</span> Real-Time Breakout Leaderboard
-          </h3>
-          <span class="text-xs text-slate-400 font-mono">Ranked by Institutional Momentum Score &amp; Liquidity</span>
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-bold text-white font-mono flex items-center gap-2">
+              <span>🏆</span> Chartink Webhook Signals Leaderboard
+            </h3>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-bold">100% Real Webhook Feed</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono" id="scannerSignalsCountDisp">0 Signals Received</span>
         </div>
 
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs font-mono">
             <thead>
               <tr class="text-slate-400 border-b border-slate-800 text-[11px] bg-slate-950/60">
-                <th class="py-2.5 px-3">Rank</th>
+                <th class="py-2.5 px-3">#</th>
                 <th class="py-2.5 px-3">Symbol</th>
-                <th class="py-2.5 px-3">Setup Trigger</th>
-                <th class="py-2.5 px-3">Momentum Score</th>
-                <th class="py-2.5 px-3 text-right">CMP / Trigger</th>
-                <th class="py-2.5 px-3 text-right">RVOL (5m)</th>
-                <th class="py-2.5 px-3 text-right">5m Turnover</th>
-                <th class="py-2.5 px-3 text-right">Day %</th>
-                <th class="py-2.5 px-3">Time</th>
+                <th class="py-2.5 px-3">Chartink Scan Name</th>
+                <th class="py-2.5 px-3 text-right">Trigger Price</th>
+                <th class="py-2.5 px-3">Trigger Time</th>
+                <th class="py-2.5 px-3">Received</th>
+                <th class="py-2.5 px-3">Source</th>
                 <th class="py-2.5 px-3 text-center">Action</th>
               </tr>
             </thead>
@@ -686,6 +716,21 @@
           </table>
         </div>
       </div>
+
+      <!-- Quick How-To Card -->
+      <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800 text-xs font-mono text-slate-400 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="space-y-1">
+          <span class="text-white font-bold flex items-center gap-1.5">
+            <span>💡</span> Instant Trade Execution:
+          </span>
+          <p>Clicking <strong>⚡ Quick Log</strong> on any Chartink webhook alert automatically opens the <em>+ Log Trade</em> form with the symbol, price, and setup pre-filled, with 0.8% Stop-Loss &amp; 2.0% Target pre-calculated.</p>
+        </div>
+        <button type="button" onclick="switchTab('rules')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-blue-400 hover:text-white transition whitespace-nowrap">
+          View Playbook &amp; Chartink Codes &rarr;
+        </button>
+      </div>
+
+    </div>
 
       <!-- Quick How-To Card -->
       <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800 text-xs font-mono text-slate-400 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -2065,8 +2110,11 @@
       document.getElementById('log_date').value = new Date().toISOString().split('T')[0];
       await loadSetups();
       await loadTrades();
-      if (document.getElementById('scannerAutoRefreshToggle') && document.getElementById('scannerAutoRefreshToggle').checked) {
-        toggleAutoScanner(true);
+      await fetchChartinkAlerts();
+      if (!chartinkPollingInterval) {
+        chartinkPollingInterval = setInterval(() => {
+          fetchChartinkAlerts();
+        }, 3500);
       }
       renderScannerView();
     }
@@ -4016,123 +4064,16 @@
     }
 
     // ========================================================
-    // LITE SCANNER & TOAST NOTIFICATION ENGINE
+    // CHARTINK LIVE WEBHOOK SCANNER & TOAST ENGINE
     // ========================================================
     let scannerSoundEnabled = true;
-    let scannerAutoTimer = null;
+    let chartinkAlerts = [];
+    let knownAlertIds = new Set();
+    let isFirstAlertsLoad = true;
     let activeScannerFilter = 'all';
+    let chartinkPollingInterval = null;
 
-    const INITIAL_SCANNER_CANDIDATES = [
-      {
-        symbol: 'DIXON',
-        name: 'Dixon Technologies Ltd',
-        setup: '⚡ F&O Momentum Leader',
-        setupCategory: 'fno',
-        color: 'cyan',
-        score: 98,
-        cmp: 14850.00,
-        rvol: 4.8,
-        turnover: 4.2, // ₹ Cr
-        dayPct: 5.2,
-        time: '09:35 AM',
-        fno: true,
-        breakout20d: true
-      },
-      {
-        symbol: 'TRENT',
-        name: 'Trent Limited',
-        setup: '🚀 20-Day Mega-Runner',
-        setupCategory: 'megarunner',
-        color: 'amber',
-        score: 96,
-        cmp: 7120.00,
-        rvol: 5.6,
-        turnover: 6.8,
-        dayPct: 4.8,
-        time: '09:35 AM',
-        fno: true,
-        breakout20d: true
-      },
-      {
-        symbol: 'PARAGMILK',
-        name: 'Parag Milk Foods Ltd',
-        setup: '🚀 20-Day Mega-Runner',
-        setupCategory: 'megarunner',
-        color: 'amber',
-        score: 94,
-        cmp: 268.50,
-        rvol: 6.2,
-        turnover: 1.8,
-        dayPct: 7.4,
-        time: '09:40 AM',
-        fno: false,
-        breakout20d: true
-      },
-      {
-        symbol: 'MCX',
-        name: 'Multi Commodity Exchange',
-        setup: '⚡ F&O Momentum Leader',
-        setupCategory: 'fno',
-        color: 'cyan',
-        score: 91,
-        cmp: 6420.00,
-        rvol: 3.9,
-        turnover: 3.4,
-        dayPct: 3.6,
-        time: '09:45 AM',
-        fno: true,
-        breakout20d: false
-      },
-      {
-        symbol: 'COFORGE',
-        name: 'Coforge Limited',
-        setup: 'Setup A: VWAP Breakout',
-        setupCategory: 'vwap',
-        color: 'emerald',
-        score: 88,
-        cmp: 7980.00,
-        rvol: 3.4,
-        turnover: 2.1,
-        dayPct: 2.8,
-        time: '09:40 AM',
-        fno: true,
-        breakout20d: false
-      },
-      {
-        symbol: 'IIFL',
-        name: 'IIFL Finance Ltd',
-        setup: 'Setup B: Volume Surge',
-        setupCategory: 'vwap',
-        color: 'emerald',
-        score: 85,
-        cmp: 482.20,
-        rvol: 4.2,
-        turnover: 1.4,
-        dayPct: 4.1,
-        time: '09:50 AM',
-        fno: false,
-        breakout20d: false
-      },
-      {
-        symbol: 'KAYNES',
-        name: 'Kaynes Technology Ltd',
-        setup: 'Setup C: Pullback Reversal',
-        setupCategory: 'pullback',
-        color: 'purple',
-        score: 82,
-        cmp: 5640.00,
-        rvol: 2.1,
-        turnover: 1.1,
-        dayPct: 1.9,
-        time: '10:05 AM',
-        fno: false,
-        breakout20d: false
-      }
-    ];
-
-    let scannerCandidates = [...INITIAL_SCANNER_CANDIDATES];
-
-    // Audio Chime via Web Audio API
+    // Web Audio API Audio Chime
     function playChime(freq = 880, type = 'sine') {
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -4253,22 +4194,135 @@
       }
       showToast({
         title: scannerSoundEnabled ? 'Sound Active' : 'Sound Muted',
-        message: scannerSoundEnabled ? 'Audio chimes enabled for breakout alerts.' : 'Audio chimes silenced.',
+        message: scannerSoundEnabled ? 'Audio chimes enabled for incoming Chartink webhook alerts.' : 'Audio chimes silenced.',
         color: scannerSoundEnabled ? 'emerald' : 'blue',
         duration: 2500
       });
     }
 
-    function testScannerToast() {
-      const sample = scannerCandidates[Math.floor(Math.random() * scannerCandidates.length)] || scannerCandidates[0];
-      showToast({
-        title: `A+ Breakout: ${sample.symbol}`,
-        badge: sample.setup,
-        color: sample.color,
-        message: `${sample.symbol} triggered at ₹${sample.cmp.toFixed(2)} with ${sample.rvol}x Volume & ₹${sample.turnover} Cr 5m Rupee Turnover!`,
-        actionText: '⚡ Quick Log',
-        onAction: () => quickLogFromScanner(sample.symbol, sample.cmp, sample.setup)
+    function toggleWebhookInstructions() {
+      const el = document.getElementById('chartinkWebhookInstructions');
+      if (el) el.classList.toggle('hidden');
+    }
+
+    function copyWebhookUrl() {
+      const url = window.location.origin + '/api/webhook/chartink';
+      navigator.clipboard.writeText(url).then(() => {
+        const icon = document.getElementById('copyWebhookIcon');
+        if (icon) icon.textContent = '✓';
+        showToast({
+          title: 'Webhook URL Copied',
+          badge: 'Chartink Ready',
+          color: 'emerald',
+          message: `Copied <b>${url}</b> to clipboard. Paste this into your Chartink Screener Alert settings under Webhook.`,
+          duration: 4000
+        });
+        setTimeout(() => {
+          if (icon) icon.textContent = '📋';
+        }, 2500);
+      }).catch(() => {
+        prompt("Copy your Chartink Webhook URL below:", url);
       });
+    }
+
+    // Fetch alerts from backend webhook receiver
+    async function fetchChartinkAlerts(isManual = false) {
+      const runIcon = document.getElementById('scannerRunIcon');
+      if (isManual && runIcon) runIcon.classList.add('animate-spin');
+
+      try {
+        const res = await fetch('/api/scanner/alerts');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.alerts)) {
+            const incoming = data.alerts;
+
+            // Check for new arrivals since last poll
+            const newArrivals = incoming.filter(a => !knownAlertIds.has(a.id));
+
+            if (!isFirstAlertsLoad && newArrivals.length > 0) {
+              // Fire toast notifications for new arrivals (max 3 at once to avoid spam)
+              newArrivals.slice(0, 3).forEach(alert => {
+                showToast({
+                  title: `⚡ Webhook Alert: ${alert.symbol}`,
+                  badge: alert.setup,
+                  color: alert.color || 'emerald',
+                  message: `<b>${alert.symbol}</b> matched <em>${alert.setup}</em>${alert.price > 0 ? ` @ ₹${alert.price.toFixed(2)}` : ''} at ${alert.time}.`,
+                  actionText: '⚡ Quick Log',
+                  onAction: () => quickLogFromScanner(alert.symbol, alert.price, alert.setup)
+                });
+              });
+            }
+
+            incoming.forEach(a => knownAlertIds.add(a.id));
+            isFirstAlertsLoad = false;
+            chartinkAlerts = incoming;
+            renderScannerView();
+
+            if (isManual) {
+              showToast({
+                title: 'Webhook Check Complete',
+                badge: `${chartinkAlerts.length} Alerts`,
+                color: 'blue',
+                message: `Currently holding ${chartinkAlerts.length} webhook alert signals from Chartink.`,
+                duration: 2500
+              });
+            }
+          }
+        }
+      } catch(e) {
+        console.warn("Could not fetch Chartink alerts from backend:", e);
+      } finally {
+        if (isManual && runIcon) {
+          setTimeout(() => runIcon.classList.remove('animate-spin'), 300);
+        }
+      }
+    }
+
+    // Send a real test webhook payload to /api/webhook/chartink
+    async function sendTestWebhookAlert() {
+      const testPicks = [
+        { stocks: "TRENT", trigger_prices: "7120.00", triggered_at: new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit', hour12: true}), scan_name: "Setup 4: 20-Day Range Breakout Mega-Runner" },
+        { stocks: "DIXON", trigger_prices: "14850.00", triggered_at: new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit', hour12: true}), scan_name: "Setup 5: High-Liquid F&O Momentum Leader" },
+        { stocks: "PARAGMILK", trigger_prices: "268.50", triggered_at: new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit', hour12: true}), scan_name: "Setup 4: 20-Day Range Breakout Mega-Runner" },
+        { stocks: "MCX", trigger_prices: "6420.00", triggered_at: new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit', hour12: true}), scan_name: "Setup 5: High-Liquid F&O Momentum Leader" },
+        { stocks: "COFORGE", trigger_prices: "7980.00", triggered_at: new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit', hour12: true}), scan_name: "Setup A: 5m VWAP Breakout" },
+        { stocks: "IIFL", trigger_prices: "482.20", triggered_at: new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit', hour12: true}), scan_name: "Setup B: Volume Surge" }
+      ];
+      const pick = testPicks[Math.floor(Math.random() * testPicks.length)];
+
+      try {
+        const res = await fetch('/api/webhook/chartink', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(pick)
+        });
+        if (res.ok) {
+          await fetchChartinkAlerts();
+        }
+      } catch(e) {
+        console.error("Test alert error:", e);
+      }
+    }
+
+    // Clear all alerts in backend
+    async function clearWebhookAlerts() {
+      if (confirm("Clear all received Chartink webhook alerts?")) {
+        try {
+          await fetch('/api/scanner/alerts/clear', { method: 'POST' });
+          chartinkAlerts = [];
+          knownAlertIds.clear();
+          renderScannerView();
+          showToast({
+            title: 'Alerts Cleared',
+            message: 'All webhook alert records have been cleared.',
+            color: 'blue',
+            duration: 2500
+          });
+        } catch(e) {
+          console.error("Error clearing alerts:", e);
+        }
+      }
     }
 
     // Quick Log Bridge: Pre-populates the + Log Trade form from Scanner Leaderboard
@@ -4279,7 +4333,7 @@
       const setupInput = document.getElementById('log_setup');
 
       if (symInput) symInput.value = symbol;
-      if (pxInput) pxInput.value = parseFloat(price).toFixed(2);
+      if (pxInput) pxInput.value = parseFloat(price || 0) > 0 ? parseFloat(price).toFixed(2) : '';
 
       if (setupInput) {
         const opts = Array.from(setupInput.options);
@@ -4298,7 +4352,7 @@
       showToast({
         title: '⚡ Quick Log Loaded',
         badge: symbol,
-        message: `Transferred ${symbol} @ ₹${price} into Log form with planned SL (0.8%) & Target (2.0%).`,
+        message: `Transferred ${symbol}${price > 0 ? ` @ ₹${price}` : ''} into Log form with planned SL (0.8%) & Target (2.0%).`,
         color: 'emerald',
         duration: 3500
       });
@@ -4306,32 +4360,45 @@
 
     // Scanner View & Leaderboard Rendering
     function renderScannerView() {
+      // Sync Webhook URL input box
+      const urlInput = document.getElementById('chartinkWebhookUrlInput');
+      if (urlInput) {
+        urlInput.value = window.location.origin + '/api/webhook/chartink';
+      }
+
       renderScannerLeaderboard();
       updateScannerStatsRibbon();
     }
 
     function updateScannerStatsRibbon() {
-      const totalMatches = scannerCandidates.length;
+      const totalMatches = chartinkAlerts.length;
       const elMatches = document.getElementById('scanStatTotalMatches');
       if (elMatches) elMatches.textContent = totalMatches;
 
-      const megaRunners = scannerCandidates.filter(c => c.breakout20d);
+      const countDisp = document.getElementById('scannerSignalsCountDisp');
+      if (countDisp) countDisp.textContent = `${totalMatches} Signal${totalMatches !== 1 ? 's' : ''} Received`;
+
+      const megaRunners = chartinkAlerts.filter(c => c.setupCategory === 'megarunner');
       const topRunner = megaRunners.length > 0 ? megaRunners[0] : null;
       const elTopRunner = document.getElementById('scanStatTopRunner');
-      if (elTopRunner && topRunner) {
-        elTopRunner.textContent = `${topRunner.symbol} (+${topRunner.dayPct}%)`;
+      if (elTopRunner) {
+        elTopRunner.textContent = topRunner ? `${topRunner.symbol} (₹${topRunner.price})` : '--';
       }
 
-      const fnoLeaders = scannerCandidates.filter(c => c.fno);
+      const fnoLeaders = chartinkAlerts.filter(c => c.setupCategory === 'fno');
       const topFNO = fnoLeaders.length > 0 ? fnoLeaders[0] : null;
       const elTopFNO = document.getElementById('scanStatTopFNO');
-      if (elTopFNO && topFNO) {
-        elTopFNO.textContent = `${topFNO.symbol} (+${topFNO.dayPct}%)`;
+      if (elTopFNO) {
+        elTopFNO.textContent = topFNO ? `${topFNO.symbol} (₹${topFNO.price})` : '--';
       }
 
-      const avgRvol = totalMatches > 0 ? (scannerCandidates.reduce((s, c) => s + c.rvol, 0) / totalMatches).toFixed(1) : '0.0';
-      const elAvgRvol = document.getElementById('scanStatAvgRvol');
-      if (elAvgRvol) elAvgRvol.textContent = `${avgRvol}x`;
+      const elLastTime = document.getElementById('scanStatLastTime');
+      if (elLastTime) {
+        elLastTime.textContent = chartinkAlerts.length > 0 ? chartinkAlerts[0].time : '--';
+      }
+
+      const filterAllCount = document.getElementById('filterCount-all');
+      if (filterAllCount) filterAllCount.textContent = totalMatches;
     }
 
     function renderScannerLeaderboard() {
@@ -4341,12 +4408,12 @@
       const searchInput = document.getElementById('scannerSearchInput');
       const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
 
-      let filtered = [...scannerCandidates];
+      let filtered = [...chartinkAlerts];
 
       if (activeScannerFilter === 'megarunner') {
-        filtered = filtered.filter(c => c.setupCategory === 'megarunner' || c.breakout20d);
+        filtered = filtered.filter(c => c.setupCategory === 'megarunner');
       } else if (activeScannerFilter === 'fno') {
-        filtered = filtered.filter(c => c.setupCategory === 'fno' || c.fno);
+        filtered = filtered.filter(c => c.setupCategory === 'fno');
       } else if (activeScannerFilter === 'vwap') {
         filtered = filtered.filter(c => c.setupCategory === 'vwap');
       } else if (activeScannerFilter === 'pullback') {
@@ -4356,21 +4423,42 @@
       if (query) {
         filtered = filtered.filter(c => 
           c.symbol.toLowerCase().includes(query) ||
-          c.name.toLowerCase().includes(query) ||
           c.setup.toLowerCase().includes(query)
         );
       }
 
-      filtered.sort((a, b) => b.score - a.score);
-
       if (filtered.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="10" class="py-8 text-center text-slate-500 font-mono text-xs">
-              No breakout candidates match the active filter "${activeScannerFilter}". Try selecting "All Setups" or click "Scan Market Now".
-            </td>
-          </tr>
-        `;
+        if (chartinkAlerts.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="8" class="py-12 text-center text-slate-400 font-mono text-xs">
+                <div class="max-w-md mx-auto space-y-3">
+                  <span class="text-3xl block">📡</span>
+                  <div class="text-white font-bold text-sm">Awaiting Chartink Webhook Signals</div>
+                  <p class="text-slate-400 text-xs leading-relaxed">
+                    No webhook alerts received yet. Copy your Webhook URL above and paste it into your Chartink screener alert settings, or click below to simulate a real alert.
+                  </p>
+                  <div class="pt-2 flex justify-center gap-2 flex-wrap">
+                    <button type="button" onclick="sendTestWebhookAlert()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center gap-1.5 shadow">
+                      <span>🧪</span> <span>Send Test Webhook Signal</span>
+                    </button>
+                    <button type="button" onclick="copyWebhookUrl()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-blue-400 hover:text-white text-xs transition">
+                      <span>📋</span> <span>Copy Webhook URL</span>
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          `;
+        } else {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="8" class="py-8 text-center text-slate-500 font-mono text-xs">
+                No alerts match the active filter "${activeScannerFilter}". Try selecting "All Alerts".
+              </td>
+            </tr>
+          `;
+        }
         return;
       }
 
@@ -4383,27 +4471,23 @@
 
         let setupBadgeClass = 'bg-blue-500/10 text-blue-300 border-blue-500/30';
         let rowGlowClass = '';
-        let scoreBarClass = 'bg-blue-500';
 
         if (c.color === 'amber') {
           setupBadgeClass = 'bg-amber-500/10 text-amber-300 border-amber-500/30';
           rowGlowClass = 'hover:bg-amber-950/20';
-          scoreBarClass = 'bg-gradient-to-r from-amber-500 to-yellow-400';
         } else if (c.color === 'cyan') {
           setupBadgeClass = 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30';
           rowGlowClass = 'hover:bg-cyan-950/20';
-          scoreBarClass = 'bg-gradient-to-r from-cyan-500 to-blue-400';
         } else if (c.color === 'emerald') {
           setupBadgeClass = 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30';
           rowGlowClass = 'hover:bg-emerald-950/20';
-          scoreBarClass = 'bg-gradient-to-r from-emerald-500 to-teal-400';
         } else if (c.color === 'purple') {
           setupBadgeClass = 'bg-purple-500/10 text-purple-300 border-purple-500/30';
           rowGlowClass = 'hover:bg-purple-950/20';
-          scoreBarClass = 'bg-gradient-to-r from-purple-500 to-indigo-400';
         }
 
         const isPre930Trade = isPre930(c.time);
+        const priceDisp = c.price > 0 ? `₹${c.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '--';
 
         return `
           <tr class="transition border-b border-slate-800/40 ${rowGlowClass}">
@@ -4411,44 +4495,31 @@
             <td class="py-2.5 px-3">
               <div class="flex items-center gap-1.5">
                 <span class="font-bold text-white text-xs">${c.symbol}</span>
-                ${c.fno ? '<span class="text-[9px] px-1 rounded bg-slate-800 text-cyan-300 border border-cyan-800/50 font-bold" title="NSE F&O Eligible">F&O</span>' : ''}
+                ${rank === 1 ? '<span class="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold animate-pulse">LATEST</span>' : ''}
               </div>
-              <span class="text-[10px] text-slate-500 block truncate max-w-[140px]">${c.name}</span>
             </td>
             <td class="py-2.5 px-3 whitespace-nowrap">
               <span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded font-bold border ${setupBadgeClass}">
                 ${c.setup}
               </span>
             </td>
-            <td class="py-2.5 px-3 min-w-[120px]">
-              <div class="flex items-center justify-between text-[11px] mb-0.5">
-                <span class="font-bold text-white">${c.score}</span>
-                <span class="text-[10px] text-slate-500">/ 100</span>
-              </div>
-              <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                <div class="h-full rounded-full ${scoreBarClass}" style="width: ${c.score}%"></div>
-              </div>
-            </td>
             <td class="py-2.5 px-3 text-right font-bold text-white">
-              ₹${c.cmp.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              ${priceDisp}
             </td>
-            <td class="py-2.5 px-3 text-right">
-              <span class="text-blue-400 font-bold">${c.rvol}x</span>
-              <span class="text-[10px] text-slate-500 block">5m SMA</span>
-            </td>
-            <td class="py-2.5 px-3 text-right">
-              <span class="text-white font-bold">₹${c.turnover.toFixed(1)} Cr</span>
-              <span class="text-[10px] text-slate-500 block">Single 5m</span>
-            </td>
-            <td class="py-2.5 px-3 text-right">
-              <span class="text-emerald-400 font-bold">+${c.dayPct.toFixed(1)}%</span>
-            </td>
-            <td class="py-2.5 px-3 text-slate-400 whitespace-nowrap">
+            <td class="py-2.5 px-3 text-slate-300 whitespace-nowrap">
               <span>${c.time}</span>
               ${isPre930Trade ? '<span class="text-[9px] px-1 rounded bg-rose-950/80 text-rose-300 border border-rose-800 ml-1 font-bold" title="Pre-09:30 Rush Warning">⏱️ Early</span>' : ''}
             </td>
+            <td class="py-2.5 px-3 text-slate-400 text-[11px] whitespace-nowrap">
+              ${new Date(c.received_at || Date.now()).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </td>
+            <td class="py-2.5 px-3 whitespace-nowrap">
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 font-mono">
+                Chartink Webhook
+              </span>
+            </td>
             <td class="py-2.5 px-3 text-center whitespace-nowrap">
-              <button type="button" onclick="quickLogFromScanner('${c.symbol}', ${c.cmp}, '${escapeHtml(c.setup)}')" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] transition flex items-center gap-1 mx-auto shadow-sm">
+              <button type="button" onclick="quickLogFromScanner('${c.symbol}', ${c.price}, '${escapeHtml(c.setup)}')" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] transition flex items-center gap-1 mx-auto shadow-sm">
                 <span>⚡ Quick Log</span>
               </button>
             </td>
@@ -4478,62 +4549,6 @@
 
     function filterScannerTable() {
       renderScannerLeaderboard();
-    }
-
-    function triggerScannerRun(isManual = false) {
-      const runIcon = document.getElementById('scannerRunIcon');
-      if (runIcon) runIcon.classList.add('animate-spin');
-
-      setTimeout(() => {
-        if (runIcon) runIcon.classList.remove('animate-spin');
-
-        scannerCandidates = INITIAL_SCANNER_CANDIDATES.map(c => {
-          const tick = (Math.random() * 0.4 - 0.2);
-          const newCmp = parseFloat((c.cmp * (1 + tick / 100)).toFixed(2));
-          const newDayPct = parseFloat((c.dayPct + tick).toFixed(1));
-          return { ...c, cmp: newCmp, dayPct: newDayPct };
-        });
-
-        renderScannerView();
-
-        const top = scannerCandidates[0];
-        if (isManual && top) {
-          showToast({
-            title: `Scanner Cycle Complete`,
-            badge: `${scannerCandidates.length} Matches`,
-            color: 'emerald',
-            message: `Found ${scannerCandidates.length} high-liquidity candidates. Top pick: <b>${top.symbol}</b> (${top.setup}) @ ₹${top.cmp.toFixed(2)}.`,
-            actionText: '⚡ Quick Log',
-            onAction: () => quickLogFromScanner(top.symbol, top.cmp, top.setup),
-            duration: 5000
-          });
-        }
-      }, isManual ? 400 : 100);
-    }
-
-    function toggleAutoScanner(enabled) {
-      if (scannerAutoTimer) {
-        clearInterval(scannerAutoTimer);
-        scannerAutoTimer = null;
-      }
-      if (enabled) {
-        scannerAutoTimer = setInterval(() => {
-          triggerScannerRun(false);
-        }, 45000);
-        showToast({
-          title: 'Auto-Scanner Active',
-          message: 'Scanner will refresh every 45 seconds for new 5m breakout candles.',
-          color: 'emerald',
-          duration: 3000
-        });
-      } else {
-        showToast({
-          title: 'Auto-Scanner Paused',
-          message: 'Automatic market scanning halted.',
-          color: 'blue',
-          duration: 2500
-        });
-      }
     }
 
     // ========================================================
