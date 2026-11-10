@@ -8,6 +8,35 @@ from excel_service import manager, XLSX_PATH
 PORT = int(os.environ.get("PORT", 8080))
 PUBLIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public")
 SETUPS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "setups_store.json")
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config_store.json")
+
+DEFAULT_GUARDRAILS = {
+    "maxDailyTrades": 2,
+    "maxDailyLoss": 10000,
+    "maxTradeRisk": 2500
+}
+
+def get_guardrails():
+    if os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, dict):
+                    return {**DEFAULT_GUARDRAILS, **data}
+        except Exception:
+            pass
+    return dict(DEFAULT_GUARDRAILS)
+
+def save_guardrails(cfg):
+    try:
+        current = get_guardrails()
+        current.update(cfg)
+        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+            json.dump(current, f, indent=2)
+        return True
+    except Exception as e:
+        print(f"[Guardrails Save Error] {e}")
+        return False
 
 DEFAULT_SETUPS = [
     {"id": "setup-playbook-a", "name": "Setup A: VWAP & EMA Breakout (VWAP BO)", "desc": "Consolidates above 20 & 50 EMA near VWAP; 5m breakout candle with Vol >= 3x prev bar, 10 EMA > 20 EMA > 50 EMA stack. Hard stop below 20 EMA or breakout candle low. Min 1:2 R:R.", "target_rr": 2.0},
@@ -67,6 +96,8 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
             self._send_json({"trades": trades, "stats": stats})
         elif path == "/api/setups":
             self._send_json({"setups": get_setups()})
+        elif path == "/api/guardrails":
+            self._send_json({"guardrails": get_guardrails()})
         elif path == "/api/download":
             if os.path.exists(XLSX_PATH):
                 with open(XLSX_PATH, "rb") as f:
@@ -169,6 +200,12 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
                 setups_data = payload.get("setups", [])
             save_setups(setups_data)
             self._send_json({"status": "ok", "setups": get_setups()})
+        elif path == "/api/guardrails":
+            if isinstance(payload, dict):
+                save_guardrails(payload)
+                self._send_json({"status": "ok", "guardrails": get_guardrails()})
+            else:
+                self._send_json({"error": "Payload must be a json object"}, status=400)
         elif path == "/api/fyers/upload":
             try:
                 import base64

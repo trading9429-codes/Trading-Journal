@@ -1247,6 +1247,75 @@
         </div>
       </div>
 
+      <!-- Risk Guardrails & Limits Configuration Card -->
+      <div class="glass-panel p-6 rounded-2xl space-y-5">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <span>🛡️</span> Risk Guardrails &amp; Rule Limits
+            </h3>
+            <p class="text-xs text-slate-400 font-mono">Configure the maximum allowed daily trades and daily stop loss limit used for automated rule breach alerts across the journal, P&amp;L calendar, and playbook.</p>
+          </div>
+          <button type="button" onclick="resetGuardrailsToDefault()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-mono transition">
+            Reset Guardrails
+          </button>
+        </div>
+
+        <form id="guardrailsConfigForm" onsubmit="handleSaveGuardrails(event)" class="bg-slate-950/70 p-4 rounded-xl border border-slate-800 space-y-4 text-xs font-mono">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            
+            <!-- Trade Limit per Day -->
+            <div class="space-y-1">
+              <label class="block text-slate-300 font-bold flex items-center justify-between">
+                <span>Daily Trade Cap (Limit)</span>
+                <span class="text-[10px] text-slate-500 font-normal">Default: 2 trades</span>
+              </label>
+              <div class="relative">
+                <input type="number" min="1" max="50" step="1" id="config_max_daily_trades" required value="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono font-bold focus:border-blue-500 focus:outline-none">
+                <span class="absolute right-3 top-2 text-slate-500 text-xs">trades / day</span>
+              </div>
+              <p class="text-[11px] text-slate-500">Flags an Overtrading rule breach in the P&amp;L calendar whenever daily trades exceed this limit.</p>
+            </div>
+
+            <!-- Daily Max Loss Hard Stop -->
+            <div class="space-y-1">
+              <label class="block text-slate-300 font-bold flex items-center justify-between">
+                <span>Daily Hard Stop Loss Cap (₹)</span>
+                <span class="text-[10px] text-slate-500 font-normal">Default: ₹10,000</span>
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-2 text-slate-500 text-xs">₹</span>
+                <input type="number" min="500" step="500" id="config_max_daily_loss" required value="10000" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-7 pr-3 py-2 text-white font-mono font-bold focus:border-blue-500 focus:outline-none">
+              </div>
+              <p class="text-[11px] text-slate-500">Flags a Hard Stop Loss breach in the P&amp;L calendar if total daily net loss exceeds this amount.</p>
+            </div>
+
+            <!-- Max Risk Per Trade (Optional reference) -->
+            <div class="space-y-1">
+              <label class="block text-slate-300 font-bold flex items-center justify-between">
+                <span>Per-Trade Risk Cap (₹)</span>
+                <span class="text-[10px] text-slate-500 font-normal">Default: ₹2,500</span>
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-2 text-slate-500 text-xs">₹</span>
+                <input type="number" min="100" step="100" id="config_max_trade_risk" required value="2500" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-7 pr-3 py-2 text-white font-mono font-bold focus:border-blue-500 focus:outline-none">
+              </div>
+              <p class="text-[11px] text-slate-500">Hard stop loss allocated per single execution (e.g. ₹2,500 = 1.0R risk limit).</p>
+            </div>
+
+          </div>
+
+          <div class="flex items-center justify-between border-t border-slate-800/80 pt-3">
+            <span id="guardrailsSavedToast" class="text-emerald-400 text-xs hidden font-mono flex items-center gap-1">
+              <span>✓</span> Guardrails updated successfully!
+            </span>
+            <button type="submit" class="ml-auto px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition flex items-center gap-1.5">
+              <span>💾</span> <span>Save Guardrails &amp; Update Rules</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
       <!-- Grid: 2 Columns on desktop -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
@@ -1581,6 +1650,7 @@
       } else if (tabId === 'calendar') {
         renderPnlCalendar();
       } else if (tabId === 'config') {
+        syncGuardrailsUI();
         renderSetupsManager();
         applyMetricsVisibility();
       }
@@ -1590,6 +1660,7 @@
     async function init() {
       startClock();
       loadMetricsConfig();
+      await loadGuardrailsConfig();
       document.getElementById('log_date').value = new Date().toISOString().split('T')[0];
       await loadSetups();
       await loadTrades();
@@ -1684,12 +1755,15 @@
         if (net < 0) todayLoss += Math.abs(net);
       });
 
-      // 1. Daily Trades Quota (Max 2 Trades)
+      const maxTrades = (guardrailsConfig && guardrailsConfig.maxDailyTrades) ? guardrailsConfig.maxDailyTrades : 2;
+      const maxLoss = (guardrailsConfig && guardrailsConfig.maxDailyLoss) ? guardrailsConfig.maxDailyLoss : 10000;
+
+      // 1. Daily Trades Quota (Max Configured Trades)
       const countDisp = document.getElementById('pbTradesCountDisp');
       const countBadge = document.getElementById('pbTradesBadge');
       if (countDisp && countBadge) {
-        countDisp.textContent = `${tradesCount} / 2 Max`;
-        if (tradesCount >= 2) {
+        countDisp.textContent = `${tradesCount} / ${maxTrades} Max`;
+        if (tradesCount >= maxTrades) {
           countBadge.textContent = 'Quota Met';
           countBadge.className = 'text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold';
         } else {
@@ -1698,12 +1772,12 @@
         }
       }
 
-      // 2. Hard Daily Stop-Loss (₹10,000 Kill-Switch)
+      // 2. Hard Daily Stop-Loss (Configured Kill-Switch)
       const lossDisp = document.getElementById('pbDailyLossDisp');
       const killBadge = document.getElementById('pbKillSwitchBadge');
       if (lossDisp && killBadge) {
-        lossDisp.textContent = `-₹${todayLoss.toLocaleString('en-IN', { maximumFractionDigits: 0 })} / ₹10,000`;
-        if (todayLoss >= 10000) {
+        lossDisp.textContent = `-₹${todayLoss.toLocaleString('en-IN', { maximumFractionDigits: 0 })} / ₹${maxLoss.toLocaleString('en-IN')}`;
+        if (todayLoss >= maxLoss) {
           lossDisp.className = 'text-lg font-bold text-rose-500 animate-pulse';
           killBadge.textContent = '🛑 KILL SWITCH TRIGGERED';
           killBadge.className = 'text-[10px] px-2 py-0.5 rounded bg-rose-600 text-white font-bold animate-pulse';
@@ -2094,9 +2168,11 @@
     }
 
     function resetAllConfigToDefaults() {
-      if (confirm("Reset all setups and dashboard metric preferences back to default?")) {
+      if (confirm("Reset all setups, rule guardrails, and dashboard metric preferences back to default?")) {
         setupsData = [...SYSTEM_DEFAULT_SETUPS];
         metricsConfig = { ...DEFAULT_METRICS_CONFIG };
+        guardrailsConfig = { ...DEFAULT_GUARDRAILS };
+        saveGuardrailsConfig();
         syncSetups();
         applyMetricsVisibility();
         updateAllViews();
@@ -3475,6 +3551,104 @@
     }
 
     // ========================================================
+    // RISK GUARDRAILS CONFIGURATION ENGINE
+    // ========================================================
+    const DEFAULT_GUARDRAILS = {
+      maxDailyTrades: 2,
+      maxDailyLoss: 10000,
+      maxTradeRisk: 2500
+    };
+
+    let guardrailsConfig = { ...DEFAULT_GUARDRAILS };
+
+    async function loadGuardrailsConfig() {
+      // 1. Try fetching from backend /api/guardrails
+      try {
+        const res = await fetch('/api/guardrails');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.guardrails) {
+            guardrailsConfig = { ...DEFAULT_GUARDRAILS, ...data.guardrails };
+            localStorage.setItem('trader_reset_guardrails_config', JSON.stringify(guardrailsConfig));
+            syncGuardrailsUI();
+            return;
+          }
+        }
+      } catch(e) {
+        console.warn("Backend /api/guardrails unavailable, using cached local config:", e);
+      }
+
+      // 2. Fallback to localStorage
+      const saved = localStorage.getItem('trader_reset_guardrails_config');
+      if (saved) {
+        try {
+          guardrailsConfig = { ...DEFAULT_GUARDRAILS, ...JSON.parse(saved) };
+        } catch(e) {
+          guardrailsConfig = { ...DEFAULT_GUARDRAILS };
+        }
+      }
+      syncGuardrailsUI();
+    }
+
+    async function saveGuardrailsConfig() {
+      localStorage.setItem('trader_reset_guardrails_config', JSON.stringify(guardrailsConfig));
+      try {
+        await fetch('/api/guardrails', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(guardrailsConfig)
+        });
+      } catch(e) {
+        console.warn("Could not sync guardrails to backend /api/guardrails:", e);
+      }
+      syncGuardrailsUI();
+      updatePlaybookGuardrails();
+      renderPnlCalendar();
+    }
+
+    function handleSaveGuardrails(e) {
+      if (e) e.preventDefault();
+      const tradesInput = document.getElementById('config_max_daily_trades');
+      const lossInput = document.getElementById('config_max_daily_loss');
+      const riskInput = document.getElementById('config_max_trade_risk');
+
+      const maxTrades = tradesInput ? parseInt(tradesInput.value) : 2;
+      const maxLoss = lossInput ? parseFloat(lossInput.value) : 10000;
+      const maxRisk = riskInput ? parseFloat(riskInput.value) : 2500;
+
+      guardrailsConfig = {
+        maxDailyTrades: isNaN(maxTrades) || maxTrades <= 0 ? 2 : maxTrades,
+        maxDailyLoss: isNaN(maxLoss) || maxLoss <= 0 ? 10000 : maxLoss,
+        maxTradeRisk: isNaN(maxRisk) || maxRisk <= 0 ? 2500 : maxRisk
+      };
+
+      saveGuardrailsConfig();
+
+      const toast = document.getElementById('guardrailsSavedToast');
+      if (toast) {
+        toast.classList.remove('hidden');
+        setTimeout(() => toast.classList.add('hidden'), 3000);
+      }
+    }
+
+    function resetGuardrailsToDefault() {
+      if (confirm("Reset rule guardrails to system defaults (Max 2 trades/day, ₹10,000 daily loss)?")) {
+        guardrailsConfig = { ...DEFAULT_GUARDRAILS };
+        saveGuardrailsConfig();
+      }
+    }
+
+    function syncGuardrailsUI() {
+      const tradesInput = document.getElementById('config_max_daily_trades');
+      const lossInput = document.getElementById('config_max_daily_loss');
+      const riskInput = document.getElementById('config_max_trade_risk');
+
+      if (tradesInput) tradesInput.value = guardrailsConfig.maxDailyTrades || 2;
+      if (lossInput) lossInput.value = guardrailsConfig.maxDailyLoss || 10000;
+      if (riskInput) riskInput.value = guardrailsConfig.maxTradeRisk || 2500;
+    }
+
+    // ========================================================
     // P&L CALENDAR & RULE AUDIT ENGINE
     // ========================================================
     let calendarState = {
@@ -3554,6 +3728,10 @@
       const year = calendarState.year;
       const month = calendarState.month; // 0-indexed
 
+      const maxTrades = (guardrailsConfig && guardrailsConfig.maxDailyTrades) ? guardrailsConfig.maxDailyTrades : 2;
+      const maxLoss = (guardrailsConfig && guardrailsConfig.maxDailyLoss) ? guardrailsConfig.maxDailyLoss : 10000;
+      const lossFmt = maxLoss >= 1000 ? (maxLoss / 1000).toFixed(0) + 'K' : maxLoss;
+
       // Group all trades by date (YYYY-MM-DD)
       const tradesByDate = {};
       for (const t of tradesData) {
@@ -3600,8 +3778,8 @@
           if (dayNet > 0) greenDaysCount++;
           else if (dayNet < 0) redDaysCount++;
 
-          const isOvertrade = dayTrades.length > 2;
-          const isHardStop = dayNet < -10000;
+          const isOvertrade = dayTrades.length > maxTrades;
+          const isHardStop = dayNet < -maxLoss;
           if (isOvertrade) overtradingDaysCount++;
           if (isHardStop) hardStopLossDaysCount++;
           if (isOvertrade || isHardStop) totalBreachDaysCount++;
@@ -3636,7 +3814,7 @@
       const elTotalTrades = document.getElementById('calStatTotalTrades');
       if (elTotalTrades) elTotalTrades.textContent = monthTradesCount;
       const elAvgTrades = document.getElementById('calStatAvgTradesPerDay');
-      if (elAvgTrades) elAvgTrades.textContent = `${avgTradesPerDay} trades / day avg`;
+      if (elAvgTrades) elAvgTrades.textContent = `${avgTradesPerDay} trades / day avg (Cap: ${maxTrades})`;
 
       const elBreachDays = document.getElementById('calStatBreachDays');
       if (elBreachDays) {
@@ -3648,7 +3826,7 @@
       }
       const elBreachBreakdown = document.getElementById('calStatBreachBreakdown');
       if (elBreachBreakdown) {
-        elBreachBreakdown.textContent = `${overtradingDaysCount} Overtrade (>2) • ${hardStopLossDaysCount} Hard SL (>₹10K)`;
+        elBreachBreakdown.textContent = `${overtradingDaysCount} Overtrade (>${maxTrades}) • ${hardStopLossDaysCount} Hard SL (>₹${lossFmt})`;
       }
       const elComplianceRate = document.getElementById('calStatComplianceRate');
       if (elComplianceRate) {
@@ -3701,10 +3879,10 @@
           const isWin = dayNet > 0;
           const isLoss = dayNet < 0;
 
-          // Rule breaches (User requirement: >2 trades OR >10K lost)
-          const isOvertrading = tradeCount > 2;
-          const isLossBreach = dayNet < -10000;
-          const hasBreach = isOvertrading || isLossBreach;
+          // Configured Rule Breaches
+          const isOvertrading = tradeCount > maxTrades;
+          const isHardStop = dayNet < -maxLoss;
+          const hasBreach = isOvertrading || isHardStop;
 
           let cardBg = '';
           let borderClass = '';
@@ -3730,14 +3908,14 @@
           const pnlSign = dayNet > 0 ? '+' : '';
 
           let badgeHtml = '';
-          if (isOvertrading && isLossBreach) {
+          if (isOvertrading && isHardStop) {
             badgeHtml = `
               <div class="mt-1 flex flex-col gap-0.5">
                 <span class="inline-flex items-center gap-1 text-[9px] font-bold text-rose-300 bg-rose-950/90 border border-rose-800/80 px-1 py-0.2 rounded w-fit">
-                  🚨 ${tradeCount} Trades (&gt;2)
+                  🚨 ${tradeCount} Trades (&gt;${maxTrades})
                 </span>
                 <span class="inline-flex items-center gap-1 text-[9px] font-bold text-amber-300 bg-amber-950/90 border border-amber-800/80 px-1 py-0.2 rounded w-fit">
-                  🛑 &gt;₹10K Hard SL
+                  🛑 &gt;₹${lossFmt} Hard SL
                 </span>
               </div>
             `;
@@ -3745,15 +3923,15 @@
             badgeHtml = `
               <div class="mt-1">
                 <span class="inline-flex items-center gap-1 text-[9px] font-bold text-rose-300 bg-rose-950/90 border border-rose-800/80 px-1 py-0.2 rounded w-fit">
-                  🚨 ${tradeCount} Trades (&gt;2)
+                  🚨 ${tradeCount} Trades (&gt;${maxTrades})
                 </span>
               </div>
             `;
-          } else if (isLossBreach) {
+          } else if (isHardStop) {
             badgeHtml = `
               <div class="mt-1">
                 <span class="inline-flex items-center gap-1 text-[9px] font-bold text-amber-300 bg-amber-950/90 border border-amber-800/80 px-1 py-0.2 rounded w-fit">
-                  🛑 &gt;₹10K Hard SL
+                  🛑 &gt;₹${lossFmt} Hard SL
                 </span>
               </div>
             `;
@@ -3858,17 +4036,20 @@
       document.getElementById('calModalDaySubTitle').textContent = `${tradeCount} Trades Executed • Gross: ₹${totalGross.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       document.getElementById('calModalSummaryNote').textContent = `Total Broker Statutory Charges: ₹${totalCosts.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-      const isOvertrading = tradeCount > 2;
-      const isHardStop = totalNet < -10000;
+      const maxTrades = (guardrailsConfig && guardrailsConfig.maxDailyTrades) ? guardrailsConfig.maxDailyTrades : 2;
+      const maxLoss = (guardrailsConfig && guardrailsConfig.maxDailyLoss) ? guardrailsConfig.maxDailyLoss : 10000;
+
+      const isOvertrading = tradeCount > maxTrades;
+      const isHardStop = totalNet < -maxLoss;
 
       const ruleCards = document.getElementById('calModalRuleCards');
       if (ruleCards) {
         ruleCards.innerHTML = `
-          <!-- Rule 1: Max 2 Trades/Day -->
+          <!-- Rule 1: Max Trades/Day -->
           <div class="glass-panel p-3.5 rounded-xl border ${isOvertrading ? 'border-rose-500/50 bg-rose-950/20' : 'border-emerald-500/40 bg-emerald-950/20'} flex flex-col justify-between">
             <div class="flex items-center justify-between">
               <span class="text-[11px] font-mono uppercase tracking-wider text-slate-300 font-bold flex items-center gap-1.5">
-                <span>🎯</span> Rule 1: Daily Trade Cap (≤ 2)
+                <span>🎯</span> Rule 1: Daily Trade Cap (≤ ${maxTrades})
               </span>
               <span class="text-[10px] font-mono px-2 py-0.5 rounded font-bold ${isOvertrading ? 'bg-rose-950 text-rose-300 border border-rose-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'}">
                 ${isOvertrading ? 'VIOLATION' : 'PASSED'}
@@ -3876,19 +4057,19 @@
             </div>
             <div class="my-2">
               <div class="text-sm font-mono font-bold ${isOvertrading ? 'text-rose-400' : 'text-emerald-400'}">
-                ${tradeCount} Trade${tradeCount > 1 ? 's' : ''} Taken (Limit: 2)
+                ${tradeCount} Trade${tradeCount > 1 ? 's' : ''} Taken (Limit: ${maxTrades})
               </div>
               <p class="text-[11px] text-slate-400 font-mono mt-0.5">
-                ${isOvertrading ? `Breached by ${tradeCount - 2} extra trade(s). Overtrading dilutes statistical edge and leads to revenge trading.` : 'Disciplined trade frequency maintained within guardrail limit.'}
+                ${isOvertrading ? `Breached by ${tradeCount - maxTrades} extra trade(s). Overtrading dilutes statistical edge and leads to revenge trading.` : 'Disciplined trade frequency maintained within configured guardrail limit.'}
               </p>
             </div>
           </div>
 
-          <!-- Rule 2: Max ₹10,000 Hard SL -->
+          <!-- Rule 2: Max Hard SL -->
           <div class="glass-panel p-3.5 rounded-xl border ${isHardStop ? 'border-amber-500/50 bg-amber-950/20' : 'border-emerald-500/40 bg-emerald-950/20'} flex flex-col justify-between">
             <div class="flex items-center justify-between">
               <span class="text-[11px] font-mono uppercase tracking-wider text-slate-300 font-bold flex items-center gap-1.5">
-                <span>🛑</span> Rule 2: Daily Hard SL (₹10,000)
+                <span>🛑</span> Rule 2: Daily Hard SL (₹${maxLoss.toLocaleString('en-IN')})
               </span>
               <span class="text-[10px] font-mono px-2 py-0.5 rounded font-bold ${isHardStop ? 'bg-amber-950 text-amber-300 border border-amber-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'}">
                 ${isHardStop ? 'BREACHED' : 'PASSED'}
@@ -3896,10 +4077,10 @@
             </div>
             <div class="my-2">
               <div class="text-sm font-mono font-bold ${isHardStop ? 'text-amber-400' : 'text-emerald-400'}">
-                ${totalNet < 0 ? `-₹${Math.abs(totalNet).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : `+₹${totalNet.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`} (Cap: -₹10,000)
+                ${totalNet < 0 ? `-₹${Math.abs(totalNet).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : `+₹${totalNet.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`} (Cap: -₹${maxLoss.toLocaleString('en-IN')})
               </div>
               <p class="text-[11px] text-slate-400 font-mono mt-0.5">
-                ${isHardStop ? `Exceeded ₹10,000 max daily stop loss by ₹${(Math.abs(totalNet) - 10000).toLocaleString('en-IN', { minimumFractionDigits: 2 })}. Circuit breaker rule requires trading to halt immediately.` : 'Daily loss was kept safely within the circuit breaker.'}
+                ${isHardStop ? `Exceeded ₹${maxLoss.toLocaleString('en-IN')} max daily stop loss by ₹${(Math.abs(totalNet) - maxLoss).toLocaleString('en-IN', { minimumFractionDigits: 2 })}. Circuit breaker rule requires trading to halt immediately.` : 'Daily loss was kept safely within the circuit breaker.'}
               </p>
             </div>
           </div>
