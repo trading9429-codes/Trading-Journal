@@ -1324,7 +1324,7 @@
           <strong>How to Use in Chartink:</strong> Open <span class="text-white underline">chartink.com/screener/create-screener</span> &rarr; Click <em>"Paste screener"</em> (or import code) &rarr; Paste one of the formulas below &rarr; Set timeframe to <strong>5-Minute</strong> &rarr; Run screener at <strong>09:30 AM, 09:45 AM, and 10:00 AM</strong>.
         </div>
 
-        <!-- 3 Scanner Formula Cards -->
+        <!-- 5 Scanner Formula Cards -->
         <div class="space-y-4">
 
           <!-- Scanner 1: Setup A - VWAP & EMA Breakout -->
@@ -1332,22 +1332,23 @@
             <div class="flex items-center justify-between flex-wrap gap-2">
               <div class="flex items-center gap-2">
                 <span class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 font-mono font-bold text-xs border border-blue-500/20">Scanner 1</span>
-                <span class="font-bold text-white text-sm">Setup A: 5m VWAP &amp; EMA Breakout (VWAP BO)</span>
+                <span class="font-bold text-white text-sm">Setup A: 5m VWAP &amp; EMA Breakout (Liquid + Daily Aligned)</span>
               </div>
               <button type="button" onclick="copyChartinkFormula('setupA', this)" class="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition flex items-center gap-1">
                 <span>📋 Copy Formula</span>
               </button>
             </div>
             <p class="text-xs text-slate-400 font-mono">
-              Scans for stocks crossing above 5m VWAP with 10 EMA &gt; 20 EMA &gt; 50 EMA, bull candle confirmation, and explosive <strong>&gt;3x relative volume</strong>.
+              Scans for liquid stocks (&ge;₹150, &ge;₹50L 5m turnover) crossing above VWAP with stacked EMAs ($10 &gt; 20 &gt; 50$), bullish daily trend (Daily &gt; 20 EMA), and closing in the upper 70% of the candle.
             </p>
             <div class="bg-slate-900/90 p-3 rounded-lg border border-slate-800 text-[11px] font-mono text-emerald-400 overflow-x-auto whitespace-pre-wrap select-all">
-( {cash} ( [0] 5 minute close &gt; [0] 5 minute vwap and [-1] 5 minute close &lt;= [-1] 5 minute vwap and [0] 5 minute ema( [0] 5 minute close , 10 ) &gt; [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) &gt; [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute volume &gt; [0] 5 minute sma( [0] 5 minute volume , 20 ) * 3 and [0] 5 minute close &gt; [0] 5 minute open and [0] 5 minute close &gt;= 100 and [0] 5 minute close &lt;= 5000 ) )
+( {cash} ( [0] 5 minute close &gt; [0] 5 minute vwap and [-1] 5 minute close &lt;= [-1] 5 minute vwap and [0] 5 minute ema( [0] 5 minute close , 10 ) &gt; [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) &gt; [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute volume &gt; [0] 5 minute sma( [0] 5 minute volume , 20 ) * 3 and [0] 5 minute close * [0] 5 minute volume &gt;= 5000000 and [0] 5 minute close &gt; [0] 5 minute open and ( [0] 5 minute close - [0] 5 minute low ) &gt;= ( [0] 5 minute high - [0] 5 minute low ) * 0.70 and [0] daily close &gt; [0] daily ema( [0] daily close , 20 ) and [0] 5 minute close &gt;= 150 and [0] 5 minute close &lt;= 7500 ) )
             </div>
             <div class="flex flex-wrap gap-3 text-[11px] text-slate-400 font-mono pt-1">
               <span>🎯 <strong>Trigger:</strong> First 5m candle closing solidly above VWAP</span>
               <span>🛑 <strong>Stop-Loss:</strong> 0.8% below candle low or VWAP</span>
               <span>🏁 <strong>Target:</strong> 2.0% - 2.5% (1:2.5 R:R)</span>
+              <span>💧 <strong>Liquidity:</strong> ₹50L+ 5m Turnover</span>
             </div>
           </div>
 
@@ -1356,22 +1357,23 @@
             <div class="flex items-center justify-between flex-wrap gap-2">
               <div class="flex items-center gap-2">
                 <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-mono font-bold text-xs border border-emerald-500/20">Scanner 2</span>
-                <span class="font-bold text-white text-sm">Setup B: 5m Volume Surge &amp; EMA Continuation</span>
+                <span class="font-bold text-white text-sm">Setup B: 5m Volume Surge &amp; EMA Continuation (₹1 Cr+ Block)</span>
               </div>
               <button type="button" onclick="copyChartinkFormula('setupB', this)" class="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition flex items-center gap-1">
                 <span>📋 Copy Formula</span>
               </button>
             </div>
             <p class="text-xs text-slate-400 font-mono">
-              Finds massive institutional order blocks: <strong>&gt;5x volume spike</strong> on a 5m candle with &ge;1.5% candle range, trading above VWAP and all 3 EMAs.
+              Finds massive institutional order blocks: <strong>&gt;4x volume spike</strong> with &ge;₹1 Crore single-candle turnover, &ge;1.2% candle range, upper 75% close, trading above VWAP and all 3 EMAs.
             </p>
             <div class="bg-slate-900/90 p-3 rounded-lg border border-slate-800 text-[11px] font-mono text-blue-400 overflow-x-auto whitespace-pre-wrap select-all">
-( {cash} ( [0] 5 minute volume &gt; [0] 5 minute sma( [0] 5 minute volume , 20 ) * 5 and [0] 5 minute close &gt; [0] 5 minute ema( [0] 5 minute close , 10 ) and [0] 5 minute ema( [0] 5 minute close , 10 ) &gt; [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) &gt; [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute close &gt; [0] 5 minute vwap and ( [0] 5 minute high - [0] 5 minute low ) / [0] 5 minute low * 100 &gt;= 1.5 and [0] 5 minute close &gt;= 100 ) )
+( {cash} ( [0] 5 minute volume &gt; [0] 5 minute sma( [0] 5 minute volume , 20 ) * 4 and [0] 5 minute close * [0] 5 minute volume &gt;= 10000000 and [0] 5 minute close &gt; [0] 5 minute ema( [0] 5 minute close , 10 ) and [0] 5 minute ema( [0] 5 minute close , 10 ) &gt; [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) &gt; [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute close &gt; [0] 5 minute vwap and ( [0] 5 minute high - [0] 5 minute low ) / [0] 5 minute low * 100 &gt;= 1.2 and ( [0] 5 minute close - [0] 5 minute low ) &gt;= ( [0] 5 minute high - [0] 5 minute low ) * 0.75 and [0] 5 minute close &gt;= 150 ) )
             </div>
             <div class="flex flex-wrap gap-3 text-[11px] text-slate-400 font-mono pt-1">
               <span>🎯 <strong>Trigger:</strong> High break of the 5m surge candle</span>
               <span>🛑 <strong>Stop-Loss:</strong> Below surge candle low</span>
               <span>🏁 <strong>Target:</strong> Trail with 10 EMA or 1:3 R:R</span>
+              <span>💧 <strong>Liquidity:</strong> ₹1 Cr+ 5m Turnover</span>
             </div>
           </div>
 
@@ -1380,7 +1382,7 @@
             <div class="flex items-center justify-between flex-wrap gap-2">
               <div class="flex items-center gap-2">
                 <span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 font-mono font-bold text-xs border border-purple-500/20">Scanner 3</span>
-                <span class="font-bold text-white text-sm">Setup C: EMA &amp; VWAP Pullback Reversal</span>
+                <span class="font-bold text-white text-sm">Setup C: EMA &amp; VWAP Pullback Reversal (Low-Risk Dip)</span>
               </div>
               <button type="button" onclick="copyChartinkFormula('setupC', this)" class="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition flex items-center gap-1">
                 <span>📋 Copy Formula</span>
@@ -1390,12 +1392,64 @@
               Identifies high-probability dip entries in established uptrends: stock pulls back to touch 20 EMA, creates a rejection wick, volume dries up on the pullback, and holds above VWAP.
             </p>
             <div class="bg-slate-900/90 p-3 rounded-lg border border-slate-800 text-[11px] font-mono text-purple-400 overflow-x-auto whitespace-pre-wrap select-all">
-( {cash} ( [0] 5 minute ema( [0] 5 minute close , 10 ) &gt; [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) &gt; [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute low &lt;= [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute close &gt;= [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute close &gt;= [0] 5 minute vwap and ( [0] 5 minute close - [0] 5 minute low ) &gt;= ( [0] 5 minute high - [0] 5 minute low ) * 0.4 and [-1] 5 minute volume &lt; [0] 5 minute sma( [0] 5 minute volume , 20 ) * 1.5 and [0] 5 minute close &gt;= 100 ) )
+( {cash} ( [0] 5 minute ema( [0] 5 minute close , 10 ) &gt; [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) &gt; [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute low &lt;= [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute close &gt;= [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute close &gt;= [0] 5 minute vwap and ( [0] 5 minute close - [0] 5 minute low ) &gt;= ( [0] 5 minute high - [0] 5 minute low ) * 0.50 and [-1] 5 minute volume &lt; [0] 5 minute sma( [0] 5 minute volume , 20 ) * 1.5 and [0] 5 minute close * [0] 5 minute volume &gt;= 2500000 and [0] daily close &gt; [0] daily ema( [0] daily close , 20 ) and [0] 5 minute close &gt;= 150 ) )
             </div>
             <div class="flex flex-wrap gap-3 text-[11px] text-slate-400 font-mono pt-1">
               <span>🎯 <strong>Trigger:</strong> Candle breaking previous high with lower rejection wick</span>
               <span>🛑 <strong>Stop-Loss:</strong> Tight, just below the 20 EMA / pullback low (0.5% - 0.7%)</span>
               <span>🏁 <strong>Target:</strong> Prior swing high then 1:2.5 R:R</span>
+            </div>
+          </div>
+
+          <!-- Scanner 4: Institutional 20-Day High Breakout Mega-Runner -->
+          <div class="bg-gradient-to-r from-amber-950/30 via-slate-950/80 to-slate-950/80 p-4 rounded-xl border border-amber-500/40 space-y-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 font-mono font-bold text-xs border border-amber-500/30">🚀 Mega-Runner</span>
+                <span class="font-bold text-white text-sm">Scanner 4: 20-Day Range Breakout (Zero Overhead Supply)</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono font-bold">Big Winner DNA</span>
+              </div>
+              <button type="button" onclick="copyChartinkFormula('setupBigWinner', this)" class="px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-mono text-xs font-bold transition flex items-center gap-1">
+                <span>📋 Copy Formula</span>
+              </button>
+            </div>
+            <p class="text-xs text-slate-300 font-mono">
+              Targets the <strong>top 0.5% multi-day super-movers</strong>: stock breaking above its 20-day high with ₹1 Crore+ single-candle turnover, &gt;3x relative volume, above VWAP, closing in the top 25% of the candle, with bullish daily EMA alignment ($20 &gt; 50$). Trapped short-sellers have no resistance to lean on!
+            </p>
+            <div class="bg-slate-900/90 p-3 rounded-lg border border-slate-800 text-[11px] font-mono text-amber-400 overflow-x-auto whitespace-pre-wrap select-all">
+( {cash} ( [0] 5 minute close &gt; [-1] daily max( 20 , [0] daily high ) and [0] 5 minute close &gt; [0] 5 minute vwap and [0] 5 minute volume &gt; [0] 5 minute sma( [0] 5 minute volume , 20 ) * 3 and [0] 5 minute close * [0] 5 minute volume &gt;= 10000000 and [0] 5 minute ema( [0] 5 minute close , 10 ) &gt; [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] daily ema( [0] daily close , 20 ) &gt; [0] daily ema( [0] daily close , 50 ) and ( [0] 5 minute close - [0] 5 minute low ) &gt;= ( [0] 5 minute high - [0] 5 minute low ) * 0.75 and [0] 5 minute close &gt;= 150 and [0] 5 minute close &lt;= 10000 ) )
+            </div>
+            <div class="flex flex-wrap gap-3 text-[11px] text-slate-300 font-mono pt-1">
+              <span>🎯 <strong>Trigger:</strong> 5m candle closing at fresh 20-day high above VWAP</span>
+              <span>🛑 <strong>Stop-Loss:</strong> Previous 20-day high breakout level or 1.0%</span>
+              <span>🏁 <strong>Target:</strong> 3.0% to 5.0%+ intraday runner or trail with 10 EMA</span>
+              <span>⚡ <strong>Edge:</strong> No trapped overhead sellers</span>
+            </div>
+          </div>
+
+          <!-- Scanner 5: F&O Institutional Momentum Leader -->
+          <div class="bg-gradient-to-r from-blue-950/30 via-slate-950/80 to-slate-950/80 p-4 rounded-xl border border-blue-500/40 space-y-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 font-mono font-bold text-xs border border-blue-500/30">⚡ F&amp;O Universe</span>
+                <span class="font-bold text-white text-sm">Scanner 5: High-Liquid F&amp;O Momentum Leader (Zero Circuit Risk)</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 font-mono font-bold">Zero Slippage</span>
+              </div>
+              <button type="button" onclick="copyChartinkFormula('setupFNO', this)" class="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition flex items-center gap-1">
+                <span>📋 Copy Formula</span>
+              </button>
+            </div>
+            <p class="text-xs text-slate-300 font-mono">
+              Filters strictly for <strong>NSE Futures &amp; Options stocks</strong> (Reliance, Tata Motors, Dixon, Trent, etc.). Zero circuit lockout risk, thick order books, ₹1.5 Crore+ 5m candle turnover, &gt;3x volume, &ge;1.0% expansion, and closing in the top 20% of range. Ideal for scaling size safely.
+            </p>
+            <div class="bg-slate-900/90 p-3 rounded-lg border border-slate-800 text-[11px] font-mono text-cyan-400 overflow-x-auto whitespace-pre-wrap select-all">
+( {future} ( [0] 5 minute volume &gt; [0] 5 minute sma( [0] 5 minute volume , 20 ) * 3 and [0] 5 minute close * [0] 5 minute volume &gt;= 15000000 and [0] 5 minute close &gt; [0] 5 minute vwap and [0] 5 minute close &gt; [0] 5 minute ema( [0] 5 minute close , 10 ) and [0] 5 minute ema( [0] 5 minute close , 10 ) &gt; [0] 5 minute ema( [0] 5 minute close , 20 ) and ( [0] 5 minute close - [0] 5 minute low ) &gt;= ( [0] 5 minute high - [0] 5 minute low ) * 0.80 and ( [0] 5 minute high - [0] 5 minute low ) / [0] 5 minute low * 100 &gt;= 1.0 ) )
+            </div>
+            <div class="flex flex-wrap gap-3 text-[11px] text-slate-300 font-mono pt-1">
+              <span>🎯 <strong>Trigger:</strong> High break of 5m expansion candle</span>
+              <span>🛑 <strong>Stop-Loss:</strong> Low of the 5m candle (tight ~0.6% - 0.8%)</span>
+              <span>🏁 <strong>Target:</strong> 1.5% - 2.5% intraday (high position sizing friendly)</span>
+              <span>🛡️ <strong>Safety:</strong> No lower circuit lockouts</span>
             </div>
           </div>
 
@@ -3756,9 +3810,11 @@
     // CHARTINK A+ SCANNERS & TIME-RESTRICTION ENGINE
     // ========================================================
     const CHARTINK_FORMULAS = {
-      setupA: `( {cash} ( [0] 5 minute close > [0] 5 minute vwap and [-1] 5 minute close <= [-1] 5 minute vwap and [0] 5 minute ema( [0] 5 minute close , 10 ) > [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) > [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute volume > [0] 5 minute sma( [0] 5 minute volume , 20 ) * 3 and [0] 5 minute close > [0] 5 minute open and [0] 5 minute close >= 100 and [0] 5 minute close <= 5000 ) )`,
-      setupB: `( {cash} ( [0] 5 minute volume > [0] 5 minute sma( [0] 5 minute volume , 20 ) * 5 and [0] 5 minute close > [0] 5 minute ema( [0] 5 minute close , 10 ) and [0] 5 minute ema( [0] 5 minute close , 10 ) > [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) > [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute close > [0] 5 minute vwap and ( [0] 5 minute high - [0] 5 minute low ) / [0] 5 minute low * 100 >= 1.5 and [0] 5 minute close >= 100 ) )`,
-      setupC: `( {cash} ( [0] 5 minute ema( [0] 5 minute close , 10 ) > [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) > [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute low <= [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute close >= [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute close >= [0] 5 minute vwap and ( [0] 5 minute close - [0] 5 minute low ) >= ( [0] 5 minute high - [0] 5 minute low ) * 0.4 and [-1] 5 minute volume < [0] 5 minute sma( [0] 5 minute volume , 20 ) * 1.5 and [0] 5 minute close >= 100 ) )`
+      setupA: `( {cash} ( [0] 5 minute close > [0] 5 minute vwap and [-1] 5 minute close <= [-1] 5 minute vwap and [0] 5 minute ema( [0] 5 minute close , 10 ) > [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) > [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute volume > [0] 5 minute sma( [0] 5 minute volume , 20 ) * 3 and [0] 5 minute close * [0] 5 minute volume >= 5000000 and [0] 5 minute close > [0] 5 minute open and ( [0] 5 minute close - [0] 5 minute low ) >= ( [0] 5 minute high - [0] 5 minute low ) * 0.70 and [0] daily close > [0] daily ema( [0] daily close , 20 ) and [0] 5 minute close >= 150 and [0] 5 minute close <= 7500 ) )`,
+      setupB: `( {cash} ( [0] 5 minute volume > [0] 5 minute sma( [0] 5 minute volume , 20 ) * 4 and [0] 5 minute close * [0] 5 minute volume >= 10000000 and [0] 5 minute close > [0] 5 minute ema( [0] 5 minute close , 10 ) and [0] 5 minute ema( [0] 5 minute close , 10 ) > [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) > [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute close > [0] 5 minute vwap and ( [0] 5 minute high - [0] 5 minute low ) / [0] 5 minute low * 100 >= 1.2 and ( [0] 5 minute close - [0] 5 minute low ) >= ( [0] 5 minute high - [0] 5 minute low ) * 0.75 and [0] 5 minute close >= 150 ) )`,
+      setupC: `( {cash} ( [0] 5 minute ema( [0] 5 minute close , 10 ) > [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) > [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute low <= [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute close >= [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute close >= [0] 5 minute vwap and ( [0] 5 minute close - [0] 5 minute low ) >= ( [0] 5 minute high - [0] 5 minute low ) * 0.50 and [-1] 5 minute volume < [0] 5 minute sma( [0] 5 minute volume , 20 ) * 1.5 and [0] 5 minute close * [0] 5 minute volume >= 2500000 and [0] daily close > [0] daily ema( [0] daily close , 20 ) and [0] 5 minute close >= 150 ) )`,
+      setupBigWinner: `( {cash} ( [0] 5 minute close > [-1] daily max( 20 , [0] daily high ) and [0] 5 minute close > [0] 5 minute vwap and [0] 5 minute volume > [0] 5 minute sma( [0] 5 minute volume , 20 ) * 3 and [0] 5 minute close * [0] 5 minute volume >= 10000000 and [0] 5 minute ema( [0] 5 minute close , 10 ) > [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] daily ema( [0] daily close , 20 ) > [0] daily ema( [0] daily close , 50 ) and ( [0] 5 minute close - [0] 5 minute low ) >= ( [0] 5 minute high - [0] 5 minute low ) * 0.75 and [0] 5 minute close >= 150 and [0] 5 minute close <= 10000 ) )`,
+      setupFNO: `( {future} ( [0] 5 minute volume > [0] 5 minute sma( [0] 5 minute volume , 20 ) * 3 and [0] 5 minute close * [0] 5 minute volume >= 15000000 and [0] 5 minute close > [0] 5 minute vwap and [0] 5 minute close > [0] 5 minute ema( [0] 5 minute close , 10 ) and [0] 5 minute ema( [0] 5 minute close , 10 ) > [0] 5 minute ema( [0] 5 minute close , 20 ) and ( [0] 5 minute close - [0] 5 minute low ) >= ( [0] 5 minute high - [0] 5 minute low ) * 0.80 and ( [0] 5 minute high - [0] 5 minute low ) / [0] 5 minute low * 100 >= 1.0 ) )`
     };
 
     function copyChartinkFormula(key, btnEl) {
