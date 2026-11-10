@@ -414,146 +414,146 @@ def aggregate_order_slices(fills):
 
 def match_roundtrip_trades(fills, existing_count=0, default_setup=DEFAULT_SETUP_NAME):
     """
-    Pairs BUY and SELL fills into consolidated daily scrip trades (Option A)
-    matching FYERS Verified P&L reporting.
-    Calculates exact VWAP Entry and Exit, Gross PnL, 0.8% Planned SL, 2.0% Planned Target,
-    and FYERS statutory friction.
+    Pairs BUY and SELL fills into individual round-trip trades using FIFO position matching.
+    Breaks down multiple trades taken in the same stock on the same day into separate individual trade rows.
+    Calculates exact execution Entry and Exit prices, hold duration, Gross PnL,
+    0.8% Planned SL, 2.0% Planned Target, 2.50 Planned RR, and FYERS statutory friction.
     """
     if not fills:
         return []
 
     from collections import defaultdict
-    by_day_sym = defaultdict(lambda: {
-        "buy_qty": 0, "buy_val": 0.0,
-        "sell_qty": 0, "sell_val": 0.0,
-        "buy_times": [], "sell_times": [],
-        "raw_symbol": ""
-    })
 
-    for f in fills:
-        key = (f["date"], f["symbol"])
-        group = by_day_sym[key]
-        if not group["raw_symbol"]:
-            group["raw_symbol"] = f.get("raw_symbol", f["symbol"])
-        if f["side"] == "BUY":
-            group["buy_qty"] += f["qty"]
-            group["buy_val"] += f["qty"] * f["price"]
-            group["buy_times"].append(f["time"])
-        else:
-            group["sell_qty"] += f["qty"]
-            group["sell_val"] += f["qty"] * f["price"]
-            group["sell_times"].append(f["time"])
+    # 1. First aggregate broker partial fills sharing the same order ID into clean order legs
+    order_legs = aggregate_order_slices(fills)
 
-    # Prepare list sorted chronologically by (date, earliest execution time)
-    trade_items = []
-    for (d, sym), v in by_day_sym.items():
-        all_times = sorted(v["buy_times"] + v["sell_times"])
-        min_time = all_times[0] if all_times else "09:20"
-        trade_items.append((d, min_time, sym, v))
+    # 2. Group order legs by (date, symbol) to prevent intraday positions from spanning days
+    by_day_sym = defaultdict(list)
+    for l in order_legs:
+        by_day_sym[(l["date"], l["symbol"])].append(l)
 
-    trade_items.sort(key=lambda x: (x[0], x[1]))
+    raw_matched_trades = []
 
+    # 3. For each symbol on each day, match entries and exits via FIFO queue
+    for (d, sym), slegs in by_day_sym.items():
+        slegs.sort(key=lambda x: x["dt"])
+        open_slices = []
+
+        for leg in slegs:
+            qty_rem = leg["qty"]
+            side = leg["side"]
+
+            while qty_rem > 0 and open_slices and open_slices[0]["side"] != side:
+                op = open_slices[0]
+                matched_qty = min(qty_rem, op["qty"])
+
+                is_long = (op["side"] == "BUY")
+                direction = "Long" if is_long else "Short"
+                entry_px = round(op["price"], 2)
+                exit_px = round(leg["price"], 2)
+
+                entry_time_clean = op["time"][:5]
+                exit_time_clean = leg["time"][:5]
+                raw_sym = op.get("raw_symbol") or leg.get("raw_symbol") or sym
+
+                # Hold duration in minutes
+                try:
+                    t1 = op["dt"]
+                    t2 = leg["dt"]
+                    hold_minutes = max(1, int((t2 - t1).total_seconds() / 60))
+                except Exception:
+                    hold_minutes = 15
+
+                # Exact Gross PnL matching broker execution
+                gross_pnl = round(matched_qty * (leg["price"] - op["price"]) if is_long else matched_qty * (op["price"] - leg["price"]), 2)
+
+                # 0.8% Planned SL, 2.0% Planned Target, 2.50R
+                if direction == "Long":
+                    stop_px = round(entry_px * (1.0 - PLANNED_SL_PCT), 2)
+                    target_px = round(entry_px * (1.0 + PLANNED_TGT_PCT), 2)
+                    risk_per_share = round(entry_px - stop_px, 2)
+                else:
+                    stop_px = round(entry_px * (1.0 + PLANNED_SL_PCT), 2)
+                    target_px = round(entry_px * (1.0 - PLANNED_TGT_PCT), 2)
+                    risk_per_share = round(stop_px - entry_px, 2)
+
+                planned_rr = PLANNED_RR
+                risk_amount = round(risk_per_share * matched_qty, 2)
+
+                # FYERS statutory friction
+                charges = calculate_fyers_charges(entry_px, exit_px, matched_qty, direction)
+                costs = round(float(charges.get("total_costs", 0.0)), 2)
+
+                net_pnl = round(gross_pnl - costs, 2)
+                r_multiple = round(net_pnl / risk_amount, 2) if risk_amount > 0 else 0.0
+                outcome = "Win" if net_pnl > 10 else ("Loss" if net_pnl < -10 else "Break-Even")
+
+                raw_matched_trades.append({
+                    "date": d,
+                    "entry_dt": op["dt"],
+                    "time": entry_time_clean,
+                    "exit_time": exit_time_clean,
+                    "hold_duration": hold_minutes,
+                    "symbol": sym,
+                    "raw_symbol": raw_sym,
+                    "direction": direction,
+                    "setup_name": default_setup or DEFAULT_SETUP_NAME,
+                    "scanner_alert_time": entry_time_clean,
+                    "htf_ok": "Y",
+                    "no_chase": "Y",
+                    "stop_defined": "Y",
+                    "target_price": target_px,
+                    "rr_planned": planned_rr,
+                    "risk_percent": PLANNED_SL_PCT,
+                    "risk_amount": risk_amount,
+                    "entry_price": entry_px,
+                    "stop_price": stop_px,
+                    "exit_price": exit_px,
+                    "qty": int(matched_qty),
+                    "gross_pnl": gross_pnl,
+                    "costs": costs,
+                    "net_pnl": net_pnl,
+                    "r_multiple": r_multiple,
+                    "outcome": outcome,
+                    "checklist_score": 5,
+                    "rule_violation": "N",
+                    "violation_type": "None",
+                    "emotion_before": 2,
+                    "emotion_during": 2,
+                    "emotion_after": 2 if net_pnl > 0 else 3,
+                    "trade_valid": "Y",
+                    "lesson": f"Imported FYERS Tradebook ({raw_sym}). {direction} {int(matched_qty)} @ ₹{entry_px} -> ₹{exit_px} ({hold_minutes}m hold). 0.8% SL (₹{stop_px}), 2.0% Target (₹{target_px}).",
+                    "screenshot_link": f"https://www.tradingview.com/chart/?symbol=NSE:{sym}"
+                })
+
+                qty_rem -= matched_qty
+                op["qty"] -= matched_qty
+                if op["qty"] <= 0.0001:
+                    open_slices.pop(0)
+
+            if qty_rem > 0.0001:
+                open_slices.append({
+                    "side": side,
+                    "qty": qty_rem,
+                    "price": leg["price"],
+                    "time": leg["time"],
+                    "dt": leg["dt"],
+                    "raw_symbol": leg.get("raw_symbol", sym)
+                })
+
+    # 4. Sort chronologically across the trading account by Date, Entry Time, and Datetime
+    raw_matched_trades.sort(key=lambda x: (x["date"], x["time"], x["entry_dt"]))
+
+    # 5. Assign sequential trade IDs
     matched_trades = []
     trade_idx = existing_count
-
-    for d, min_time, sym, v in trade_items:
-        bq = v["buy_qty"]
-        sq = v["sell_qty"]
-        matched_qty = min(bq, sq)
-        if matched_qty <= 0:
-            continue
-
-        buy_avg = round(v["buy_val"] / bq, 2)
-        sell_avg = round(v["sell_val"] / sq, 2)
-
-        v["buy_times"].sort()
-        v["sell_times"].sort()
-        first_buy = v["buy_times"][0] if v["buy_times"] else "23:59"
-        first_sell = v["sell_times"][0] if v["sell_times"] else "23:59"
-
-        # Chronological direction determination:
-        is_long = first_buy <= first_sell
-        direction = "Long" if is_long else "Short"
-
-        entry_px = buy_avg if is_long else sell_avg
-        exit_px = sell_avg if is_long else buy_avg
-        entry_time_clean = (first_buy[:5] if is_long else first_sell[:5])
-        exit_time_clean = (v["sell_times"][-1][:5] if is_long else v["buy_times"][-1][:5])
-        raw_sym = v["raw_symbol"] or sym
-
-        # Exact Gross PnL matching FYERS broker ledger
-        gross_pnl = round(v["sell_val"] - v["buy_val"], 2) if is_long else round(v["buy_val"] - v["sell_val"], 2)
-
-        # 0.8% Planned SL, 2.0% Planned Target, 2.50R
-        if direction == "Long":
-            stop_px = round(entry_px * (1.0 - PLANNED_SL_PCT), 2)
-            target_px = round(entry_px * (1.0 + PLANNED_TGT_PCT), 2)
-            risk_per_share = round(entry_px - stop_px, 2)
-        else:
-            stop_px = round(entry_px * (1.0 + PLANNED_SL_PCT), 2)
-            target_px = round(entry_px * (1.0 - PLANNED_TGT_PCT), 2)
-            risk_per_share = round(stop_px - entry_px, 2)
-
-        planned_rr = PLANNED_RR
-        risk_amount = round(risk_per_share * matched_qty, 2)
-
-        # FYERS statutory friction
-        charges = calculate_fyers_charges(entry_px, exit_px, matched_qty, direction)
-        costs = round(float(charges.get("total_costs", 0.0)), 2)
-
-        net_pnl = round(gross_pnl - costs, 2)
-        r_multiple = round(net_pnl / risk_amount, 2) if risk_amount > 0 else 0.0
-
-        outcome = "Win" if net_pnl > 10 else ("Loss" if net_pnl < -10 else "Break-Even")
-
-        # Calculate approximate hold duration in minutes
-        try:
-            t1 = datetime.strptime(entry_time_clean, "%H:%M")
-            t2 = datetime.strptime(exit_time_clean, "%H:%M")
-            hold_minutes = max(1, int((t2 - t1).total_seconds() / 60))
-        except Exception:
-            hold_minutes = 15
-
+    for t in raw_matched_trades:
         trade_idx += 1
-        trade_obj = {
-            "id": f"T-{trade_idx:03d}",
-            "date": d,
-            "day": get_weekday_from_date(d, "Mon"),
-            "time": entry_time_clean,
-            "exit_time": exit_time_clean,
-            "hold_duration": hold_minutes,
-            "symbol": sym,
-            "raw_symbol": raw_sym,
-            "direction": direction,
-            "setup_name": default_setup or DEFAULT_SETUP_NAME,
-            "scanner_alert_time": entry_time_clean,
-            "htf_ok": "Y",
-            "no_chase": "Y",
-            "stop_defined": "Y",
-            "target_price": target_px,
-            "rr_planned": planned_rr,
-            "risk_percent": PLANNED_SL_PCT,
-            "risk_amount": risk_amount,
-            "entry_price": entry_px,
-            "stop_price": stop_px,
-            "exit_price": exit_px,
-            "qty": matched_qty,
-            "gross_pnl": gross_pnl,
-            "costs": costs,
-            "net_pnl": net_pnl,
-            "r_multiple": r_multiple,
-            "outcome": outcome,
-            "checklist_score": 5,
-            "rule_violation": "N",
-            "violation_type": "None",
-            "emotion_before": 2,
-            "emotion_during": 2,
-            "emotion_after": 2 if net_pnl > 0 else 3,
-            "trade_valid": "Y",
-            "lesson": f"Imported FYERS Tradebook ({raw_sym}). VWAP Entry ₹{entry_px}, Exit ₹{exit_px}, 0.8% SL (₹{stop_px}), 2.0% Target (₹{target_px}).",
-            "screenshot_link": f"https://www.tradingview.com/chart/?symbol=NSE:{sym}"
-        }
-        matched_trades.append(trade_obj)
+        t_copy = dict(t)
+        t_copy.pop("entry_dt", None)
+        t_copy["id"] = f"T-{trade_idx:03d}"
+        t_copy["day"] = get_weekday_from_date(t_copy["date"], "Mon")
+        matched_trades.append(t_copy)
 
     return matched_trades
 

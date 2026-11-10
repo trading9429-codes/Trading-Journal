@@ -1342,7 +1342,7 @@
     }
 
     function parseFyersDateTimeStr(dtStr) {
-      if (!dtStr) return { date: new Date().toISOString().split('T')[0], time: '09:20' };
+      if (!dtStr) return { date: new Date().toISOString().split('T')[0], time: '09:20', timeFull: '09:20:00', dt: 0 };
       const m12 = dtStr.match(/(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4}),?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i);
       if (m12) {
         const day = m12[1].padStart(2, '0');
@@ -1352,22 +1352,36 @@
         const year = m12[3];
         let hour = parseInt(m12[4]);
         const min = m12[5];
+        const sec = (m12[6] || '00').padStart(2, '0');
         const ampm = (m12[7] || '').toUpperCase();
         if (ampm === 'PM' && hour < 12) hour += 12;
         if (ampm === 'AM' && hour === 12) hour = 0;
         const hourStr = String(hour).padStart(2, '0');
-        return { date: `${year}-${month}-${day}`, time: `${hourStr}:${min}` };
+        const dtObj = new Date(`${year}-${month}-${day}T${hourStr}:${min}:${sec}`);
+        return {
+          date: `${year}-${month}-${day}`,
+          time: `${hourStr}:${min}`,
+          timeFull: `${hourStr}:${min}:${sec}`,
+          dt: isNaN(dtObj.getTime()) ? 0 : dtObj.getTime()
+        };
       }
-      const mIso = dtStr.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?/);
+      const mIso = dtStr.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
       if (mIso) {
         const year = mIso[1];
         const month = mIso[2].padStart(2, '0');
         const day = mIso[3].padStart(2, '0');
         const hour = mIso[4] ? mIso[4].padStart(2, '0') : '09';
         const min = mIso[5] || '20';
-        return { date: `${year}-${month}-${day}`, time: `${hour}:${min}` };
+        const sec = mIso[6] ? mIso[6].padStart(2, '0') : '00';
+        const dtObj = new Date(`${year}-${month}-${day}T${hour}:${min}:${sec}`);
+        return {
+          date: `${year}-${month}-${day}`,
+          time: `${hour}:${min}`,
+          timeFull: `${hour}:${min}:${sec}`,
+          dt: isNaN(dtObj.getTime()) ? 0 : dtObj.getTime()
+        };
       }
-      return { date: new Date().toISOString().split('T')[0], time: '09:20' };
+      return { date: new Date().toISOString().split('T')[0], time: '09:20', timeFull: '09:20:00', dt: 0 };
     }
 
     function getTradeWeekday(dateStr) {
@@ -2989,7 +3003,7 @@
       document.getElementById('log_date').value = new Date().toISOString().split('T')[0];
     }
 
-    // --- FYERS Drag & Drop & Upload Importer (Option A Consolidated) ---
+    // --- FYERS Drag & Drop & Upload Importer (FIFO Individual Trades) ---
     function handleDragOver(e) { e.preventDefault(); e.stopPropagation(); document.getElementById('fyersDropZone').classList.add('border-orange-500', 'bg-orange-950/20'); }
     function handleDragLeave(e) { e.preventDefault(); e.stopPropagation(); document.getElementById('fyersDropZone').classList.remove('border-orange-500', 'bg-orange-950/20'); }
     function handleDrop(e) {
@@ -3086,6 +3100,7 @@
       const colPrice = findCol('traded price', 'price', 'rate');
       const colQty = findCol('qty', 'quantity', 'trade qty');
       const colDt = findCol('date & time', 'trade date', 'order date', 'date');
+      const colOrderId = findCol('exchange order id', 'oms order id', 'order id', 'order no');
 
       const rawFills = [];
       for (let i = headerIdx + 1; i < lines.length; i++) {
@@ -3098,47 +3113,134 @@
         const price = parseFloat(cells[colPrice].replace(/[^0-9.]/g, ''));
         const qty = Math.round(parseFloat(cells[colQty].replace(/[^0-9.]/g, '')));
         const dtStr = colDt !== -1 ? cells[colDt] : '';
-        const { date, time } = parseFyersDateTimeStr(dtStr);
+        const { date, time, timeFull, dt } = parseFyersDateTimeStr(dtStr);
+        const orderId = colOrderId !== -1 ? cells[colOrderId].replace(/[^0-9a-zA-Z]/g, '') : '';
 
         if (!sym || isNaN(price) || isNaN(qty) || qty <= 0) continue;
-        rawFills.push({ symbol: sym, side, price, qty, date, time });
+        rawFills.push({ symbol: sym, rawSymbol: cells[colSym], side, price, qty, date, time, timeFull, dt, orderId });
       }
 
-      // Option A: Consolidate by (date, symbol)
-      const dayGroups = {};
+      // Aggregate partial fills sharing the same order ID into unified order legs
+      const orderLegsMap = {};
       for (const f of rawFills) {
-        const k = `${f.date}_${f.symbol}`;
-        if (!dayGroups[k]) {
-          dayGroups[k] = {
+        const oidKey = f.orderId || f.timeFull;
+        const k = `${f.date}_${f.symbol}_${f.side}_${oidKey}`;
+        if (!orderLegsMap[k]) {
+          orderLegsMap[k] = {
             date: f.date,
             symbol: f.symbol,
-            buyQty: 0,
-            buyVal: 0,
-            sellQty: 0,
-            sellVal: 0,
-            buyTimes: [],
-            sellTimes: []
+            rawSymbol: f.rawSymbol,
+            side: f.side,
+            qty: 0,
+            val: 0,
+            time: f.time,
+            timeFull: f.timeFull,
+            dt: f.dt,
+            orderId: f.orderId
           };
         }
-        if (f.side === 'BUY') {
-          dayGroups[k].buyQty += f.qty;
-          dayGroups[k].buyVal += f.qty * f.price;
-          dayGroups[k].buyTimes.push(f.time);
-        } else {
-          dayGroups[k].sellQty += f.qty;
-          dayGroups[k].sellVal += f.qty * f.price;
-          dayGroups[k].sellTimes.push(f.time);
+        orderLegsMap[k].qty += f.qty;
+        orderLegsMap[k].val += f.qty * f.price;
+        if (f.dt < orderLegsMap[k].dt) {
+          orderLegsMap[k].dt = f.dt;
+          orderLegsMap[k].time = f.time;
+          orderLegsMap[k].timeFull = f.timeFull;
         }
       }
 
-      const tradeList = Object.values(dayGroups).map(g => {
-        const allTimes = [...g.buyTimes, ...g.sellTimes].sort();
-        const minTime = allTimes[0] || '09:20';
-        return { ...g, minTime };
-      });
-      tradeList.sort((a, b) => {
+      const orderLegs = Object.values(orderLegsMap).map(o => ({
+        ...o,
+        price: o.val / o.qty
+      }));
+      orderLegs.sort((a, b) => a.dt - b.dt);
+
+      // FIFO matching per (date, symbol) to identify each individual trade cycle
+      const byDateSym = {};
+      for (const l of orderLegs) {
+        const k = `${l.date}_${l.symbol}`;
+        if (!byDateSym[k]) byDateSym[k] = [];
+        byDateSym[k].push(l);
+      }
+
+      const rawMatched = [];
+      for (const [k, legs] of Object.entries(byDateSym)) {
+        legs.sort((a, b) => a.dt - b.dt);
+        const openSlices = [];
+        for (const leg of legs) {
+          let qtyRem = leg.qty;
+          const side = leg.side;
+          while (qtyRem > 0 && openSlices.length > 0 && openSlices[0].side !== side) {
+            const op = openSlices[0];
+            const matchedQty = Math.min(qtyRem, op.qty);
+            const isLong = (op.side === 'BUY');
+            const direction = isLong ? 'Long' : 'Short';
+            const entryPrice = parseFloat(op.price.toFixed(2));
+            const exitPrice = parseFloat(leg.price.toFixed(2));
+            const grossPnL = parseFloat((isLong ? (matchedQty * (leg.price - op.price)) : (matchedQty * (op.price - leg.price))).toFixed(2));
+            const stopPrice = isLong ? parseFloat((entryPrice * 0.992).toFixed(2)) : parseFloat((entryPrice * 1.008).toFixed(2));
+            const targetPrice = isLong ? parseFloat((entryPrice * 1.020).toFixed(2)) : parseFloat((entryPrice * 0.980).toFixed(2));
+            const riskPerShare = Math.abs(entryPrice - stopPrice);
+            const totalRisk = parseFloat((riskPerShare * matchedQty).toFixed(2));
+            const fyers = computeFyersCharges(entryPrice * matchedQty, exitPrice * matchedQty);
+            const netPnL = parseFloat((grossPnL - fyers.totalCosts).toFixed(2));
+            const realizedR = totalRisk > 0 ? parseFloat((netPnL / totalRisk).toFixed(2)) : 0;
+            const outcome = netPnL > 10 ? 'Win' : (netPnL < -10 ? 'Loss' : 'Break-Even');
+            const holdMins = Math.max(1, Math.round((leg.dt - op.dt) / 60000));
+            const rawSym = op.rawSymbol || leg.rawSymbol || leg.symbol;
+
+            rawMatched.push({
+              date: leg.date,
+              time: op.time,
+              exit_time: leg.time,
+              dt: op.dt,
+              symbol: leg.symbol,
+              raw_symbol: rawSym,
+              direction: direction,
+              qty: matchedQty,
+              entry_price: entryPrice,
+              stop_price: stopPrice,
+              target_price: targetPrice,
+              exit_price: exitPrice,
+              hold_duration: holdMins,
+              gross_pnl: grossPnL,
+              costs: parseFloat(fyers.totalCosts.toFixed(2)),
+              net_pnl: netPnL,
+              r_multiple: realizedR,
+              outcome: outcome,
+              risk_amount: totalRisk,
+              setup_name: defaultSetup || 'Default Setup',
+              scanner_alert_time: op.time,
+              htf_ok: 'Y',
+              no_chase: 'Y',
+              stop_defined: 'Y',
+              rr_planned: 2.50,
+              risk_percent: 0.008,
+              checklist_score: 5,
+              rule_violation: 'N',
+              violation_type: 'None',
+              emotion_before: 2,
+              emotion_during: 2,
+              emotion_after: netPnL > 0 ? 2 : 3,
+              trade_valid: 'Y',
+              lesson: `Imported FYERS Tradebook (${rawSym}). ${direction} ${matchedQty} @ ₹${entryPrice} -> ₹${exitPrice} (${holdMins}m hold). 0.8% SL (₹${stopPrice}), 2.0% Target (₹${targetPrice}).`,
+              screenshot_link: `https://www.tradingview.com/chart/?symbol=NSE:${leg.symbol}`
+            });
+
+            qtyRem -= matchedQty;
+            op.qty -= matchedQty;
+            if (op.qty <= 0.0001) openSlices.shift();
+          }
+          if (qtyRem > 0.0001) {
+            openSlices.push({ ...leg, qty: qtyRem });
+          }
+        }
+      }
+
+      // Sort chronologically across the trading account
+      rawMatched.sort((a, b) => {
         if (a.date !== b.date) return a.date.localeCompare(b.date);
-        return a.minTime.localeCompare(b.minTime);
+        if (a.time !== b.time) return a.time.localeCompare(b.time);
+        return a.dt - b.dt;
       });
 
       const existingMaxId = tradesData.reduce((max, t) => {
@@ -3147,76 +3249,15 @@
       }, 0);
 
       let currentIdCounter = existingMaxId;
-      const parsedTrades = [];
-
-      for (const g of tradeList) {
-        const matchedQty = Math.min(g.buyQty, g.sellQty);
-        if (matchedQty <= 0) continue;
-
-        const buyAvg = parseFloat((g.buyVal / g.buyQty).toFixed(2));
-        const sellAvg = parseFloat((g.sellVal / g.sellQty).toFixed(2));
-
-        g.buyTimes.sort();
-        g.sellTimes.sort();
-        const firstBuy = g.buyTimes[0] || '23:59';
-        const firstSell = g.sellTimes[0] || '23:59';
-        const isLong = firstBuy <= firstSell;
-        const direction = isLong ? 'Long' : 'Short';
-
-        const entryPrice = isLong ? buyAvg : sellAvg;
-        const exitPrice = isLong ? sellAvg : buyAvg;
-        const entryTime = isLong ? firstBuy.slice(0, 5) : firstSell.slice(0, 5);
-        const exitTime = isLong ? g.sellTimes.slice(-1)[0].slice(0, 5) : g.buyTimes.slice(-1)[0].slice(0, 5);
-
-        const grossPnL = isLong ? parseFloat((g.sellVal - g.buyVal).toFixed(2)) : parseFloat((g.buyVal - g.sellVal).toFixed(2));
-        const stopPrice = isLong ? parseFloat((entryPrice * 0.992).toFixed(2)) : parseFloat((entryPrice * 1.008).toFixed(2));
-        const targetPrice = isLong ? parseFloat((entryPrice * 1.020).toFixed(2)) : parseFloat((entryPrice * 0.980).toFixed(2));
-        const riskPerShare = Math.abs(entryPrice - stopPrice);
-        const totalRisk = parseFloat((riskPerShare * matchedQty).toFixed(2));
-        const fyers = computeFyersCharges(entryPrice * matchedQty, exitPrice * matchedQty);
-        const netPnL = parseFloat((grossPnL - fyers.totalCosts).toFixed(2));
-        const realizedR = totalRisk > 0 ? parseFloat((netPnL / totalRisk).toFixed(2)) : 0;
-        const outcome = netPnL > 10 ? 'Win' : (netPnL < -10 ? 'Loss' : 'Break-Even');
-
+      const parsedTrades = rawMatched.map(t => {
         currentIdCounter++;
-        parsedTrades.push({
+        const { dt, ...rest } = t;
+        return {
           id: `T-${String(currentIdCounter).padStart(3, '0')}`,
-          date: g.date,
-          day: getTradeWeekday(g.date),
-          time: entryTime,
-          exit_time: exitTime,
-          hold_duration: 15,
-          symbol: g.symbol,
-          direction: direction,
-          setup_name: defaultSetup,
-          scanner_alert_time: entryTime,
-          htf_ok: 'Y',
-          no_chase: 'Y',
-          stop_defined: 'Y',
-          target_price: targetPrice,
-          rr_planned: 2.50,
-          risk_percent: 0.008,
-          risk_amount: totalRisk,
-          entry_price: entryPrice,
-          stop_price: stopPrice,
-          exit_price: exitPrice,
-          qty: matchedQty,
-          gross_pnl: grossPnL,
-          costs: parseFloat(fyers.totalCosts.toFixed(2)),
-          net_pnl: netPnL,
-          r_multiple: realizedR,
-          outcome: outcome,
-          checklist_score: 5,
-          rule_violation: 'N',
-          violation_type: 'None',
-          emotion_before: 2,
-          emotion_during: 2,
-          emotion_after: netPnL > 0 ? 2 : 3,
-          trade_valid: 'Y',
-          lesson: `Imported FYERS Tradebook (${g.symbol}). VWAP Entry ₹${entryPrice}, Exit ₹${exitPrice}, 0.8% SL (₹${stopPrice}), 2.0% Target (₹${targetPrice}).`,
-          screenshot_link: `https://www.tradingview.com/chart/?symbol=NSE:${g.symbol}`
-        });
-      }
+          day: getTradeWeekday(t.date),
+          ...rest
+        };
+      });
 
       renderFyersPreview(parsedTrades);
     }
@@ -3227,7 +3268,7 @@
       const badge = document.getElementById('fyersMatchCountBadge');
       const tbody = document.getElementById('fyersPreviewTableBody');
 
-      badge.textContent = `${trades.length} Consolidated Trades`;
+      badge.textContent = `${trades.length} Individual Trades`;
       container.classList.remove('hidden');
 
       tbody.innerHTML = trades.map(t => {
