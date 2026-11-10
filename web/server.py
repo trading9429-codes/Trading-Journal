@@ -13,7 +13,8 @@ CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config_s
 DEFAULT_GUARDRAILS = {
     "maxDailyTrades": 2,
     "maxDailyLoss": 10000,
-    "maxTradeRisk": 2500
+    "maxTradeRisk": 2500,
+    "enforceTimeFilter": True
 }
 
 def get_guardrails():

@@ -662,11 +662,20 @@
             </div>
             <div>
               <label class="block text-slate-400 mb-1">Entry Time</label>
-              <input type="time" id="log_entry_time" value="09:20" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+              <input type="time" id="log_entry_time" value="09:35" onchange="checkTimeRestriction()" oninput="checkTimeRestriction()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
             </div>
             <div>
               <label class="block text-slate-400 mb-1">Exit Time</label>
-              <input type="time" id="log_exit_time" value="09:35" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+              <input type="time" id="log_exit_time" value="10:05" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+            </div>
+          </div>
+
+          <!-- 09:15-09:30 AM Time Restriction Warning Banner -->
+          <div id="logTimeRestrictionAlert" class="hidden p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-mono flex items-start gap-2.5">
+            <span class="text-base leading-none">⚠️</span>
+            <div>
+              <span class="font-bold text-rose-400">Rule 5 Warning: 09:15–09:30 AM No-Trade Zone</span>
+              <p class="text-[11px] text-rose-300/90 mt-0.5">Entries before 09:30 AM suffer from opening auction whip-saws, institutional price discovery traps, and abnormal spreads. This trade will be logged with a <b>Rule Violation: First 15m Rush (&lt;09:30)</b>.</p>
             </div>
           </div>
 
@@ -1225,6 +1234,175 @@
         </div>
       </div>
 
+      <!-- SECTION 5: Rule 5: 09:15–09:30 AM No-Trade Zone (Opening Trap Protection) -->
+      <div class="glass-panel p-6 rounded-2xl space-y-5 border-l-4 border-l-amber-500">
+        <div class="flex items-start justify-between flex-wrap gap-2 border-b border-slate-800 pb-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 font-bold border border-amber-500/20">Rule 5 • Non-Negotiable</span>
+              <span class="text-xs font-mono text-slate-400">Capital Protection Directive</span>
+            </div>
+            <h3 class="text-base font-bold text-white tracking-tight mt-1 flex items-center gap-2">
+              <span>⏱️</span> The 09:15–09:30 AM Strict No-Trade Zone
+            </h3>
+            <p class="text-xs text-slate-400 font-mono mt-0.5">Let institutional price discovery settle before committing risk capital</p>
+          </div>
+          <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-300 border border-rose-500/20 font-bold">
+            Zero Entries Allowed &lt; 09:30 AM
+          </span>
+        </div>
+
+        <!-- The Mechanics & Empirical Proof -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+          <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-3">
+            <h4 class="text-amber-400 font-bold flex items-center gap-1.5">
+              <span>🔬</span> The Institutional Price Discovery Trap
+            </h4>
+            <p class="text-slate-300 leading-relaxed">
+              Between 09:15 and 09:30 AM, market microstructure is dominated by opening market orders, overnight retail stop runs, and aggressive high-frequency liquidity probing.
+            </p>
+            <ul class="space-y-2 text-slate-400 list-disc list-inside">
+              <li><strong class="text-slate-200">First 3 × 5m Candles (09:15–09:30):</strong> Establish the true <em>Initial Balance</em> and allow volume-weighted average price (VWAP) to stabilize mathematically.</li>
+              <li><strong class="text-slate-200">Whipsaw Risk:</strong> Spikes in the first 10 minutes have a &gt;70% failure rate when chasing 1-minute impulse candles without higher-timeframe confirmation.</li>
+              <li><strong class="text-slate-200">Institutional Action:</strong> Real institutional money enters after 09:30 once initial auction volatility resolves.</li>
+            </ul>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-3">
+            <h4 class="text-blue-400 font-bold flex items-center gap-1.5">
+              <span>📊</span> Empirical Proof From Your FYERS Tradebook
+            </h4>
+            <div class="space-y-2">
+              <div class="p-2.5 rounded-lg bg-rose-950/30 border border-rose-900/40 text-rose-300">
+                <span class="font-bold text-rose-400">Pre-09:30 AM Rush Trades (Massive Drag):</span>
+                <p class="text-[11px] text-slate-400 mt-1">
+                  AWFIS (09:17) <span class="text-rose-400 font-bold">-₹11,540</span> • V2RETAIL (09:18) <span class="text-rose-400 font-bold">-₹9,313</span> • KSHINTL (10:03 impulse) <span class="text-rose-400 font-bold">-₹5,528</span>. 
+                  All were quick stopouts under 2 minutes caused by jumping in before 5m candle confirmation.
+                </p>
+              </div>
+              <div class="p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-900/40 text-emerald-300">
+                <span class="font-bold text-emerald-400">Patient Post-09:30 AM Trades (Huge Winners):</span>
+                <p class="text-[11px] text-slate-400 mt-1">
+                  PARAGMILK (10:24–14:20) <span class="text-emerald-400 font-bold">+₹28,347</span> • IIFL (09:26–15:22) <span class="text-emerald-400 font-bold">+₹16,215</span>. 
+                  Letting candles form and riding the trend generated your best statistical edge.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-mono text-slate-300 flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 font-bold">✓ Daily Workflow Checklist:</span>
+            <span>09:15–09:30 AM: Watchlist observation only. No order punches. Check Chartink scanners at 09:30 AM sharp.</span>
+          </div>
+          <span class="text-[11px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold">
+            Earliest Allowed Entry: 09:30:01 AM
+          </span>
+        </div>
+      </div>
+
+      <!-- SECTION 6: Institutional Chartink A+ Scanner Formulae -->
+      <div class="glass-panel p-6 rounded-2xl space-y-6 border-l-4 border-l-blue-500">
+        <div class="flex items-start justify-between flex-wrap gap-3 border-b border-slate-800 pb-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 font-bold border border-blue-500/20">A+ Scanners</span>
+              <span class="text-xs font-mono text-slate-400">Automated High Probability Setups</span>
+            </div>
+            <h3 class="text-base font-bold text-white tracking-tight mt-1 flex items-center gap-2">
+              <span>📡</span> Ready-to-Paste Chartink A+ Scanner Formulae
+            </h3>
+            <p class="text-xs text-slate-400 font-mono mt-0.5">Direct copy-paste syntax for Chartink screener engine to identify clean institutional momentum</p>
+          </div>
+          <a href="https://chartink.com/screener/create-screener" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-blue-400 hover:text-blue-300 text-xs font-mono flex items-center gap-1.5 transition">
+            <span>🔗</span> <span>Open Chartink Screener</span>
+          </a>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-blue-950/20 border border-blue-900/40 text-xs font-mono text-blue-200">
+          <strong>How to Use in Chartink:</strong> Open <span class="text-white underline">chartink.com/screener/create-screener</span> &rarr; Click <em>"Paste screener"</em> (or import code) &rarr; Paste one of the formulas below &rarr; Set timeframe to <strong>5-Minute</strong> &rarr; Run screener at <strong>09:30 AM, 09:45 AM, and 10:00 AM</strong>.
+        </div>
+
+        <!-- 3 Scanner Formula Cards -->
+        <div class="space-y-4">
+
+          <!-- Scanner 1: Setup A - VWAP & EMA Breakout -->
+          <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 font-mono font-bold text-xs border border-blue-500/20">Scanner 1</span>
+                <span class="font-bold text-white text-sm">Setup A: 5m VWAP &amp; EMA Breakout (VWAP BO)</span>
+              </div>
+              <button type="button" onclick="copyChartinkFormula('setupA', this)" class="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition flex items-center gap-1">
+                <span>📋 Copy Formula</span>
+              </button>
+            </div>
+            <p class="text-xs text-slate-400 font-mono">
+              Scans for stocks crossing above 5m VWAP with 10 EMA &gt; 20 EMA &gt; 50 EMA, bull candle confirmation, and explosive <strong>&gt;3x relative volume</strong>.
+            </p>
+            <div class="bg-slate-900/90 p-3 rounded-lg border border-slate-800 text-[11px] font-mono text-emerald-400 overflow-x-auto whitespace-pre-wrap select-all">
+( {cash} ( [0] 5 minute close &gt; [0] 5 minute vwap and [-1] 5 minute close &lt;= [-1] 5 minute vwap and [0] 5 minute ema( [0] 5 minute close , 10 ) &gt; [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) &gt; [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute volume &gt; [0] 5 minute sma( [0] 5 minute volume , 20 ) * 3 and [0] 5 minute close &gt; [0] 5 minute open and [0] 5 minute close &gt;= 100 and [0] 5 minute close &lt;= 5000 ) )
+            </div>
+            <div class="flex flex-wrap gap-3 text-[11px] text-slate-400 font-mono pt-1">
+              <span>🎯 <strong>Trigger:</strong> First 5m candle closing solidly above VWAP</span>
+              <span>🛑 <strong>Stop-Loss:</strong> 0.8% below candle low or VWAP</span>
+              <span>🏁 <strong>Target:</strong> 2.0% - 2.5% (1:2.5 R:R)</span>
+            </div>
+          </div>
+
+          <!-- Scanner 2: Setup B - Volume Surge & EMA Continuation -->
+          <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-mono font-bold text-xs border border-emerald-500/20">Scanner 2</span>
+                <span class="font-bold text-white text-sm">Setup B: 5m Volume Surge &amp; EMA Continuation</span>
+              </div>
+              <button type="button" onclick="copyChartinkFormula('setupB', this)" class="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition flex items-center gap-1">
+                <span>📋 Copy Formula</span>
+              </button>
+            </div>
+            <p class="text-xs text-slate-400 font-mono">
+              Finds massive institutional order blocks: <strong>&gt;5x volume spike</strong> on a 5m candle with &ge;1.5% candle range, trading above VWAP and all 3 EMAs.
+            </p>
+            <div class="bg-slate-900/90 p-3 rounded-lg border border-slate-800 text-[11px] font-mono text-blue-400 overflow-x-auto whitespace-pre-wrap select-all">
+( {cash} ( [0] 5 minute volume &gt; [0] 5 minute sma( [0] 5 minute volume , 20 ) * 5 and [0] 5 minute close &gt; [0] 5 minute ema( [0] 5 minute close , 10 ) and [0] 5 minute ema( [0] 5 minute close , 10 ) &gt; [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) &gt; [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute close &gt; [0] 5 minute vwap and ( [0] 5 minute high - [0] 5 minute low ) / [0] 5 minute low * 100 &gt;= 1.5 and [0] 5 minute close &gt;= 100 ) )
+            </div>
+            <div class="flex flex-wrap gap-3 text-[11px] text-slate-400 font-mono pt-1">
+              <span>🎯 <strong>Trigger:</strong> High break of the 5m surge candle</span>
+              <span>🛑 <strong>Stop-Loss:</strong> Below surge candle low</span>
+              <span>🏁 <strong>Target:</strong> Trail with 10 EMA or 1:3 R:R</span>
+            </div>
+          </div>
+
+          <!-- Scanner 3: Setup C - EMA & VWAP Pullback Reversal -->
+          <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 font-mono font-bold text-xs border border-purple-500/20">Scanner 3</span>
+                <span class="font-bold text-white text-sm">Setup C: EMA &amp; VWAP Pullback Reversal</span>
+              </div>
+              <button type="button" onclick="copyChartinkFormula('setupC', this)" class="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition flex items-center gap-1">
+                <span>📋 Copy Formula</span>
+              </button>
+            </div>
+            <p class="text-xs text-slate-400 font-mono">
+              Identifies high-probability dip entries in established uptrends: stock pulls back to touch 20 EMA, creates a rejection wick, volume dries up on the pullback, and holds above VWAP.
+            </p>
+            <div class="bg-slate-900/90 p-3 rounded-lg border border-slate-800 text-[11px] font-mono text-purple-400 overflow-x-auto whitespace-pre-wrap select-all">
+( {cash} ( [0] 5 minute ema( [0] 5 minute close , 10 ) &gt; [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) &gt; [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute low &lt;= [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute close &gt;= [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute close &gt;= [0] 5 minute vwap and ( [0] 5 minute close - [0] 5 minute low ) &gt;= ( [0] 5 minute high - [0] 5 minute low ) * 0.4 and [-1] 5 minute volume &lt; [0] 5 minute sma( [0] 5 minute volume , 20 ) * 1.5 and [0] 5 minute close &gt;= 100 ) )
+            </div>
+            <div class="flex flex-wrap gap-3 text-[11px] text-slate-400 font-mono pt-1">
+              <span>🎯 <strong>Trigger:</strong> Candle breaking previous high with lower rejection wick</span>
+              <span>🛑 <strong>Stop-Loss:</strong> Tight, just below the 20 EMA / pullback low (0.5% - 0.7%)</span>
+              <span>🏁 <strong>Target:</strong> Prior swing high then 1:2.5 R:R</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
 
     <!-- ========================================== -->
@@ -1301,6 +1479,21 @@
                 <input type="number" min="100" step="100" id="config_max_trade_risk" required value="2500" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-7 pr-3 py-2 text-white font-mono font-bold focus:border-blue-500 focus:outline-none">
               </div>
               <p class="text-[11px] text-slate-500">Hard stop loss allocated per single execution (e.g. ₹2,500 = 1.0R risk limit).</p>
+            </div>
+
+            <!-- Strict No-Trade Zone (09:15–09:30 AM) -->
+            <div class="sm:col-span-2 lg:col-span-3 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+              <div>
+                <div class="font-bold text-slate-200 text-xs flex items-center gap-2">
+                  <span>⏱️ Strict No-Trade Zone (09:15–09:30 AM)</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">Recommended</span>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-0.5">Enforces Rule 5: auto-flags pre-09:30 trades as rule violations in logger and P&amp;L calendar audits to eliminate opening impulse losses.</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer ml-4">
+                <input type="checkbox" id="config_enforce_time_filter" checked class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
             </div>
 
           </div>
@@ -1649,6 +1842,8 @@
         renderCharts();
       } else if (tabId === 'calendar') {
         renderPnlCalendar();
+      } else if (tabId === 'log') {
+        checkTimeRestriction();
       } else if (tabId === 'config') {
         syncGuardrailsUI();
         renderSetupsManager();
@@ -3194,6 +3389,10 @@
       }, 0);
       const tradeId = `T-${String(existingMaxId + 1).padStart(3, '0')}`;
 
+      const isEarlyEntry = isPre930(entryTime);
+      const enforceEarlyFilter = (guardrailsConfig && guardrailsConfig.enforceTimeFilter !== false);
+      const isViolated = enforceEarlyFilter && isEarlyEntry;
+
       const newTrade = {
         id: tradeId,
         date: date,
@@ -3206,7 +3405,7 @@
         setup_name: setup,
         scanner_alert_time: entryTime,
         htf_ok: 'Y',
-        no_chase: 'Y',
+        no_chase: isViolated ? 'N' : 'Y',
         stop_defined: 'Y',
         target_price: target,
         rr_planned: 2.50,
@@ -3221,10 +3420,10 @@
         net_pnl: parseFloat(net.toFixed(2)),
         r_multiple: parseFloat(r.toFixed(2)),
         outcome: outcome,
-        checklist_score: 5,
-        rule_violation: 'N',
-        violation_type: 'None',
-        emotion_before: 2,
+        checklist_score: isViolated ? 4 : 5,
+        rule_violation: isViolated ? 'Y' : 'N',
+        violation_type: isViolated ? 'First 15m Rush (<09:30)' : 'None',
+        emotion_before: isViolated ? 3 : 2,
         emotion_during: 2,
         emotion_after: net > 0 ? 2 : 3,
         trade_valid: 'Y',
@@ -3236,9 +3435,12 @@
       await syncWithBackend();
       updateAllViews();
       switchTab('trades');
-      alert(`Trade ${tradeId} (${symbol}) logged successfully!`);
+      alert(`Trade ${tradeId} (${symbol}) logged successfully!${isViolated ? '\n\n⚠️ Note: Logged with Rule 5 violation (09:15-09:30 No-Trade Zone).' : ''}`);
       e.target.reset();
       document.getElementById('log_date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('log_entry_time').value = '09:35';
+      document.getElementById('log_exit_time').value = '10:05';
+      checkTimeRestriction();
     }
 
     // --- FYERS Drag & Drop & Upload Importer (FIFO Individual Trades) ---
@@ -3551,12 +3753,64 @@
     }
 
     // ========================================================
+    // CHARTINK A+ SCANNERS & TIME-RESTRICTION ENGINE
+    // ========================================================
+    const CHARTINK_FORMULAS = {
+      setupA: `( {cash} ( [0] 5 minute close > [0] 5 minute vwap and [-1] 5 minute close <= [-1] 5 minute vwap and [0] 5 minute ema( [0] 5 minute close , 10 ) > [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) > [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute volume > [0] 5 minute sma( [0] 5 minute volume , 20 ) * 3 and [0] 5 minute close > [0] 5 minute open and [0] 5 minute close >= 100 and [0] 5 minute close <= 5000 ) )`,
+      setupB: `( {cash} ( [0] 5 minute volume > [0] 5 minute sma( [0] 5 minute volume , 20 ) * 5 and [0] 5 minute close > [0] 5 minute ema( [0] 5 minute close , 10 ) and [0] 5 minute ema( [0] 5 minute close , 10 ) > [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) > [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute close > [0] 5 minute vwap and ( [0] 5 minute high - [0] 5 minute low ) / [0] 5 minute low * 100 >= 1.5 and [0] 5 minute close >= 100 ) )`,
+      setupC: `( {cash} ( [0] 5 minute ema( [0] 5 minute close , 10 ) > [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute ema( [0] 5 minute close , 20 ) > [0] 5 minute ema( [0] 5 minute close , 50 ) and [0] 5 minute low <= [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute close >= [0] 5 minute ema( [0] 5 minute close , 20 ) and [0] 5 minute close >= [0] 5 minute vwap and ( [0] 5 minute close - [0] 5 minute low ) >= ( [0] 5 minute high - [0] 5 minute low ) * 0.4 and [-1] 5 minute volume < [0] 5 minute sma( [0] 5 minute volume , 20 ) * 1.5 and [0] 5 minute close >= 100 ) )`
+    };
+
+    function copyChartinkFormula(key, btnEl) {
+      const formula = CHARTINK_FORMULAS[key];
+      if (!formula) return;
+      navigator.clipboard.writeText(formula).then(() => {
+        if (btnEl) {
+          const originalText = btnEl.innerHTML;
+          btnEl.innerHTML = '<span>✓ Copied!</span>';
+          btnEl.classList.remove('bg-blue-600', 'hover:bg-blue-500');
+          btnEl.classList.add('bg-emerald-600', 'text-white');
+          setTimeout(() => {
+            btnEl.innerHTML = originalText;
+            btnEl.classList.add('bg-blue-600', 'hover:bg-blue-500');
+            btnEl.classList.remove('bg-emerald-600', 'text-white');
+          }, 2200);
+        }
+      }).catch(err => {
+        prompt("Copy the Chartink formula below:", formula);
+      });
+    }
+
+    function isPre930(timeStr) {
+      if (!timeStr) return false;
+      const parts = String(timeStr).trim().split(':');
+      if (parts.length < 2) return false;
+      const h = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10);
+      if (isNaN(h) || isNaN(m)) return false;
+      return (h === 9 && m < 30);
+    }
+
+    function checkTimeRestriction() {
+      const timeInput = document.getElementById('log_entry_time');
+      const alertEl = document.getElementById('logTimeRestrictionAlert');
+      if (!timeInput || !alertEl) return;
+      const enforce = (guardrailsConfig && guardrailsConfig.enforceTimeFilter !== false);
+      if (enforce && isPre930(timeInput.value)) {
+        alertEl.classList.remove('hidden');
+      } else {
+        alertEl.classList.add('hidden');
+      }
+    }
+
+    // ========================================================
     // RISK GUARDRAILS CONFIGURATION ENGINE
     // ========================================================
     const DEFAULT_GUARDRAILS = {
       maxDailyTrades: 2,
       maxDailyLoss: 10000,
-      maxTradeRisk: 2500
+      maxTradeRisk: 2500,
+      enforceTimeFilter: true
     };
 
     let guardrailsConfig = { ...DEFAULT_GUARDRAILS };
@@ -3571,6 +3825,7 @@
             guardrailsConfig = { ...DEFAULT_GUARDRAILS, ...data.guardrails };
             localStorage.setItem('trader_reset_guardrails_config', JSON.stringify(guardrailsConfig));
             syncGuardrailsUI();
+            checkTimeRestriction();
             return;
           }
         }
@@ -3588,6 +3843,7 @@
         }
       }
       syncGuardrailsUI();
+      checkTimeRestriction();
     }
 
     async function saveGuardrailsConfig() {
@@ -3602,6 +3858,7 @@
         console.warn("Could not sync guardrails to backend /api/guardrails:", e);
       }
       syncGuardrailsUI();
+      checkTimeRestriction();
       updatePlaybookGuardrails();
       renderPnlCalendar();
     }
@@ -3611,15 +3868,18 @@
       const tradesInput = document.getElementById('config_max_daily_trades');
       const lossInput = document.getElementById('config_max_daily_loss');
       const riskInput = document.getElementById('config_max_trade_risk');
+      const timeFilterToggle = document.getElementById('config_enforce_time_filter');
 
       const maxTrades = tradesInput ? parseInt(tradesInput.value) : 2;
       const maxLoss = lossInput ? parseFloat(lossInput.value) : 10000;
       const maxRisk = riskInput ? parseFloat(riskInput.value) : 2500;
+      const enforceTimeFilter = timeFilterToggle ? timeFilterToggle.checked : true;
 
       guardrailsConfig = {
         maxDailyTrades: isNaN(maxTrades) || maxTrades <= 0 ? 2 : maxTrades,
         maxDailyLoss: isNaN(maxLoss) || maxLoss <= 0 ? 10000 : maxLoss,
-        maxTradeRisk: isNaN(maxRisk) || maxRisk <= 0 ? 2500 : maxRisk
+        maxTradeRisk: isNaN(maxRisk) || maxRisk <= 0 ? 2500 : maxRisk,
+        enforceTimeFilter: enforceTimeFilter
       };
 
       saveGuardrailsConfig();
@@ -3632,7 +3892,7 @@
     }
 
     function resetGuardrailsToDefault() {
-      if (confirm("Reset rule guardrails to system defaults (Max 2 trades/day, ₹10,000 daily loss)?")) {
+      if (confirm("Reset rule guardrails to system defaults (Max 2 trades/day, ₹10,000 daily loss, 09:15-09:30 AM No-Trade Filter)?")) {
         guardrailsConfig = { ...DEFAULT_GUARDRAILS };
         saveGuardrailsConfig();
       }
@@ -3642,10 +3902,12 @@
       const tradesInput = document.getElementById('config_max_daily_trades');
       const lossInput = document.getElementById('config_max_daily_loss');
       const riskInput = document.getElementById('config_max_trade_risk');
+      const timeFilterToggle = document.getElementById('config_enforce_time_filter');
 
       if (tradesInput) tradesInput.value = guardrailsConfig.maxDailyTrades || 2;
       if (lossInput) lossInput.value = guardrailsConfig.maxDailyLoss || 10000;
       if (riskInput) riskInput.value = guardrailsConfig.maxTradeRisk || 2500;
+      if (timeFilterToggle) timeFilterToggle.checked = guardrailsConfig.enforceTimeFilter !== false;
     }
 
     // ========================================================
@@ -3759,6 +4021,7 @@
       let redDaysCount = 0;
       let overtradingDaysCount = 0;
       let hardStopLossDaysCount = 0;
+      let pre930BreachDaysCount = 0;
       let totalBreachDaysCount = 0;
 
       for (let d = 1; d <= daysInMonth; d++) {
@@ -3780,9 +4043,12 @@
 
           const isOvertrade = dayTrades.length > maxTrades;
           const isHardStop = dayNet < -maxLoss;
+          const enforceEarly = (guardrailsConfig && guardrailsConfig.enforceTimeFilter !== false);
+          const isTimeBreach = enforceEarly && dayTrades.some(t => isPre930(t.time));
           if (isOvertrade) overtradingDaysCount++;
           if (isHardStop) hardStopLossDaysCount++;
-          if (isOvertrade || isHardStop) totalBreachDaysCount++;
+          if (isTimeBreach) pre930BreachDaysCount++;
+          if (isOvertrade || isHardStop || isTimeBreach) totalBreachDaysCount++;
         }
       }
 
@@ -3826,7 +4092,7 @@
       }
       const elBreachBreakdown = document.getElementById('calStatBreachBreakdown');
       if (elBreachBreakdown) {
-        elBreachBreakdown.textContent = `${overtradingDaysCount} Overtrade (>${maxTrades}) • ${hardStopLossDaysCount} Hard SL (>₹${lossFmt})`;
+        elBreachBreakdown.textContent = `${overtradingDaysCount} Overtrade (>${maxTrades}) • ${hardStopLossDaysCount} Hard SL (>₹${lossFmt}) • ${pre930BreachDaysCount} Pre-09:30`;
       }
       const elComplianceRate = document.getElementById('calStatComplianceRate');
       if (elComplianceRate) {
@@ -3882,7 +4148,11 @@
           // Configured Rule Breaches
           const isOvertrading = tradeCount > maxTrades;
           const isHardStop = dayNet < -maxLoss;
-          const hasBreach = isOvertrading || isHardStop;
+          const pre930Trades = dayTrades.filter(t => isPre930(t.time));
+          const hasPre930 = pre930Trades.length > 0;
+          const enforceEarly = (guardrailsConfig && guardrailsConfig.enforceTimeFilter !== false);
+          const isTimeBreach = enforceEarly && hasPre930;
+          const hasBreach = isOvertrading || isHardStop || isTimeBreach;
 
           let cardBg = '';
           let borderClass = '';
@@ -3907,34 +4177,20 @@
           const pnlTextClass = isWin ? 'text-emerald-400 font-extrabold' : (isLoss ? 'text-rose-400 font-extrabold' : 'text-slate-300 font-bold');
           const pnlSign = dayNet > 0 ? '+' : '';
 
+          let breachBadges = [];
+          if (isOvertrading) {
+            breachBadges.push(`<span class="inline-flex items-center gap-1 text-[9px] font-bold text-rose-300 bg-rose-950/90 border border-rose-800/80 px-1 py-0.2 rounded w-fit">🚨 ${tradeCount} Trades (&gt;${maxTrades})</span>`);
+          }
+          if (isHardStop) {
+            breachBadges.push(`<span class="inline-flex items-center gap-1 text-[9px] font-bold text-amber-300 bg-amber-950/90 border border-amber-800/80 px-1 py-0.2 rounded w-fit">🛑 &gt;₹${lossFmt} Hard SL</span>`);
+          }
+          if (isTimeBreach) {
+            breachBadges.push(`<span class="inline-flex items-center gap-1 text-[9px] font-bold text-orange-300 bg-orange-950/90 border border-orange-800/80 px-1 py-0.2 rounded w-fit">⏱️ Pre-09:30 (${pre930Trades.length})</span>`);
+          }
+
           let badgeHtml = '';
-          if (isOvertrading && isHardStop) {
-            badgeHtml = `
-              <div class="mt-1 flex flex-col gap-0.5">
-                <span class="inline-flex items-center gap-1 text-[9px] font-bold text-rose-300 bg-rose-950/90 border border-rose-800/80 px-1 py-0.2 rounded w-fit">
-                  🚨 ${tradeCount} Trades (&gt;${maxTrades})
-                </span>
-                <span class="inline-flex items-center gap-1 text-[9px] font-bold text-amber-300 bg-amber-950/90 border border-amber-800/80 px-1 py-0.2 rounded w-fit">
-                  🛑 &gt;₹${lossFmt} Hard SL
-                </span>
-              </div>
-            `;
-          } else if (isOvertrading) {
-            badgeHtml = `
-              <div class="mt-1">
-                <span class="inline-flex items-center gap-1 text-[9px] font-bold text-rose-300 bg-rose-950/90 border border-rose-800/80 px-1 py-0.2 rounded w-fit">
-                  🚨 ${tradeCount} Trades (&gt;${maxTrades})
-                </span>
-              </div>
-            `;
-          } else if (isHardStop) {
-            badgeHtml = `
-              <div class="mt-1">
-                <span class="inline-flex items-center gap-1 text-[9px] font-bold text-amber-300 bg-amber-950/90 border border-amber-800/80 px-1 py-0.2 rounded w-fit">
-                  🛑 &gt;₹${lossFmt} Hard SL
-                </span>
-              </div>
-            `;
+          if (breachBadges.length > 0) {
+            badgeHtml = `<div class="mt-1 flex flex-col gap-0.5">${breachBadges.join('')}</div>`;
           } else {
             badgeHtml = `
               <div class="mt-1">
@@ -4041,6 +4297,10 @@
 
       const isOvertrading = tradeCount > maxTrades;
       const isHardStop = totalNet < -maxLoss;
+      const pre930Trades = dayTrades.filter(t => isPre930(t.time));
+      const hasPre930 = pre930Trades.length > 0;
+      const enforceEarly = (guardrailsConfig && guardrailsConfig.enforceTimeFilter !== false);
+      const isEarlyBreach = enforceEarly && hasPre930;
 
       const ruleCards = document.getElementById('calModalRuleCards');
       if (ruleCards) {
@@ -4049,7 +4309,7 @@
           <div class="glass-panel p-3.5 rounded-xl border ${isOvertrading ? 'border-rose-500/50 bg-rose-950/20' : 'border-emerald-500/40 bg-emerald-950/20'} flex flex-col justify-between">
             <div class="flex items-center justify-between">
               <span class="text-[11px] font-mono uppercase tracking-wider text-slate-300 font-bold flex items-center gap-1.5">
-                <span>🎯</span> Rule 1: Daily Trade Cap (≤ ${maxTrades})
+                <span>🎯</span> Rule 1: Trade Cap (≤ ${maxTrades})
               </span>
               <span class="text-[10px] font-mono px-2 py-0.5 rounded font-bold ${isOvertrading ? 'bg-rose-950 text-rose-300 border border-rose-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'}">
                 ${isOvertrading ? 'VIOLATION' : 'PASSED'}
@@ -4060,7 +4320,7 @@
                 ${tradeCount} Trade${tradeCount > 1 ? 's' : ''} Taken (Limit: ${maxTrades})
               </div>
               <p class="text-[11px] text-slate-400 font-mono mt-0.5">
-                ${isOvertrading ? `Breached by ${tradeCount - maxTrades} extra trade(s). Overtrading dilutes statistical edge and leads to revenge trading.` : 'Disciplined trade frequency maintained within configured guardrail limit.'}
+                ${isOvertrading ? `Breached by ${tradeCount - maxTrades} extra trade(s). Overtrading dilutes statistical edge.` : 'Disciplined trade frequency maintained within guardrail limit.'}
               </p>
             </div>
           </div>
@@ -4069,7 +4329,7 @@
           <div class="glass-panel p-3.5 rounded-xl border ${isHardStop ? 'border-amber-500/50 bg-amber-950/20' : 'border-emerald-500/40 bg-emerald-950/20'} flex flex-col justify-between">
             <div class="flex items-center justify-between">
               <span class="text-[11px] font-mono uppercase tracking-wider text-slate-300 font-bold flex items-center gap-1.5">
-                <span>🛑</span> Rule 2: Daily Hard SL (₹${maxLoss.toLocaleString('en-IN')})
+                <span>🛑</span> Rule 2: Hard SL (₹${maxLoss.toLocaleString('en-IN')})
               </span>
               <span class="text-[10px] font-mono px-2 py-0.5 rounded font-bold ${isHardStop ? 'bg-amber-950 text-amber-300 border border-amber-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'}">
                 ${isHardStop ? 'BREACHED' : 'PASSED'}
@@ -4080,7 +4340,27 @@
                 ${totalNet < 0 ? `-₹${Math.abs(totalNet).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : `+₹${totalNet.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`} (Cap: -₹${maxLoss.toLocaleString('en-IN')})
               </div>
               <p class="text-[11px] text-slate-400 font-mono mt-0.5">
-                ${isHardStop ? `Exceeded ₹${maxLoss.toLocaleString('en-IN')} max daily stop loss by ₹${(Math.abs(totalNet) - maxLoss).toLocaleString('en-IN', { minimumFractionDigits: 2 })}. Circuit breaker rule requires trading to halt immediately.` : 'Daily loss was kept safely within the circuit breaker.'}
+                ${isHardStop ? `Exceeded ₹${maxLoss.toLocaleString('en-IN')} max daily stop loss by ₹${(Math.abs(totalNet) - maxLoss).toLocaleString('en-IN', { minimumFractionDigits: 2 })}. Immediate kill switch mandatory.` : 'Daily loss was kept safely within the circuit breaker.'}
+              </p>
+            </div>
+          </div>
+
+          <!-- Rule 5: 09:15-09:30 AM No-Trade Zone -->
+          <div class="glass-panel p-3.5 rounded-xl border ${isEarlyBreach ? 'border-rose-500/50 bg-rose-950/20' : 'border-emerald-500/40 bg-emerald-950/20'} flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-mono uppercase tracking-wider text-slate-300 font-bold flex items-center gap-1.5">
+                <span>⏱️</span> Rule 5: 09:15–09:30 Zone
+              </span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded font-bold ${isEarlyBreach ? 'bg-rose-950 text-rose-300 border border-rose-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'}">
+                ${isEarlyBreach ? 'VIOLATION' : 'PASSED'}
+              </span>
+            </div>
+            <div class="my-2">
+              <div class="text-sm font-mono font-bold ${isEarlyBreach ? 'text-rose-400' : 'text-emerald-400'}">
+                ${hasPre930 ? `${pre930Trades.length} Trade${pre930Trades.length > 1 ? 's' : ''} &lt; 09:30 AM` : '0 Pre-09:30 Trades'}
+              </div>
+              <p class="text-[11px] text-slate-400 font-mono mt-0.5">
+                ${isEarlyBreach ? `Entered prematurely during opening discovery (${pre930Trades.map(t=>t.symbol).join(', ')}). High risk of opening whipsaw.` : 'All executions entered patiently after 09:30 AM opening candle confirmation.'}
               </p>
             </div>
           </div>
@@ -4095,9 +4375,10 @@
           const netClass = isWin ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
           const dirClass = t.direction === 'Long' ? 'text-emerald-400' : 'text-rose-400';
           const hold = t.hold_duration ? `${t.hold_duration}m` : '--';
+          const pre930Tag = isPre930(t.time) ? '<span class="text-[9px] px-1 py-0.2 rounded bg-rose-950/80 text-rose-300 border border-rose-800/60 font-bold ml-1" title="Executed in 09:15-09:30 No-Trade Zone">⏱️ Pre-09:30</span>' : '';
           return `
             <tr class="hover:bg-slate-800/40 border-b border-slate-800/40 transition">
-              <td class="py-2 px-2.5 text-slate-300">${t.time || '--'}–${t.exit_time || '--'}</td>
+              <td class="py-2 px-2.5 text-slate-300 whitespace-nowrap">${t.time || '--'}–${t.exit_time || '--'}${pre930Tag}</td>
               <td class="py-2 px-2.5 font-bold text-white flex items-center gap-1.5">
                 <span>${t.symbol}</span>
                 <span class="text-[10px] px-1 rounded bg-slate-800 text-slate-400 font-normal">${t.id}</span>
@@ -4241,7 +4522,7 @@
   <!-- CALENDAR DAY DETAIL & AUDIT MODAL                         -->
   <!-- ======================================================== -->
   <div id="calendarDayModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="glass-panel bg-[#0b0f19] border border-slate-800 rounded-2xl max-w-3xl w-full p-6 space-y-5 max-h-[90vh] flex flex-col shadow-2xl">
+    <div class="glass-panel bg-[#0b0f19] border border-slate-800 rounded-2xl max-w-4xl w-full p-6 space-y-5 max-h-[90vh] flex flex-col shadow-2xl">
       <!-- Modal Header -->
       <div class="flex items-start justify-between border-b border-slate-800 pb-3">
         <div>
@@ -4259,7 +4540,7 @@
       </div>
 
       <!-- Rule Audit Cards for this day -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="calModalRuleCards">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="calModalRuleCards">
         <!-- Injected via JS -->
       </div>
 

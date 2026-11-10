@@ -1,5 +1,6 @@
 {
   "maxDailyTrades": 2,
   "maxDailyLoss": 10000,
-  "maxTradeRisk": 2500
+  "maxTradeRisk": 2500,
+  "enforceTimeFilter": true
 }
