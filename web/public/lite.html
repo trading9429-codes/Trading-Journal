@@ -82,6 +82,9 @@
         <button onclick="switchTab('overview')" id="tabBtn-overview" class="tab-btn px-3.5 py-1.5 rounded-lg text-white bg-blue-600 font-semibold transition">
           Dashboard
         </button>
+        <button onclick="switchTab('calendar')" id="tabBtn-calendar" class="tab-btn px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5">
+          <span>📅</span> Calendar
+        </button>
         <button onclick="switchTab('trades')" id="tabBtn-trades" class="tab-btn px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
           Trades <span id="navTradesCount" class="ml-1 text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-slate-800">0</span>
         </button>
@@ -270,7 +273,12 @@
               </h3>
               <p class="text-xs text-slate-400 font-mono">Realized performance broken down by individual trading day</p>
             </div>
-            <span class="text-xs font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400" id="dailyPnLDaysCount">0 Days</span>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400" id="dailyPnLDaysCount">0 Days</span>
+              <button onclick="switchTab('calendar')" class="text-xs font-mono text-blue-400 hover:text-blue-300 flex items-center gap-1 bg-blue-500/10 hover:bg-blue-500/20 px-2 py-0.5 rounded-lg border border-blue-500/20 transition" title="Open full P&L Calendar">
+                <span>📅 Calendar</span> ↗
+              </button>
+            </div>
           </div>
           <div class="relative h-64 w-full">
             <canvas id="dailyPnLCanvas"></canvas>
@@ -388,6 +396,157 @@
               <!-- Rendered via JS -->
             </tbody>
           </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB: P&L CALENDAR & RULE AUDIT             -->
+    <!-- ========================================== -->
+    <div id="tabContent-calendar" class="hidden space-y-6">
+
+      <!-- Calendar Top Bar -->
+      <div class="glass-panel p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <span>📅</span> <span>Daily P&amp;L Calendar &amp; Rule Audit</span>
+            </h2>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-semibold">
+              Automated Guardrails
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 font-mono mt-0.5">
+            Intraday compliance tracker: Flags days exceeding <span class="text-rose-400 font-bold">2 trades/day</span> or losing more than <span class="text-amber-300 font-bold">₹10,000</span>.
+          </p>
+        </div>
+
+        <!-- Month Navigation Controls -->
+        <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-800 rounded-xl p-1.5 font-mono text-xs">
+          <button onclick="changeCalendarMonth(-1)" class="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition" title="Previous Month">
+            ◀
+          </button>
+          <div class="flex items-center gap-1.5 px-2">
+            <select id="calMonthSelect" onchange="onCalendarSelectChange()" class="bg-transparent text-white font-bold font-mono text-xs focus:outline-none cursor-pointer">
+              <option value="0">January</option>
+              <option value="1">February</option>
+              <option value="2">March</option>
+              <option value="3">April</option>
+              <option value="4">May</option>
+              <option value="5">June</option>
+              <option value="6">July</option>
+              <option value="7">August</option>
+              <option value="8">September</option>
+              <option value="9">October</option>
+              <option value="10">November</option>
+              <option value="11">December</option>
+            </select>
+            <select id="calYearSelect" onchange="onCalendarSelectChange()" class="bg-transparent text-white font-bold font-mono text-xs focus:outline-none cursor-pointer">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <button onclick="changeCalendarMonth(1)" class="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition" title="Next Month">
+            ▶
+          </button>
+          <button onclick="resetCalendarToCurrent()" class="ml-1 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-[11px] font-semibold transition">
+            Current
+          </button>
+        </div>
+      </div>
+
+      <!-- Month Summary Metrics Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+        <!-- 1. Month Net P&L -->
+        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
+          <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Month Net P&amp;L</span>
+          <div class="my-1.5">
+            <h3 id="calStatMonthNet" class="text-xl md:text-2xl font-bold font-mono text-slate-200">₹0.00</h3>
+            <p id="calStatMonthGross" class="text-xs font-mono text-slate-400">Gross: ₹0.00</p>
+          </div>
+          <span id="calStatMonthFriction" class="text-[11px] font-mono text-slate-500 border-t border-slate-800/80 pt-1.5">Friction: ₹0</span>
+        </div>
+
+        <!-- 2. Day Win Rate -->
+        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
+          <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Trading Days Win Rate</span>
+          <div class="my-1.5">
+            <h3 id="calStatDayWinRate" class="text-xl md:text-2xl font-bold font-mono text-slate-200">0.0%</h3>
+            <p id="calStatDayCounts" class="text-xs font-mono text-slate-400">0 Green &bull; 0 Red</p>
+          </div>
+          <span id="calStatTotalActiveDays" class="text-[11px] font-mono text-slate-500 border-t border-slate-800/80 pt-1.5">0 Total Trading Days</span>
+        </div>
+
+        <!-- 3. Monthly Trades & Avg Frequency -->
+        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
+          <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Monthly Trades Volume</span>
+          <div class="my-1.5">
+            <h3 id="calStatTotalTrades" class="text-xl md:text-2xl font-bold font-mono text-slate-200">0</h3>
+            <p id="calStatAvgTradesPerDay" class="text-xs font-mono text-slate-400">0.0 trades / day avg</p>
+          </div>
+          <span class="text-[11px] font-mono text-slate-500 border-t border-slate-800/80 pt-1.5">Target: &le; 2.0 trades / day</span>
+        </div>
+
+        <!-- 4. Rule Compliance & Breach Audit -->
+        <div class="glass-panel p-4 rounded-xl flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Rule Discipline Status</span>
+            <span id="calStatBreachBadge" class="text-[10px] font-mono px-1.5 py-0.5 rounded font-bold bg-slate-800 text-slate-400">--</span>
+          </div>
+          <div class="my-1.5">
+            <h3 id="calStatBreachDays" class="text-xl md:text-2xl font-bold font-mono text-slate-200">0 Breach Days</h3>
+            <p id="calStatBreachBreakdown" class="text-xs font-mono text-slate-400">0 Overtrade &bull; 0 Loss Cap</p>
+          </div>
+          <span id="calStatComplianceRate" class="text-[11px] font-mono text-slate-500 border-t border-slate-800/80 pt-1.5">100% Rule Compliance</span>
+        </div>
+      </div>
+
+      <!-- Rule Guardrails Legend Bar -->
+      <div class="glass-panel px-4 py-2.5 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+        <div class="flex items-center gap-4 flex-wrap">
+          <span class="text-slate-400 font-bold uppercase text-[11px] tracking-wider">Guardrails Legend:</span>
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-sm bg-emerald-500/80"></span>
+            <span class="text-slate-300">Profitable Day</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-sm bg-rose-500/80"></span>
+            <span class="text-slate-300">Loss Day</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="px-1.5 py-0.5 rounded bg-rose-950 border border-rose-800 text-rose-300 text-[10px] font-bold">🚨 &gt;2 Trades</span>
+            <span class="text-slate-400">Overtrading Breach</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="px-1.5 py-0.5 rounded bg-amber-950 border border-amber-800 text-amber-300 text-[10px] font-bold">🛑 &gt;₹10K Loss</span>
+            <span class="text-slate-400">Hard SL Breach</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="px-1.5 py-0.5 rounded bg-emerald-950 border border-emerald-800 text-emerald-300 text-[10px]">✓ Disciplined</span>
+            <span class="text-slate-400">Within Rules</span>
+          </div>
+        </div>
+        <div class="text-slate-400 text-[11px]">
+          Click any trading day cell for trade breakdown &amp; audit drilldown
+        </div>
+      </div>
+
+      <!-- The Calendar Grid -->
+      <div class="glass-panel p-4 md:p-5 rounded-2xl overflow-x-auto">
+        <!-- 7-Column Day Names Header -->
+        <div class="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-mono font-bold text-slate-400 uppercase tracking-wider">
+          <div class="py-1 bg-slate-900/60 rounded-lg">Mon</div>
+          <div class="py-1 bg-slate-900/60 rounded-lg">Tue</div>
+          <div class="py-1 bg-slate-900/60 rounded-lg">Wed</div>
+          <div class="py-1 bg-slate-900/60 rounded-lg">Thu</div>
+          <div class="py-1 bg-slate-900/60 rounded-lg">Fri</div>
+          <div class="py-1 bg-slate-900/30 text-slate-600 rounded-lg">Sat</div>
+          <div class="py-1 bg-slate-900/30 text-slate-600 rounded-lg">Sun</div>
+        </div>
+
+        <!-- 7-Column Calendar Days Grid (populated via JS) -->
+        <div id="calendarGrid" class="grid grid-cols-7 gap-2 min-w-[700px]">
+          <!-- Days populated dynamically by renderPnlCalendar() -->
         </div>
       </div>
 
@@ -1397,7 +1556,7 @@
 
     // --- Tab Navigation ---
     function switchTab(tabId) {
-      ['overview', 'trades', 'log', 'fyers', 'rules', 'config'].forEach(id => {
+      ['overview', 'calendar', 'trades', 'log', 'fyers', 'rules', 'config'].forEach(id => {
         const content = document.getElementById(`tabContent-${id}`);
         const btn = document.getElementById(`tabBtn-${id}`);
         if (content) {
@@ -1419,6 +1578,8 @@
       if (tabId === 'overview') {
         applyMetricsVisibility();
         renderCharts();
+      } else if (tabId === 'calendar') {
+        renderPnlCalendar();
       } else if (tabId === 'config') {
         renderSetupsManager();
         applyMetricsVisibility();
@@ -1565,6 +1726,7 @@
       renderSetupDropdowns();
       applyMetricsVisibility();
       updatePlaybookGuardrails();
+      renderPnlCalendar();
     }
 
     
@@ -3312,6 +3474,483 @@
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
+    // ========================================================
+    // P&L CALENDAR & RULE AUDIT ENGINE
+    // ========================================================
+    let calendarState = {
+      year: new Date().getFullYear(),
+      month: new Date().getMonth(), // 0 to 11
+      selectedDate: null
+    };
+
+    function initCalendarYears() {
+      const yearSelect = document.getElementById('calYearSelect');
+      if (!yearSelect) return;
+      const curYear = new Date().getFullYear();
+      let html = '';
+      for (let y = curYear - 3; y <= curYear + 1; y++) {
+        html += `<option value="${y}" ${y === calendarState.year ? 'selected' : ''}>${y}</option>`;
+      }
+      yearSelect.innerHTML = html;
+      const monthSelect = document.getElementById('calMonthSelect');
+      if (monthSelect) monthSelect.value = String(calendarState.month);
+    }
+
+    function syncCalendarControls() {
+      const monthSelect = document.getElementById('calMonthSelect');
+      const yearSelect = document.getElementById('calYearSelect');
+      if (monthSelect) monthSelect.value = String(calendarState.month);
+      if (yearSelect) yearSelect.value = String(calendarState.year);
+    }
+
+    function changeCalendarMonth(delta) {
+      calendarState.month += delta;
+      if (calendarState.month < 0) {
+        calendarState.month = 11;
+        calendarState.year -= 1;
+      } else if (calendarState.month > 11) {
+        calendarState.month = 0;
+        calendarState.year += 1;
+      }
+      syncCalendarControls();
+      renderPnlCalendar();
+    }
+
+    function onCalendarSelectChange() {
+      const monthSelect = document.getElementById('calMonthSelect');
+      const yearSelect = document.getElementById('calYearSelect');
+      if (monthSelect) calendarState.month = parseInt(monthSelect.value);
+      if (yearSelect) calendarState.year = parseInt(yearSelect.value);
+      renderPnlCalendar();
+    }
+
+    function resetCalendarToCurrent() {
+      if (tradesData && tradesData.length > 0) {
+        const sortedDates = tradesData.map(t => t.date).filter(Boolean).sort();
+        if (sortedDates.length > 0) {
+          const latest = sortedDates[sortedDates.length - 1];
+          const parts = latest.split('-');
+          if (parts.length === 3) {
+            calendarState.year = parseInt(parts[0]);
+            calendarState.month = parseInt(parts[1]) - 1;
+          }
+        }
+      } else {
+        const now = new Date();
+        calendarState.year = now.getFullYear();
+        calendarState.month = now.getMonth();
+      }
+      syncCalendarControls();
+      renderPnlCalendar();
+    }
+
+    function renderPnlCalendar() {
+      const grid = document.getElementById('calendarGrid');
+      if (!grid) return;
+
+      initCalendarYears();
+      syncCalendarControls();
+
+      const year = calendarState.year;
+      const month = calendarState.month; // 0-indexed
+
+      // Group all trades by date (YYYY-MM-DD)
+      const tradesByDate = {};
+      for (const t of tradesData) {
+        if (!t.date) continue;
+        if (!tradesByDate[t.date]) tradesByDate[t.date] = [];
+        tradesByDate[t.date].push(t);
+      }
+
+      // Monday-first offset (Mon=0, Tue=1, ..., Sun=6)
+      const firstDayObj = new Date(year, month, 1);
+      const rawFirstDay = firstDayObj.getDay();
+      const mondayOffset = (rawFirstDay === 0) ? 6 : rawFirstDay - 1;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+      const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+
+      // Month Aggregate Stats
+      let monthNet = 0;
+      let monthGross = 0;
+      let monthFriction = 0;
+      let monthTradesCount = 0;
+      let activeDaysCount = 0;
+      let greenDaysCount = 0;
+      let redDaysCount = 0;
+      let overtradingDaysCount = 0;
+      let hardStopLossDaysCount = 0;
+      let totalBreachDaysCount = 0;
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dStr = `${monthPrefix}-${String(d).padStart(2, '0')}`;
+        const dayTrades = tradesByDate[dStr];
+        if (dayTrades && dayTrades.length > 0) {
+          activeDaysCount++;
+          monthTradesCount += dayTrades.length;
+          const dayNet = dayTrades.reduce((s, t) => s + (parseFloat(t.net_pnl) || 0), 0);
+          const dayGross = dayTrades.reduce((s, t) => s + (parseFloat(t.gross_pnl) || 0), 0);
+          const dayFriction = dayTrades.reduce((s, t) => s + (parseFloat(t.costs) || 0), 0);
+
+          monthNet += dayNet;
+          monthGross += dayGross;
+          monthFriction += dayFriction;
+
+          if (dayNet > 0) greenDaysCount++;
+          else if (dayNet < 0) redDaysCount++;
+
+          const isOvertrade = dayTrades.length > 2;
+          const isHardStop = dayNet < -10000;
+          if (isOvertrade) overtradingDaysCount++;
+          if (isHardStop) hardStopLossDaysCount++;
+          if (isOvertrade || isHardStop) totalBreachDaysCount++;
+        }
+      }
+
+      // Update Month KPI Cards
+      const netClass = monthNet >= 0 ? 'text-emerald-400' : 'text-rose-400';
+      const netSign = monthNet > 0 ? '+' : '';
+      const elMonthNet = document.getElementById('calStatMonthNet');
+      if (elMonthNet) {
+        elMonthNet.innerHTML = `<span class="${netClass}">${netSign}₹${monthNet.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>`;
+      }
+      const elMonthGross = document.getElementById('calStatMonthGross');
+      if (elMonthGross) {
+        elMonthGross.textContent = `Gross: ₹${monthGross.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      }
+      const elMonthFriction = document.getElementById('calStatMonthFriction');
+      if (elMonthFriction) {
+        elMonthFriction.textContent = `Friction: ₹${monthFriction.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      }
+
+      const winRateDays = activeDaysCount > 0 ? ((greenDaysCount / activeDaysCount) * 100).toFixed(1) : '0.0';
+      const elDayWinRate = document.getElementById('calStatDayWinRate');
+      if (elDayWinRate) elDayWinRate.textContent = `${winRateDays}%`;
+      const elDayCounts = document.getElementById('calStatDayCounts');
+      if (elDayCounts) elDayCounts.textContent = `${greenDaysCount} Green • ${redDaysCount} Red Days`;
+      const elTotalActiveDays = document.getElementById('calStatTotalActiveDays');
+      if (elTotalActiveDays) elTotalActiveDays.textContent = `${activeDaysCount} Active Trading Days`;
+
+      const avgTradesPerDay = activeDaysCount > 0 ? (monthTradesCount / activeDaysCount).toFixed(1) : '0.0';
+      const elTotalTrades = document.getElementById('calStatTotalTrades');
+      if (elTotalTrades) elTotalTrades.textContent = monthTradesCount;
+      const elAvgTrades = document.getElementById('calStatAvgTradesPerDay');
+      if (elAvgTrades) elAvgTrades.textContent = `${avgTradesPerDay} trades / day avg`;
+
+      const elBreachDays = document.getElementById('calStatBreachDays');
+      if (elBreachDays) {
+        if (totalBreachDaysCount === 0) {
+          elBreachDays.innerHTML = `<span class="text-emerald-400">0 Breaches</span>`;
+        } else {
+          elBreachDays.innerHTML = `<span class="text-rose-400">${totalBreachDaysCount} Breach Day${totalBreachDaysCount > 1 ? 's' : ''}</span>`;
+        }
+      }
+      const elBreachBreakdown = document.getElementById('calStatBreachBreakdown');
+      if (elBreachBreakdown) {
+        elBreachBreakdown.textContent = `${overtradingDaysCount} Overtrade (>2) • ${hardStopLossDaysCount} Hard SL (>₹10K)`;
+      }
+      const elComplianceRate = document.getElementById('calStatComplianceRate');
+      if (elComplianceRate) {
+        const compliancePct = activeDaysCount > 0 ? (((activeDaysCount - totalBreachDaysCount) / activeDaysCount) * 100).toFixed(0) : 100;
+        elComplianceRate.textContent = `${compliancePct}% Rule Compliance`;
+      }
+      const elBreachBadge = document.getElementById('calStatBreachBadge');
+      if (elBreachBadge) {
+        if (totalBreachDaysCount === 0) {
+          elBreachBadge.className = 'text-[10px] font-mono px-1.5 py-0.5 rounded font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+          elBreachBadge.textContent = 'PERFECT DISCIPLINE';
+        } else {
+          elBreachBadge.className = 'text-[10px] font-mono px-1.5 py-0.5 rounded font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20';
+          elBreachBadge.textContent = 'RULE BREACHES';
+        }
+      }
+
+      // Generate Calendar Grid HTML
+      let cellsHtml = '';
+
+      // 1. Previous month trailing padding cells
+      for (let p = 0; p < mondayOffset; p++) {
+        const prevDayNum = daysInPrevMonth - mondayOffset + p + 1;
+        cellsHtml += `
+          <div class="min-h-[105px] p-2.5 rounded-xl bg-slate-950/20 border border-slate-900/40 text-slate-700 select-none flex flex-col justify-between">
+            <span class="text-xs font-mono font-medium">${prevDayNum}</span>
+          </div>
+        `;
+      }
+
+      // 2. Days of current month
+      const today = new Date();
+      const isCurrentYear = today.getFullYear() === year;
+      const isCurrentMonth = today.getMonth() === month;
+      const todayDate = today.getDate();
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${monthPrefix}-${String(day).padStart(2, '0')}`;
+        const dayOfWeekIndex = (mondayOffset + day - 1) % 7;
+        const isWeekend = (dayOfWeekIndex === 5 || dayOfWeekIndex === 6);
+        const isToday = isCurrentYear && isCurrentMonth && (day === todayDate);
+
+        const dayTrades = tradesByDate[dateStr] || [];
+        const hasTrades = dayTrades.length > 0;
+
+        if (hasTrades) {
+          const tradeCount = dayTrades.length;
+          const dayNet = dayTrades.reduce((s, t) => s + (parseFloat(t.net_pnl) || 0), 0);
+          const dayGross = dayTrades.reduce((s, t) => s + (parseFloat(t.gross_pnl) || 0), 0);
+          const isWin = dayNet > 0;
+          const isLoss = dayNet < 0;
+
+          // Rule breaches (User requirement: >2 trades OR >10K lost)
+          const isOvertrading = tradeCount > 2;
+          const isLossBreach = dayNet < -10000;
+          const hasBreach = isOvertrading || isLossBreach;
+
+          let cardBg = '';
+          let borderClass = '';
+          let glowClass = '';
+
+          if (hasBreach) {
+            borderClass = 'border-rose-500/50 hover:border-rose-400 ring-1 ring-rose-500/30';
+          } else if (isWin) {
+            borderClass = 'border-emerald-500/30 hover:border-emerald-400';
+          } else {
+            borderClass = 'border-slate-800 hover:border-slate-700';
+          }
+
+          if (isWin) {
+            cardBg = 'bg-gradient-to-b from-emerald-950/30 via-slate-900/90 to-slate-950/90';
+            glowClass = 'shadow-[0_0_14px_rgba(16,185,129,0.08)]';
+          } else {
+            cardBg = 'bg-gradient-to-b from-rose-950/30 via-slate-900/90 to-slate-950/90';
+            glowClass = 'shadow-[0_0_14px_rgba(244,63,94,0.08)]';
+          }
+
+          const pnlTextClass = isWin ? 'text-emerald-400 font-extrabold' : (isLoss ? 'text-rose-400 font-extrabold' : 'text-slate-300 font-bold');
+          const pnlSign = dayNet > 0 ? '+' : '';
+
+          let badgeHtml = '';
+          if (isOvertrading && isLossBreach) {
+            badgeHtml = `
+              <div class="mt-1 flex flex-col gap-0.5">
+                <span class="inline-flex items-center gap-1 text-[9px] font-bold text-rose-300 bg-rose-950/90 border border-rose-800/80 px-1 py-0.2 rounded w-fit">
+                  🚨 ${tradeCount} Trades (&gt;2)
+                </span>
+                <span class="inline-flex items-center gap-1 text-[9px] font-bold text-amber-300 bg-amber-950/90 border border-amber-800/80 px-1 py-0.2 rounded w-fit">
+                  🛑 &gt;₹10K Hard SL
+                </span>
+              </div>
+            `;
+          } else if (isOvertrading) {
+            badgeHtml = `
+              <div class="mt-1">
+                <span class="inline-flex items-center gap-1 text-[9px] font-bold text-rose-300 bg-rose-950/90 border border-rose-800/80 px-1 py-0.2 rounded w-fit">
+                  🚨 ${tradeCount} Trades (&gt;2)
+                </span>
+              </div>
+            `;
+          } else if (isLossBreach) {
+            badgeHtml = `
+              <div class="mt-1">
+                <span class="inline-flex items-center gap-1 text-[9px] font-bold text-amber-300 bg-amber-950/90 border border-amber-800/80 px-1 py-0.2 rounded w-fit">
+                  🛑 &gt;₹10K Hard SL
+                </span>
+              </div>
+            `;
+          } else {
+            badgeHtml = `
+              <div class="mt-1">
+                <span class="inline-flex items-center gap-1 text-[9px] font-medium text-emerald-400/90 bg-emerald-950/40 border border-emerald-900/40 px-1 py-0.2 rounded w-fit">
+                  ✓ Disciplined
+                </span>
+              </div>
+            `;
+          }
+
+          cellsHtml += `
+            <div onclick="openCalendarDayModal('${dateStr}')" 
+                 class="min-h-[105px] p-2.5 rounded-xl ${cardBg} border ${borderClass} ${glowClass} cursor-pointer transition-all duration-150 hover:scale-[1.02] flex flex-col justify-between group">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-mono font-bold ${isToday ? 'text-blue-400 bg-blue-500/10 px-1.5 py-0.2 rounded border border-blue-500/30' : 'text-slate-200'}">
+                    ${day}
+                  </span>
+                  <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-900/90 text-slate-300 border border-slate-800 group-hover:border-slate-700">
+                    ${tradeCount} trade${tradeCount > 1 ? 's' : ''}
+                  </span>
+                </div>
+                <div class="mt-1">
+                  <div class="text-xs sm:text-sm font-mono ${pnlTextClass}">
+                    ${pnlSign}₹${dayNet.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
+                  <div class="text-[10px] font-mono text-slate-500">
+                    Gross: ₹${dayGross.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                  </div>
+                </div>
+              </div>
+              <div>
+                ${badgeHtml}
+              </div>
+            </div>
+          `;
+        } else {
+          const cellBg = isWeekend ? 'bg-slate-950/40 border-slate-900/60' : 'bg-slate-900/30 border-slate-800/40';
+          const textCol = isWeekend ? 'text-slate-600' : 'text-slate-500';
+
+          cellsHtml += `
+            <div class="min-h-[105px] p-2.5 rounded-xl ${cellBg} border flex flex-col justify-between hover:border-slate-700/50 transition">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono font-semibold ${isToday ? 'text-blue-400 bg-blue-500/10 px-1.5 py-0.2 rounded border border-blue-500/30' : textCol}">
+                  ${day}
+                </span>
+                ${isWeekend ? '<span class="text-[9px] font-mono text-slate-700 uppercase">Weekend</span>' : ''}
+              </div>
+              <div class="text-[10px] font-mono text-slate-700 italic">No Trades</div>
+              <div></div>
+            </div>
+          `;
+        }
+      }
+
+      // 3. Next month trailing padding cells
+      const totalCellsFilled = mondayOffset + daysInMonth;
+      const trailingCells = (7 - (totalCellsFilled % 7)) % 7;
+      for (let t = 1; t <= trailingCells; t++) {
+        cellsHtml += `
+          <div class="min-h-[105px] p-2.5 rounded-xl bg-slate-950/20 border border-slate-900/40 text-slate-700 select-none flex flex-col justify-between">
+            <span class="text-xs font-mono font-medium">${t}</span>
+          </div>
+        `;
+      }
+
+      grid.innerHTML = cellsHtml;
+    }
+
+    // --- Calendar Day Drilldown Modal ---
+    function openCalendarDayModal(dateStr) {
+      calendarState.selectedDate = dateStr;
+      const modal = document.getElementById('calendarDayModal');
+      if (!modal) return;
+
+      const dayTrades = tradesData.filter(t => t.date === dateStr);
+      if (dayTrades.length === 0) return;
+
+      dayTrades.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+
+      const dObj = new Date(dateStr + 'T00:00:00');
+      const dayOptions = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+      const formattedDate = dObj.toLocaleDateString('en-US', dayOptions);
+
+      document.getElementById('calModalDateTitle').textContent = formattedDate;
+
+      const totalNet = dayTrades.reduce((s, t) => s + (parseFloat(t.net_pnl) || 0), 0);
+      const totalGross = dayTrades.reduce((s, t) => s + (parseFloat(t.gross_pnl) || 0), 0);
+      const totalCosts = dayTrades.reduce((s, t) => s + (parseFloat(t.costs) || 0), 0);
+      const tradeCount = dayTrades.length;
+
+      const badge = document.getElementById('calModalDayPnlBadge');
+      if (badge) {
+        const isWin = totalNet > 0;
+        badge.className = isWin ? 'text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30';
+        badge.textContent = `${totalNet > 0 ? '+' : ''}₹${totalNet.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      }
+
+      document.getElementById('calModalDaySubTitle').textContent = `${tradeCount} Trades Executed • Gross: ₹${totalGross.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('calModalSummaryNote').textContent = `Total Broker Statutory Charges: ₹${totalCosts.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      const isOvertrading = tradeCount > 2;
+      const isHardStop = totalNet < -10000;
+
+      const ruleCards = document.getElementById('calModalRuleCards');
+      if (ruleCards) {
+        ruleCards.innerHTML = `
+          <!-- Rule 1: Max 2 Trades/Day -->
+          <div class="glass-panel p-3.5 rounded-xl border ${isOvertrading ? 'border-rose-500/50 bg-rose-950/20' : 'border-emerald-500/40 bg-emerald-950/20'} flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-mono uppercase tracking-wider text-slate-300 font-bold flex items-center gap-1.5">
+                <span>🎯</span> Rule 1: Daily Trade Cap (≤ 2)
+              </span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded font-bold ${isOvertrading ? 'bg-rose-950 text-rose-300 border border-rose-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'}">
+                ${isOvertrading ? 'VIOLATION' : 'PASSED'}
+              </span>
+            </div>
+            <div class="my-2">
+              <div class="text-sm font-mono font-bold ${isOvertrading ? 'text-rose-400' : 'text-emerald-400'}">
+                ${tradeCount} Trade${tradeCount > 1 ? 's' : ''} Taken (Limit: 2)
+              </div>
+              <p class="text-[11px] text-slate-400 font-mono mt-0.5">
+                ${isOvertrading ? `Breached by ${tradeCount - 2} extra trade(s). Overtrading dilutes statistical edge and leads to revenge trading.` : 'Disciplined trade frequency maintained within guardrail limit.'}
+              </p>
+            </div>
+          </div>
+
+          <!-- Rule 2: Max ₹10,000 Hard SL -->
+          <div class="glass-panel p-3.5 rounded-xl border ${isHardStop ? 'border-amber-500/50 bg-amber-950/20' : 'border-emerald-500/40 bg-emerald-950/20'} flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-mono uppercase tracking-wider text-slate-300 font-bold flex items-center gap-1.5">
+                <span>🛑</span> Rule 2: Daily Hard SL (₹10,000)
+              </span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded font-bold ${isHardStop ? 'bg-amber-950 text-amber-300 border border-amber-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'}">
+                ${isHardStop ? 'BREACHED' : 'PASSED'}
+              </span>
+            </div>
+            <div class="my-2">
+              <div class="text-sm font-mono font-bold ${isHardStop ? 'text-amber-400' : 'text-emerald-400'}">
+                ${totalNet < 0 ? `-₹${Math.abs(totalNet).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : `+₹${totalNet.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`} (Cap: -₹10,000)
+              </div>
+              <p class="text-[11px] text-slate-400 font-mono mt-0.5">
+                ${isHardStop ? `Exceeded ₹10,000 max daily stop loss by ₹${(Math.abs(totalNet) - 10000).toLocaleString('en-IN', { minimumFractionDigits: 2 })}. Circuit breaker rule requires trading to halt immediately.` : 'Daily loss was kept safely within the circuit breaker.'}
+              </p>
+            </div>
+          </div>
+        `;
+      }
+
+      const tbody = document.getElementById('calModalTradesTableBody');
+      if (tbody) {
+        tbody.innerHTML = dayTrades.map((t) => {
+          const net = parseFloat(t.net_pnl) || 0;
+          const isWin = net > 0;
+          const netClass = isWin ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+          const dirClass = t.direction === 'Long' ? 'text-emerald-400' : 'text-rose-400';
+          const hold = t.hold_duration ? `${t.hold_duration}m` : '--';
+          return `
+            <tr class="hover:bg-slate-800/40 border-b border-slate-800/40 transition">
+              <td class="py-2 px-2.5 text-slate-300">${t.time || '--'}–${t.exit_time || '--'}</td>
+              <td class="py-2 px-2.5 font-bold text-white flex items-center gap-1.5">
+                <span>${t.symbol}</span>
+                <span class="text-[10px] px-1 rounded bg-slate-800 text-slate-400 font-normal">${t.id}</span>
+              </td>
+              <td class="py-2 px-2 font-bold ${dirClass}">${t.direction}</td>
+              <td class="py-2 px-2 text-right text-slate-300">${t.qty}</td>
+              <td class="py-2 px-2 text-right text-slate-200">₹${parseFloat(t.entry_price).toFixed(2)}</td>
+              <td class="py-2 px-2 text-right text-slate-200">₹${parseFloat(t.exit_price).toFixed(2)}</td>
+              <td class="py-2 px-2 text-right text-slate-400">${hold}</td>
+              <td class="py-2 px-2.5 text-right ${netClass}">₹${net.toFixed(2)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeCalendarDayModal() {
+      const modal = document.getElementById('calendarDayModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function jumpToLedgerForDate() {
+      if (!calendarState.selectedDate) return;
+      closeCalendarDayModal();
+      switchTab('trades');
+      const search = document.getElementById('ledgerSearchInput');
+      if (search) {
+        search.value = calendarState.selectedDate;
+        filterTrades();
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', init);
   </script>
 
@@ -3413,6 +4052,75 @@
         <button onclick="closeQuickMetricsModal()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs font-mono transition">
           Done
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- CALENDAR DAY DETAIL & AUDIT MODAL                         -->
+  <!-- ======================================================== -->
+  <div id="calendarDayModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="glass-panel bg-[#0b0f19] border border-slate-800 rounded-2xl max-w-3xl w-full p-6 space-y-5 max-h-[90vh] flex flex-col shadow-2xl">
+      <!-- Modal Header -->
+      <div class="flex items-start justify-between border-b border-slate-800 pb-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 id="calModalDateTitle" class="text-base font-bold text-white font-mono">
+              Wednesday, 04 Nov 2026
+            </h3>
+            <span id="calModalDayPnlBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded-full">--</span>
+          </div>
+          <p id="calModalDaySubTitle" class="text-xs text-slate-400 font-mono mt-0.5">
+            4 Trades Executed &bull; ₹-46,846.54 Net P&amp;L
+          </p>
+        </div>
+        <button onclick="closeCalendarDayModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition">✕</button>
+      </div>
+
+      <!-- Rule Audit Cards for this day -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="calModalRuleCards">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Day Trades Table -->
+      <div class="flex-1 overflow-y-auto space-y-2 border border-slate-800/80 rounded-xl bg-slate-900/40 p-2">
+        <h4 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 px-2 pt-1">
+          Individual Executions on this Day
+        </h4>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead>
+              <tr class="text-slate-400 border-b border-slate-800/80 bg-slate-900/60 text-[11px]">
+                <th class="py-2 px-2.5">Time</th>
+                <th class="py-2 px-2.5">Symbol</th>
+                <th class="py-2 px-2">Side</th>
+                <th class="py-2 px-2 text-right">Qty</th>
+                <th class="py-2 px-2 text-right">Entry</th>
+                <th class="py-2 px-2 text-right">Exit</th>
+                <th class="py-2 px-2 text-right">Hold</th>
+                <th class="py-2 px-2.5 text-right">Net P&amp;L</th>
+              </tr>
+            </thead>
+            <tbody id="calModalTradesTableBody">
+              <!-- Injected via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-between border-t border-slate-800 pt-3 text-xs font-mono">
+        <div class="text-slate-400" id="calModalSummaryNote">
+          Total Charges: ₹0.00
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="jumpToLedgerForDate()" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold transition">
+            Filter in Master Ledger &rarr;
+          </button>
+          <button onclick="closeCalendarDayModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition">
+            Close
+          </button>
+        </div>
       </div>
     </div>
   </div>
