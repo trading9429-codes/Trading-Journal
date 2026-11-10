@@ -49,6 +49,62 @@ def clear_chartink_alerts():
     save_chartink_alerts([])
     return []
 
+def get_stock_leaderboard():
+    alerts = get_chartink_alerts()
+    stocks = {}
+    for a in alerts:
+        sym = (a.get("symbol") or "").strip().upper()
+        if not sym:
+            continue
+        if sym not in stocks:
+            stocks[sym] = {
+                "symbol": sym,
+                "count": 0,
+                "latest_price": a.get("price", 0.0),
+                "earliest_price": a.get("price", 0.0),
+                "highest_price": a.get("price", 0.0),
+                "lowest_price": a.get("price", 0.0),
+                "latest_time": a.get("time", ""),
+                "earliest_time": a.get("time", ""),
+                "latest_received_at": a.get("received_at", ""),
+                "setups": {},
+                "categories": [],
+                "color": a.get("color", "emerald"),
+                "alerts": []
+            }
+        item = stocks[sym]
+        item["count"] += 1
+        item["alerts"].append(a)
+
+        px = float(a.get("price") or 0.0)
+        if px > 0:
+            if item["highest_price"] == 0 or px > item["highest_price"]:
+                item["highest_price"] = px
+            if item["lowest_price"] == 0 or px < item["lowest_price"]:
+                item["lowest_price"] = px
+            item["earliest_price"] = px
+            if item["count"] == 1:
+                item["latest_price"] = px
+
+        setup = a.get("setup", "Chartink Alert")
+        item["setups"][setup] = item["setups"].get(setup, 0) + 1
+        cat = a.get("setupCategory", "vwap")
+        if cat not in item["categories"]:
+            item["categories"].append(cat)
+
+        if "megarunner" in item["categories"]:
+            item["color"] = "amber"
+        elif "fno" in item["categories"]:
+            item["color"] = "cyan"
+        elif "vwap" in item["categories"]:
+            item["color"] = "emerald"
+        elif "pullback" in item["categories"]:
+            item["color"] = "purple"
+
+    leaderboard = list(stocks.values())
+    leaderboard.sort(key=lambda x: (x["count"], x.get("latest_received_at", "")), reverse=True)
+    return leaderboard
+
 def parse_chartink_webhook(payload, raw_body=""):
     import datetime
     
@@ -213,9 +269,16 @@ class WebAppHandler(http.server.SimpleHTTPRequestHandler):
             self._send_json({"setups": get_setups()})
         elif path == "/api/guardrails":
             self._send_json({"guardrails": get_guardrails()})
-        elif path in ("/api/scanner/alerts", "/api/webhook/chartink", "/api/chartink/alerts"):
+        elif path in ("/api/scanner/alerts", "/api/webhook/chartink", "/api/chartink/alerts", "/api/scanner/leaderboard"):
             alerts = get_chartink_alerts()
-            self._send_json({"status": "ok", "alerts": alerts, "count": len(alerts)})
+            leaderboard = get_stock_leaderboard()
+            self._send_json({
+                "status": "ok",
+                "alerts": alerts,
+                "leaderboard": leaderboard,
+                "count": len(alerts),
+                "unique_stocks_count": len(leaderboard)
+            })
         elif path == "/api/download":
             if os.path.exists(XLSX_PATH):
                 with open(XLSX_PATH, "rb") as f:
