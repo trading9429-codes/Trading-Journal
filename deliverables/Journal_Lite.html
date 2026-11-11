@@ -577,22 +577,34 @@
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
-          <button type="button" onclick="fetchChartinkAlerts(true)" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-emerald-950/40">
+          <!-- Refresh -->
+          <button type="button" onclick="fetchChartinkAlerts(true)" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-emerald-950/40">
             <span id="scannerRunIcon">🔄</span> <span>Check Webhook Alerts</span>
           </button>
+
+          <!-- Copy All to TradingView Watchlist -->
+          <button type="button" onclick="copyAllToTradingView()" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition flex items-center gap-1.5 shadow-md" title="Copy all alerted stocks formatted for TradingView Watchlist (NSE:TRENT, NSE:DIXON...)">
+            <span>📋</span> <span>Copy to TradingView</span>
+          </button>
           
-          <!-- Sound Chime Toggle -->
-          <button type="button" id="scannerSoundToggleBtn" onclick="toggleScannerSound()" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-mono flex items-center gap-1 transition" title="Toggle Sound Chimes">
+          <!-- Sound Chime Toggle Button -->
+          <button type="button" id="scannerSoundToggleBtn" onclick="toggleScannerSound()" class="px-2.5 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-500/40 text-emerald-300 hover:text-white text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-sm" title="Toggle Alert Sound ON/OFF">
             <span id="scannerSoundIcon">🔔</span>
+            <span id="scannerSoundLabel">Sound ON</span>
+          </button>
+
+          <!-- Test Sound Chime Button -->
+          <button type="button" onclick="testScannerAlertSound()" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white text-xs font-mono flex items-center gap-1 transition" title="Play test alert double-chime to verify speaker volume">
+            <span class="text-amber-400">🔊</span> <span>Test Sound</span>
           </button>
 
           <!-- Test Webhook Alert Button -->
-          <button type="button" onclick="sendTestWebhookAlert()" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition flex items-center gap-1 shadow-md" title="Simulate a real Chartink webhook payload">
-            <span>🧪</span> <span>Send Test Webhook</span>
+          <button type="button" onclick="sendTestWebhookAlert()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-xs font-bold transition flex items-center gap-1 border border-slate-700" title="Simulate a real Chartink webhook payload">
+            <span>🧪</span> <span>Send Test Alert</span>
           </button>
 
           <!-- Clear Webhook History -->
-          <button type="button" onclick="clearWebhookAlerts()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-950/50 hover:text-rose-300 border border-slate-800 text-slate-400 text-xs font-mono transition" title="Clear all received alerts">
+          <button type="button" onclick="clearWebhookAlerts()" class="px-2 py-1.5 rounded-lg bg-slate-900 hover:bg-rose-950/60 hover:text-rose-300 border border-slate-800 text-slate-400 text-xs font-mono transition" title="Clear all received alerts">
             <span>🗑️</span>
           </button>
         </div>
@@ -667,7 +679,12 @@
               Ranked by Alert Count
             </span>
           </div>
-          <span class="text-[11px] text-slate-400 font-mono">Click stock name to open chart on TradingView ↗</span>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="copyTop5ToTradingView()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-sm" title="Copy Top 5 stocks formatted for TradingView Watchlist (NSE:TRENT, NSE:DIXON...)">
+              <span>📋</span> <span>Copy Top 5 to TV</span>
+            </button>
+            <span class="text-[11px] text-slate-400 font-mono hidden md:inline">&bull; Click stock name to open TV ↗</span>
+          </div>
         </div>
 
         <!-- 5-Column Grid for Top 5 Leaders -->
@@ -699,7 +716,10 @@
           </button>
         </div>
 
-        <div class="flex items-center gap-2 flex-1 sm:flex-initial min-w-[200px]">
+        <div class="flex items-center gap-2 flex-1 sm:flex-initial min-w-[240px]">
+          <button type="button" onclick="copyFilteredToTradingView()" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-blue-400 hover:text-white text-xs font-mono font-bold transition flex items-center gap-1.5 whitespace-nowrap shadow-sm" title="Copy currently filtered/searched stocks to TradingView Watchlist">
+            <span>📋</span> <span>Copy TV List</span>
+          </button>
           <span class="text-slate-500 text-xs">🔍</span>
           <input type="text" id="scannerSearchInput" oninput="filterScannerTable()" placeholder="Search symbol or scan name..." class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-mono">
         </div>
@@ -4199,24 +4219,284 @@
       updateScannerStatsRibbon();
     }
 
-    // Web Audio API Audio Chime
-    function playChime(freq = 880, type = 'sine') {
+    // ========================================================
+    // SCANNER AUDIO NOTIFICATION ENGINE (Web Audio API)
+    // ========================================================
+    let globalAudioCtx = null;
+
+    function initOrResumeAudioContext() {
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(freq * 1.5, ctx.currentTime + 0.12);
-        gain.gain.setValueAtTime(0.12, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.3);
-      } catch(e) {}
+        if (!AudioCtx) return null;
+        if (!globalAudioCtx) {
+          globalAudioCtx = new AudioCtx();
+        }
+        if (globalAudioCtx.state === 'suspended') {
+          globalAudioCtx.resume().catch(() => {});
+        }
+        return globalAudioCtx;
+      } catch(e) {
+        return null;
+      }
+    }
+
+    // Auto-unlock audio playback on first interaction anywhere on page
+    ['click', 'touchstart', 'keydown', 'mousedown'].forEach(evt => {
+      window.addEventListener(evt, () => {
+        initOrResumeAudioContext();
+      }, { once: false, passive: true });
+    });
+
+    // Dual-tone harmonic crystal bell chime (Trading terminal style)
+    function playChime(color = 'emerald') {
+      if (!scannerSoundEnabled) return;
+
+      try {
+        const ctx = initOrResumeAudioContext();
+        if (!ctx) return;
+
+        if (ctx.state === 'suspended') {
+          ctx.resume().catch(() => {});
+        }
+
+        const now = ctx.currentTime;
+
+        // Frequencies for pleasant crystal trading bell:
+        // Amber (Mega-Runner / 20-Day): C6 (1046.5Hz) -> E6 (1318.5Hz)
+        // Cyan (F&O Leader): A5 (880Hz) -> D6 (1174.7Hz)
+        // Emerald (VWAP Breakout): G5 (784Hz) -> C6 (1046.5Hz)
+        // Purple (Pullback Reversal): E5 (659.3Hz) -> A5 (880Hz)
+        let f1 = 784.0;
+        let f2 = 1046.5;
+        if (color === 'amber' || color === 'gold') {
+          f1 = 1046.5;
+          f2 = 1318.5;
+        } else if (color === 'cyan') {
+          f1 = 880.0;
+          f2 = 1174.7;
+        } else if (color === 'purple') {
+          f1 = 659.3;
+          f2 = 880.0;
+        }
+
+        // Tone 1: Triangle wave bell body
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        osc1.type = 'triangle';
+        osc1.frequency.setValueAtTime(f1, now);
+        gain1.gain.setValueAtTime(0.35, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.40);
+
+        // Tone 2: Crisp harmonic sine chime (offset by 75ms)
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(f2, now + 0.075);
+        gain2.gain.setValueAtTime(0.001, now);
+        gain2.gain.setValueAtTime(0.38, now + 0.075);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.60);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start(now + 0.075);
+        osc2.stop(now + 0.62);
+      } catch(e) {
+        console.warn("Audio chime error:", e);
+      }
+    }
+
+    function testScannerAlertSound() {
+      initOrResumeAudioContext();
+      scannerSoundEnabled = true;
+      updateScannerSoundButton();
+      playChime('amber');
+      showToast({
+        title: '🔔 Alert Sound Test',
+        badge: 'Speaker OK',
+        color: 'amber',
+        message: 'Playing crystal double-chime! Webhook alerts will sound with this chime.',
+        duration: 3000
+      });
+    }
+
+    function toggleScannerSound() {
+      initOrResumeAudioContext();
+      scannerSoundEnabled = !scannerSoundEnabled;
+      updateScannerSoundButton();
+
+      if (scannerSoundEnabled) {
+        playChime('cyan');
+        showToast({
+          title: '🔔 Alert Sound Active',
+          badge: 'Unmuted',
+          color: 'emerald',
+          message: 'Audio chimes enabled for incoming Chartink webhook alerts.',
+          duration: 2500
+        });
+      } else {
+        showToast({
+          title: '🔕 Alert Sound Silenced',
+          badge: 'Muted',
+          color: 'blue',
+          message: 'Audio chimes silenced. Visual toast notifications will still appear.',
+          duration: 2500
+        });
+      }
+    }
+
+    function updateScannerSoundButton() {
+      const icon = document.getElementById('scannerSoundIcon');
+      const label = document.getElementById('scannerSoundLabel');
+      const btn = document.getElementById('scannerSoundToggleBtn');
+      if (icon) icon.textContent = scannerSoundEnabled ? '🔔' : '🔕';
+      if (label) label.textContent = scannerSoundEnabled ? 'Sound ON' : 'Sound OFF';
+      if (btn) {
+        if (scannerSoundEnabled) {
+          btn.className = 'px-2.5 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-500/40 text-emerald-300 hover:text-white text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-sm';
+        } else {
+          btn.className = 'px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-400 text-xs font-mono flex items-center gap-1.5 transition';
+        }
+      }
+    }
+
+    // ========================================================
+    // TRADINGVIEW WATCHLIST CLIPBOARD UTILITIES
+    // ========================================================
+    function copyTextToClipboard(text, successMessage) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text).then(() => {
+          showToast({
+            title: 'Copied to Clipboard',
+            badge: 'TradingView Ready',
+            color: 'emerald',
+            message: successMessage || `Copied <b>${escapeHtml(text)}</b> to clipboard.`,
+            duration: 3500
+          });
+          return true;
+        }).catch(() => {
+          prompt("Copy TradingView text below:", text);
+          showToast({
+            title: 'Ready to Copy',
+            badge: 'TradingView',
+            color: 'blue',
+            message: successMessage || 'Text ready in prompt.',
+            duration: 2500
+          });
+          return true;
+        });
+      } else {
+        prompt("Copy TradingView text below:", text);
+        showToast({
+          title: 'Ready to Copy',
+          badge: 'TradingView',
+          color: 'blue',
+          message: successMessage || 'Text ready in prompt.',
+          duration: 2500
+        });
+        return true;
+      }
+    }
+
+    // Copy single stock formatted as NSE:SYMBOL
+    function copySingleTradingViewSymbol(symbol, btnEl) {
+      const clean = String(symbol || '').replace(/^NSE:/i, '').replace(/-EQ$/i, '').trim().toUpperCase();
+      const tvFormat = `NSE:${clean}`;
+      copyTextToClipboard(tvFormat, `Copied <b>${tvFormat}</b> to clipboard. Paste directly into TradingView.`);
+      if (btnEl) {
+        const orig = btnEl.innerHTML;
+        btnEl.innerHTML = '✓';
+        btnEl.classList.add('text-emerald-400');
+        setTimeout(() => {
+          btnEl.innerHTML = orig;
+          btnEl.classList.remove('text-emerald-400');
+        }, 2000);
+      }
+    }
+
+    // Copy all current alerted stocks formatted for TradingView Watchlist
+    function copyAllToTradingView() {
+      const leaderboard = getStockLeaderboard(chartinkAlerts);
+      if (leaderboard.length === 0) {
+        showToast({
+          title: 'No Stocks to Copy',
+          message: 'No webhook alerts received yet. Send a test alert or wait for market webhook signals.',
+          color: 'blue',
+          duration: 3000
+        });
+        return;
+      }
+      const symbols = leaderboard.map(s => {
+        const clean = String(s.symbol || '').replace(/^NSE:/i, '').replace(/-EQ$/i, '').trim().toUpperCase();
+        return `NSE:${clean}`;
+      });
+      const text = symbols.join(', ');
+      copyTextToClipboard(text, `Copied <b>${symbols.length} stocks</b> to clipboard for TradingView Watchlist:<br><span class="text-[10px] text-blue-300 font-mono">${escapeHtml(text.slice(0, 90))}${text.length > 90 ? '...' : ''}</span>`);
+    }
+
+    // Copy Top 5 leaders formatted for TradingView Watchlist
+    function copyTop5ToTradingView() {
+      const leaderboard = getStockLeaderboard(chartinkAlerts);
+      const top5 = leaderboard.slice(0, 5);
+      if (top5.length === 0) {
+        showToast({
+          title: 'No Leaders to Copy',
+          message: 'No alert leaders available yet. Send a test webhook or await Chartink alerts.',
+          color: 'blue',
+          duration: 3000
+        });
+        return;
+      }
+      const symbols = top5.map(s => {
+        const clean = String(s.symbol || '').replace(/^NSE:/i, '').replace(/-EQ$/i, '').trim().toUpperCase();
+        return `NSE:${clean}`;
+      });
+      const text = symbols.join(', ');
+      copyTextToClipboard(text, `Copied <b>Top ${symbols.length} Leaders</b> (${symbols.join(', ')}) for TradingView Watchlist.`);
+    }
+
+    // Copy currently filtered stocks formatted for TradingView
+    function copyFilteredToTradingView() {
+      const searchInput = document.getElementById('scannerSearchInput');
+      const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+      const fullLeaderboard = getStockLeaderboard(chartinkAlerts);
+
+      let filtered = [...fullLeaderboard];
+      if (activeScannerFilter === 'megarunner') {
+        filtered = filtered.filter(s => s.categories.has('megarunner'));
+      } else if (activeScannerFilter === 'fno') {
+        filtered = filtered.filter(s => s.categories.has('fno'));
+      } else if (activeScannerFilter === 'vwap') {
+        filtered = filtered.filter(s => s.categories.has('vwap'));
+      } else if (activeScannerFilter === 'pullback') {
+        filtered = filtered.filter(s => s.categories.has('pullback'));
+      }
+
+      if (query) {
+        filtered = filtered.filter(s => 
+          s.symbol.toLowerCase().includes(query) ||
+          Object.keys(s.setups).some(k => k.toLowerCase().includes(query))
+        );
+      }
+
+      if (filtered.length === 0) {
+        showToast({
+          title: 'No Matches',
+          message: `No stocks match filter "${activeScannerFilter}".`,
+          color: 'blue',
+          duration: 2500
+        });
+        return;
+      }
+
+      const symbols = filtered.map(s => {
+        const clean = String(s.symbol || '').replace(/^NSE:/i, '').replace(/-EQ$/i, '').trim().toUpperCase();
+        return `NSE:${clean}`;
+      });
+      const text = symbols.join(', ');
+      copyTextToClipboard(text, `Copied <b>${symbols.length} filtered stocks</b> (${activeScannerFilter}) for TradingView Watchlist.`);
     }
 
     // Toast Notification System
@@ -4225,8 +4505,7 @@
       if (!container) return;
 
       if (scannerSoundEnabled) {
-        const freq = color === 'amber' ? 987 : (color === 'cyan' ? 880 : (color === 'emerald' ? 784 : 659));
-        playChime(freq);
+        playChime(color);
       }
 
       const toastId = 'toast-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
@@ -4310,20 +4589,6 @@
           toast.parentNode.removeChild(toast);
         }
       }, 300);
-    }
-
-    function toggleScannerSound() {
-      scannerSoundEnabled = !scannerSoundEnabled;
-      const icon = document.getElementById('scannerSoundIcon');
-      if (icon) {
-        icon.textContent = scannerSoundEnabled ? '🔔' : '🔕';
-      }
-      showToast({
-        title: scannerSoundEnabled ? 'Sound Active' : 'Sound Muted',
-        message: scannerSoundEnabled ? 'Audio chimes enabled for incoming Chartink webhook alerts.' : 'Audio chimes silenced.',
-        color: scannerSoundEnabled ? 'emerald' : 'blue',
-        duration: 2500
-      });
     }
 
     function toggleWebhookInstructions() {
@@ -4573,10 +4838,15 @@
 
               <div class="space-y-1">
                 <div class="flex items-baseline justify-between gap-1">
-                  <a href="${tvUrl}" target="_blank" rel="noopener noreferrer" class="group/tv inline-flex items-center gap-1 font-bold text-white hover:text-blue-400 text-sm transition" title="Open ${s.symbol} on TradingView">
-                    <span class="border-b border-dashed border-slate-600 group-hover/tv:border-blue-400">${s.symbol}</span>
-                    <span class="text-[10px] text-blue-400 group-hover/tv:translate-x-0.5 group-hover/tv:-translate-y-0.5 transition-transform">↗</span>
-                  </a>
+                  <div class="flex items-center gap-1">
+                    <a href="${tvUrl}" target="_blank" rel="noopener noreferrer" class="group/tv inline-flex items-center gap-1 font-bold text-white hover:text-blue-400 text-sm transition" title="Open ${s.symbol} on TradingView">
+                      <span class="border-b border-dashed border-slate-600 group-hover/tv:border-blue-400">${s.symbol}</span>
+                      <span class="text-[10px] text-blue-400 group-hover/tv:translate-x-0.5 group-hover/tv:-translate-y-0.5 transition-transform">↗</span>
+                    </a>
+                    <button type="button" onclick="copySingleTradingViewSymbol('${s.symbol}', this)" class="p-0.5 rounded text-slate-500 hover:text-white hover:bg-slate-800 text-[10px] font-mono transition" title="Copy NSE:${s.symbol} for TradingView">
+                      📋
+                    </button>
+                  </div>
                   <span class="font-mono text-xs font-bold text-white">${priceDisp}</span>
                 </div>
                 <div class="flex items-center justify-between text-[10px] text-slate-400">
@@ -4823,6 +5093,9 @@
                     <span class="border-b border-dashed border-slate-600 group-hover/tv:border-blue-400">${s.symbol}</span>
                     <span class="text-[10px] text-blue-400 group-hover/tv:translate-x-0.5 group-hover/tv:-translate-y-0.5 transition-transform">↗</span>
                   </a>
+                  <button type="button" onclick="copySingleTradingViewSymbol('${s.symbol}', this)" class="px-1 py-0.5 rounded text-slate-500 hover:text-white hover:bg-slate-800 text-[10px] font-mono transition" title="Copy NSE:${s.symbol} for TradingView">
+                    📋
+                  </button>
                   ${s.count >= 2 ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold ml-1 animate-pulse">🔥 MULTI-HIT</span>' : ''}
                 </div>
               </td>
@@ -4965,6 +5238,9 @@
                     <span class="border-b border-dashed border-slate-600 group-hover/tv:border-blue-400 font-bold">${c.symbol}</span>
                     <span class="text-[10px] text-blue-400 group-hover/tv:translate-x-0.5 group-hover/tv:-translate-y-0.5 transition-transform">↗</span>
                   </a>
+                  <button type="button" onclick="copySingleTradingViewSymbol('${c.symbol}', this)" class="px-1 py-0.5 rounded text-slate-500 hover:text-white hover:bg-slate-800 text-[10px] font-mono transition" title="Copy NSE:${c.symbol} for TradingView">
+                    📋
+                  </button>
                   ${rank === 1 ? '<span class="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold animate-pulse">LATEST</span>' : ''}
                 </div>
               </td>
